@@ -8,7 +8,7 @@ class MenuInicial(ttk.Window):
         super().__init__()
         self.title("SAP-UFAC - Menu Inicial")
         self.geometry("1000x600")
-        self.resizable(False, False) # Bloqueia o redimensionamento (impede que aumente ou diminua)
+        # self.resizable(False, False) # Bloqueia o redimensionamento (impede que aumente ou diminua)
 
         # ----- Cabeçalho azul claro -----
         cabecalho_frame = ttk.Frame(self)
