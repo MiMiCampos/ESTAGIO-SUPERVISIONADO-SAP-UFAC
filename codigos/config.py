@@ -4,7 +4,7 @@ from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 
 
-class Configuracao():
+class Configuracoes():
     def __init__(self, master):
         self.janela = master
     

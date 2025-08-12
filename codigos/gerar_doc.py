@@ -3,7 +3,7 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 
-class Gerardoc():
+class GerarDocumentos():
     def __init__(self, master):
         self.janela = master
     
