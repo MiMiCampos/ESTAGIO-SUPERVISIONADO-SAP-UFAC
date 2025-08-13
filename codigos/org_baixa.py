@@ -4,8 +4,8 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledFrame
 from PIL import Image, ImageTk
 
-# --- Dados Fictícios (Lógica não alterada, conforme solicitado) ---
-# No seu projeto, você substituirá esta parte pela lógica que lê e agrupa os dados da sua planilha.
+# ----- Dados Fictícios -----
+# Essa parte será substituída pela lógica que lê e agrupa os dados da planilha de desfazimento.
 def carregar_dados_agrupados():
     """
     Função que simula o carregamento e agrupamento dos dados da planilha.
@@ -189,7 +189,7 @@ class OrganizacaoBaixas():
             bootstyle="success-outline")
         self.btn_atualizar.pack(side="right", padx=5)
 
-# --- Bloco para Teste da Janela (PADRONIZADO) ---
+# ----- Bloco para Teste da Janela (PADRONIZADO) -----
 if __name__ == "__main__":
     
     # Classe de teste que simula a sua classe "MenuInicial"
