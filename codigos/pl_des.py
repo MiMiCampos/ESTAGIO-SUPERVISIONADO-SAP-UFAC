@@ -8,6 +8,14 @@ class PlanilhaDesfazimento():
         self.janela = master
 
     def planilha_des(self):
+        # Evita criar múltiplas janelas se o botão for clicado várias vezes
+        try:
+            if self.tpl_planilha_des.winfo_exists():
+                self.tpl_planilha_des.focus()
+                return
+        except AttributeError:
+            pass
+        
         self.tpl_planilha_des = ttk.Toplevel(self.janela)
         self.tpl_planilha_des.title("Planilha de Desfazimento")
         self.tpl_planilha_des.geometry("800x600")

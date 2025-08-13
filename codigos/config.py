@@ -9,6 +9,13 @@ class Configuracoes():
         self.janela = master
     
     def configuracao(self):
+        # Evita criar múltiplas janelas se o botão for clicado várias vezes
+        try:
+            if self.tpl_config.winfo_exists():
+                self.tpl_config.focus()
+                return
+        except AttributeError:
+            pass
 
         self.tpl_config = ttk.Toplevel(self.janela)
         self.tpl_config.title("Configurações")

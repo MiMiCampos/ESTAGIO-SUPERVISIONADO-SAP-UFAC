@@ -8,6 +8,14 @@ class GerarDocumentos():
         self.janela = master
     
     def gerar_doc(self):
+        # Evita criar múltiplas janelas se o botão for clicado várias vezes
+        try:
+            if self.tpl_gerar_doc.winfo_exists():
+                self.tpl_gerar_doc.focus()
+                return
+        except AttributeError:
+            pass
+        
         self.tpl_gerar_doc = ttk.Toplevel(self.janela)
         self.tpl_gerar_doc.title("Gerar Documentos")
         self.tpl_gerar_doc.geometry("800x600")
