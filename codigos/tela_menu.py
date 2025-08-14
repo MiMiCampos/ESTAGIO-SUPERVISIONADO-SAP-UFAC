@@ -14,7 +14,6 @@ class MenuInicial():
         self.janela.geometry("1000x700")
         self.janela.position_center()
 
-
         # ------ Chamando outras telas -----
         self.config = Configuracoes(self.janela)
         self.gerar_doc = GerarDocumentos(self.janela)

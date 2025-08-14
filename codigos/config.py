@@ -3,7 +3,6 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 
-
 class Configuracoes():
     def __init__(self, master):
         self.janela = master
@@ -21,27 +20,31 @@ class Configuracoes():
         self.tpl_config.title("Configurações")
         self.tpl_config.geometry("800x600")
         self.tpl_config.position_center()
+        
+        # ----- Instância do Style UMA VEZ no início -----
+        style = ttk.Style()
+        
+        # ----- Estilo de cor customizada para o cabeçalho -----
+        style.configure('MyHeader.TFrame', background='#5bc0de')
+        
+        # ----- Estilo customizado para as fontes dos botões -----
+        style.configure(
+            "Fonte.light.TButton", # Nome do estilo customizado, com o 'light', para continuar meio cinza
+            font=("Inclusive Sans", 12))
+        
+        # ===== Estilo customizado para as fontes dos combobox =====
+        # 1. Para a LISTA SUSPENSA (o menu que abre)
+        self.janela.option_add('*TCombobox*Listbox.font', ('Inclusive Sans', 12))
+        
+        # 2. Para o CAMPO DE TEXTO (o que fica visível)
+        style.configure(
+            'TCombobox', # Aplicado diretamente ao tipo base
+            font=('Inclusive Sans', 12))
 
         # ----- Cabeçalho azul claro -----
         self.cabecalho_frame = ttk.Frame(self.tpl_config)
         self.cabecalho_frame.pack(fill=X)
         self.cabecalho_frame.configure(style='MyHeader.TFrame')
-
-        # ----- Estilo de cor customizada para o cabeçalho -----
-        style_azul = ttk.Style()
-        style_azul.configure('MyHeader.TFrame', background='#5bc0de')
-        
-        # ----- Estilo customizado para as fontes dos botões -----
-        style = ttk.Style()
-        style.configure(
-            "Fonte.light.TButton", # Nome do estilo customizado, com o 'light', para continuar meio cinza
-            font=("Inclusive Sans", 12))
-        
-        # ----- Estilo customizado para as fontes dos combobox -----
-        style = ttk.Style()
-        style.configure(
-            "Fonte.light.TCombobox", # Nome do estilo customizado, com o 'light', para continuar meio cinza
-            font=("Inclusive Sans", 12))
     
         # ----- Inserindo o brasão da UFAC -----
         try:
@@ -97,8 +100,7 @@ class Configuracoes():
         
         self.combo_tema = ttk.Combobox(frame_config, 
             values=['Claro', 'Escuro'], 
-            state="readonly",
-            style="Fonte.light.TCombobox")
+            state="readonly")
         self.combo_tema.set("Claro")
         self.combo_tema.grid(row=1, column=1, sticky='ew', padx=5)
 
@@ -112,26 +114,39 @@ class Configuracoes():
             style="Fonte.light.TButton")
         self.btn_pasta.grid(row=2, column=1, sticky='ew', padx=5)
 
-        # --- Opção 4: Formato Padrão ---
-        lbl_formato = ttk.Label(frame_config, text="Formato padrão de documentos", font=("Helvetica", 11))
-        lbl_formato.grid(row=3, column=0, sticky='w', pady=10)
-        combo_formato = ttk.Combobox(frame_config, values=['.pdf', '.docx', '.xlsx'], state="readonly")
-        combo_formato.set(".pdf")
-        combo_formato.grid(row=3, column=1, sticky='ew', padx=5)
+        # ----- Opção 4: Formato Padrão -----
+        self.lbl_formato = ttk.Label(frame_config, 
+            text="Formato padrão de documentos", 
+            font=("Inclusive Sans", 12))
+        self.lbl_formato.grid(row=3, column=0, sticky='w', pady=10)
+        
+        self.combo_formato = ttk.Combobox(frame_config, 
+            values=['.pdf', '.docx', '.xlsx'], 
+            state="readonly")
+        self.combo_formato.set(".pdf")
+        self.combo_formato.grid(row=3, column=1, sticky='ew', padx=5)
 
-        # --- Opção 5: Salvar Automaticamente (Switch) ---
-        lbl_salvar_auto = ttk.Label(frame_config, text="Salvar automaticamente após adicionar tombos", font=("Helvetica", 11))
-        lbl_salvar_auto.grid(row=4, column=0, sticky='w', pady=10)
-        check_salvar_auto = ttk.Checkbutton(frame_config, bootstyle="round-toggle")
-        check_salvar_auto.invoke()
-        check_salvar_auto.grid(row=4, column=1, sticky='e', padx=5, pady=10)
+        # ----- Opção 5: Salvar Automaticamente (Switch) -----
+        self.lbl_salvar_auto = ttk.Label(frame_config, 
+            text="Salvar automaticamente após adicionar tombos", 
+            font=("Inclusive Sans", 12))
+        self.lbl_salvar_auto.grid(row=4, column=0, sticky='w', pady=10)
+        
+        self.check_salvar_auto = ttk.Checkbutton(frame_config,
+            bootstyle="round-toggle")
+        self.check_salvar_auto.invoke()
+        self.check_salvar_auto.grid(row=4, column=1, sticky='e', padx=5, pady=10)
 
-        # --- Opção 6: Lembrar Configurações (Switch) ---
-        lbl_lembrar = ttk.Label(frame_config, text="Lembrar configurações anteriores", font=("Helvetica", 11))
-        lbl_lembrar.grid(row=5, column=0, sticky='w', pady=10)
-        check_lembrar = ttk.Checkbutton(frame_config, bootstyle="round-toggle")
-        check_lembrar.invoke()
-        check_lembrar.grid(row=5, column=1, sticky='e', padx=5, pady=10)
+        # ----- Opção 6: Lembrar Configurações (Switch) -----
+        self.lbl_lembrar = ttk.Label(frame_config, 
+            text="Lembrar configurações anteriores", 
+            font=("Inclusive Sans", 12))
+        self.lbl_lembrar.grid(row=5, column=0, sticky='w', pady=10)
+        
+        self.check_lembrar = ttk.Checkbutton(frame_config, 
+            bootstyle="round-toggle")
+        self.check_lembrar.invoke()
+        self.check_lembrar.grid(row=5, column=1, sticky='e', padx=5, pady=10)
 
         # ----- Botão de Voltar -----
         btn_voltar = ttk.Button(
@@ -142,8 +157,7 @@ class Configuracoes():
         )
         btn_voltar.pack(side=LEFT, pady=(20, 0))
 
-
-# --- Bloco para Teste da Janela (PADRONIZADO) ---
+# ----- Bloco para Teste da Janela (PADRONIZADO) -----
 if __name__ == "__main__":
     
     class AppTeste:
