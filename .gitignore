@@ -1,0 +1,10 @@
+# Arquivos de Cache e Bytecode do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Outras pastas e arquivos comuns a serem ignorados
+.vscode/
+.env
+venv/
