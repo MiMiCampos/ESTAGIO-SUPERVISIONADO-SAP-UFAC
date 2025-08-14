@@ -19,6 +19,7 @@ class GerarDocumentos():
         self.tpl_gerar_doc = ttk.Toplevel(self.janela)
         self.tpl_gerar_doc.title("Gerar Documentos")
         self.tpl_gerar_doc.geometry("800x600")
+        self.tpl_gerar_doc.position_center()
 
         # ----- Cabeçalho azul claro -----
         cabecalho_frame = ttk.Frame(self.tpl_gerar_doc)

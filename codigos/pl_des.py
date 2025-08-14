@@ -19,6 +19,7 @@ class PlanilhaDesfazimento():
         self.tpl_planilha_des = ttk.Toplevel(self.janela)
         self.tpl_planilha_des.title("Planilha de Desfazimento")
         self.tpl_planilha_des.geometry("800x600")
+        self.tpl_planilha_des.position_center()
 
         # ----- Cabeçalho azul claro -----
         cabecalho_frame = ttk.Frame(self.tpl_planilha_des)
