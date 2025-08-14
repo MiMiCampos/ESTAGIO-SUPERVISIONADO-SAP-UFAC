@@ -211,7 +211,7 @@ if __name__ == "__main__":
             )
             btn_abrir.pack(expand=True)
 
-    # Inicialização padrão, igual à sua tela de menu
+    # Inicialização padrão, igual à tela de menu
     janela_teste = ttk.Window()
     app = AppTeste(janela_teste)
     janela_teste.mainloop()
