@@ -104,19 +104,16 @@ class OrganizacaoBaixas():
         
         self.lbl_nome_plan = ttk.Label(resumo_frame, 
             text="Nome da planilha: RELATÓRIO DE DESFAZIMENTO DE BENS MÓVEIS PATRIMONIAIS DE 2024",
-            foreground='black',
             font=("Inconsolata", 12, "bold"))
         self.lbl_nome_plan.pack(anchor="w")
         
         self.lbl_tombos = ttk.Label(resumo_frame,
             text="120 tombos",
-            foreground='black',
             font=("Inconsolata", 12, "bold"))
         self.lbl_tombos.pack(anchor="w")
         
         self.lbl_unid_resp = ttk.Label(resumo_frame, 
             text="30 unidades, 60 responsáveis",
-            foreground='black',
             font=("Inconsolata", 12, "bold"))                                       
         self.lbl_unid_resp.pack(anchor="w")
 
