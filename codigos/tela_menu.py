@@ -37,7 +37,7 @@ class MenuInicial():
 
         # ----- Estilo de cor customizada para os botões -----
         style_azul_btn = ttk.Style()
-        style_azul_btn.configure('MyHeader.TButton', font = ("Inconsolata", 26), background='white', foreground='#5bc0de', borderwidth=5, padding=10, bordercolor='#5bc0de')
+        style_azul_btn.configure('MyHeader.TButton', font = ("Inconsolata", 26), background='white', foreground="#000000", borderwidth=5, padding=10, bordercolor='#5bc0de')
 
         # ----- Cabeçalho azul claro -----
         self.frm_cabecalho = ttk.Frame(self.janela)
