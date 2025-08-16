@@ -2,11 +2,54 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
+from tkinter import filedialog
 
 class Configuracoes():
     def __init__(self, master):
         self.janela = master
+        self.pasta_selecionada_var = ttk.StringVar(value="Nenhuma pasta selecionada")
     
+    def importar_documentos(self):
+        """Abre uma janela para o usuário selecionar um arquivo."""
+        # Define os tipos de arquivos que podem ser abertos
+        tipos_de_arquivo = (
+            ("Documentos de Planilha", "*.xlsx;*.xls;*.csv"),
+            ("Todos os arquivos", "*.*")
+        )
+        caminho_arquivo = filedialog.askopenfilename(
+            title="Selecione o documento de tombos para importar",
+            filetypes=tipos_de_arquivo
+        )
+        if caminho_arquivo:
+            print(f"Arquivo selecionado para importação: {caminho_arquivo}")
+            # Aqui você colocaria a lógica para processar o arquivo
+        else:
+            print("Nenhum arquivo selecionado.")
+
+    def mudar_tema(self, event):
+        """Muda o tema da aplicação com base na seleção do Combobox."""
+        tema_selecionado = self.combo_tema.get()
+        style = ttk.Style()
+        if tema_selecionado == 'Claro':
+            style.theme_use('litera')
+            print("Tema alterado para: Claro (litera)")
+        elif tema_selecionado == 'Escuro':
+            style.theme_use('darkly')
+            print("Tema alterado para: Escuro (darkly)")
+
+    def selecionar_pasta(self):
+        """Abre uma janela para o usuário selecionar uma pasta."""
+        caminho_pasta = filedialog.askdirectory(title="Selecione a pasta padrão")
+        if caminho_pasta:
+            self.pasta_selecionada_var.set(caminho_pasta) # Atualiza a variável
+            print(f"Pasta padrão selecionada: {caminho_pasta}")
+        else:
+            print("Nenhuma pasta selecionada.")
+            
+    def opcao_alterada(self, nome_opcao, valor):
+        """Função genérica para imprimir a mudança de estado das outras opções."""
+        print(f"Opção '{nome_opcao}' alterada para: {valor}")
+        
     def configuracao(self):
         # Evita criar múltiplas janelas se o botão for clicado várias vezes
         try:
@@ -89,7 +132,7 @@ class Configuracoes():
         
         self.btn_importar = ttk.Button(frame_config,
             text="Importar",
-            style="Fonte.light.TButton")
+            style="Fonte.light.TButton", command=self.importar_documentos)
         self.btn_importar.grid(row=0, column=1, sticky='ew', padx=5)
 
         # ----- Opção 2: Tema -----
@@ -103,6 +146,7 @@ class Configuracoes():
             state="readonly")
         self.combo_tema.set("Claro")
         self.combo_tema.grid(row=1, column=1, sticky='ew', padx=5)
+        self.combo_tema.bind("<<ComboboxSelected>>", self.mudar_tema)
 
         # ----- Opção 3: Pasta Padrão -----
         self.lbl_pasta = ttk.Label(frame_config, 
@@ -111,8 +155,15 @@ class Configuracoes():
         
         self.btn_pasta = ttk.Button(frame_config, 
             text="Selecionar pasta", 
-            style="Fonte.light.TButton")
+            style="Fonte.light.TButton", command=self.selecionar_pasta)
         self.btn_pasta.grid(row=2, column=1, sticky='ew', padx=5)
+        
+        # Label para mostrar a pasta que foi selecionada
+        self.lbl_caminho_pasta = ttk.Label(frame_config, 
+            textvariable=self.pasta_selecionada_var, 
+            font=("Inclusive Sans", 9), 
+            bootstyle="secondary")
+        self.lbl_caminho_pasta.grid(row=3, column=0, columnspan=2, sticky='w', pady=(0, 10))
 
         # ----- Opção 4: Formato Padrão -----
         self.lbl_formato = ttk.Label(frame_config, 
@@ -125,15 +176,20 @@ class Configuracoes():
             state="readonly")
         self.combo_formato.set(".pdf")
         self.combo_formato.grid(row=3, column=1, sticky='ew', padx=5)
+        self.combo_formato.bind("<<ComboboxSelected>>", 
+            lambda event: self.opcao_alterada("Formato", self.combo_formato.get()))
 
         # ----- Opção 5: Salvar Automaticamente (Switch) -----
         self.lbl_salvar_auto = ttk.Label(frame_config, 
             text="Salvar automaticamente após adicionar tombos", 
             font=("Inclusive Sans", 12))
         self.lbl_salvar_auto.grid(row=4, column=0, sticky='w', pady=10)
+        self.salvar_auto_var = ttk.BooleanVar(value=True)
         
         self.check_salvar_auto = ttk.Checkbutton(frame_config,
-            bootstyle="round-toggle")
+            bootstyle="round-toggle",
+            variable=self.salvar_auto_var,
+            command=lambda: self.opcao_alterada("Salvar Auto", self.salvar_auto_var.get()))
         self.check_salvar_auto.invoke()
         self.check_salvar_auto.grid(row=4, column=1, sticky='e', padx=5, pady=10)
 
@@ -142,10 +198,12 @@ class Configuracoes():
             text="Lembrar configurações anteriores", 
             font=("Inclusive Sans", 12))
         self.lbl_lembrar.grid(row=5, column=0, sticky='w', pady=10)
+        self.lembrar_var = ttk.BooleanVar(value=True)
         
         self.check_lembrar = ttk.Checkbutton(frame_config, 
-            bootstyle="round-toggle")
-        self.check_lembrar.invoke()
+            bootstyle="round-toggle", 
+            variable=self.lembrar_var,
+            command=lambda: self.opcao_alterada("Lembrar Configs", self.lembrar_var.get()))
         self.check_lembrar.grid(row=5, column=1, sticky='e', padx=5, pady=10)
 
         # ----- Botão de Voltar -----
