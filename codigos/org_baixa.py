@@ -54,6 +54,7 @@ class OrganizacaoBaixas():
         self.tpl_org_baixas = ttk.Toplevel(self.janela)
         self.tpl_org_baixas.title("Organização de Baixas Patrimoniais")
         self.tpl_org_baixas.geometry("800x600")
+        self.tpl_org_baixas.position_center()
 
         # ----- Cabeçalho azul claro -----
         self.cabecalho_frame = ttk.Frame(self.tpl_org_baixas)
