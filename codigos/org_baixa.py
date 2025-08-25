@@ -98,9 +98,9 @@ class OrganizacaoBaixas():
         resumo_frame = ttk.Frame(frame_conteudo)
         resumo_frame.pack(fill=X, pady=(0, 15), anchor='w')
         ttk.Label(resumo_frame, text="Resumo da planilha atual", foreground='#5bc0de', font=("Inconsolata", 12, "bold")).pack(anchor="w")
-        ttk.Label(resumo_frame, text=f"Nome da planilha: {nome_exibicao}", foreground='black', font=("Inconsolata", 12, "bold")).pack(anchor="w")
-        ttk.Label(resumo_frame, text=f"{total_tombos} tombos", foreground='black', font=("Inconsolata", 12, "bold")).pack(anchor="w")
-        ttk.Label(resumo_frame, text=f"{total_unidades} unidades/responsáveis", foreground='black', font=("Inconsolata", 12, "bold")).pack(anchor="w")
+        ttk.Label(resumo_frame, text=f"Nome da planilha: {nome_exibicao}", font=("Inconsolata", 12, "bold")).pack(anchor="w")
+        ttk.Label(resumo_frame, text=f"{total_tombos} tombos", font=("Inconsolata", 12, "bold")).pack(anchor="w")
+        ttk.Label(resumo_frame, text=f"{total_unidades} unidades/responsáveis", font=("Inconsolata", 12, "bold")).pack(anchor="w")
 
         # --- Área de Rolagem para os Grupos ---
         scl_frame_grupos = ScrolledFrame(frame_conteudo, autohide=True, bootstyle="light")

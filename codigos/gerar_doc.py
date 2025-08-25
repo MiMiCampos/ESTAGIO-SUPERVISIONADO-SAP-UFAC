@@ -79,8 +79,8 @@ class GerarDocumentos():
         # --- Rodapé ---
         frame_rodape_geradoc = ttk.Frame(self.toplevel_geradoc, padding=10)
         frame_rodape_geradoc.pack(fill=X, side=BOTTOM)
-        btn_voltar = ttk.Button(frame_rodape_geradoc, text="<- Voltar", command=self.toplevel_geradoc.destroy, bootstyle="light-outline")
-        btn_voltar.pack(side=LEFT)
+        btn_voltar = ttk.Button(frame_rodape_geradoc, text="<- Voltar", command=self.toplevel_geradoc.destroy, bootstyle="primary-outline")
+        btn_voltar.pack(side=LEFT, padx=12)
 
         # --- Frame Principal ---
         frame_corpo_geradoc = ttk.Frame(self.toplevel_geradoc, padding=(20, 20))
@@ -98,10 +98,10 @@ class GerarDocumentos():
         # Cabeçalho da lista
         frame_cabecalho_lista = ttk.Frame(frame_lista_planilhas)
         frame_cabecalho_lista.pack(fill=X, pady=(0, 5))
-        ttk.Label(frame_cabecalho_lista, text="Todas as Planilhas", font=("Inconsolata", 11, "bold")).grid(row=0, column=0, sticky=W)
-        ttk.Label(frame_cabecalho_lista, text="Data", font=("Inconsolata", 11, "bold")).grid(row=0, column=1, sticky=W, padx=10)
-        ttk.Label(frame_cabecalho_lista, text="Tombos", font=("Inconsolata", 11, "bold")).grid(row=0, column=2, sticky=W, padx=10)
-        ttk.Label(frame_cabecalho_lista, text="Ações", font=("Inconsolata", 11, "bold")).grid(row=0, column=3, sticky=W, padx=10)
+        ttk.Label(frame_cabecalho_lista, text="Todas as Planilhas", font=("Inconsolata", 12, "bold")).grid(row=0, column=0, sticky=W)
+        ttk.Label(frame_cabecalho_lista, text="Data", font=("Inconsolata", 12, "bold")).grid(row=0, column=1, sticky=W, padx=10)
+        ttk.Label(frame_cabecalho_lista, text="Tombos", font=("Inconsolata", 12, "bold")).grid(row=0, column=2, sticky=W, padx=10)
+        ttk.Label(frame_cabecalho_lista, text="Ações", font=("Inconsolata", 12, "bold")).grid(row=0, column=3, sticky=W, padx=10)
         frame_cabecalho_lista.grid_columnconfigure(0, weight=4)
         frame_cabecalho_lista.grid_columnconfigure(1, weight=1)
         frame_cabecalho_lista.grid_columnconfigure(2, weight=1)

@@ -89,16 +89,16 @@ class PlanilhaDesfazimento:
 
         btn_voltar = ttk.Button(
             frm_rodape, text="<- Voltar",
-            command=self.tpl_planilha_des.destroy, bootstyle="light-outline", style='custom.TButton'
+            command=self.tpl_planilha_des.destroy, bootstyle="primary-outline"
         )
-        btn_voltar.pack(side=LEFT)
+        btn_voltar.pack(side=LEFT, padx=20)
 
         frm_corpo = ttk.Frame(self.tpl_planilha_des, padding=(50, 30))
         frm_corpo.pack(expand=True, fill=BOTH)
 
         lbl_pergunta = ttk.Label(
             frm_corpo, text="O que você quer fazer?",
-            font=("Inconsolata", 15)
+            font=("Inconsolata", 14)
         )
         lbl_pergunta.pack(anchor=W, pady=(0, 20))
 
