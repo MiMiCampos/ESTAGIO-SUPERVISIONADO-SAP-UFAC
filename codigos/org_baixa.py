@@ -77,7 +77,7 @@ class OrganizacaoBaixas():
             brasao_label.image = self.brasao
             brasao_label.pack(side=LEFT, padx=10, pady=5)
         
-        titulo = ttk.Label(cabecalho_frame, text="Organização de Baixas", font=("Inconsolata", 15, "bold"), bootstyle=INVERSE, foreground='black', background='#5bc0de')
+        titulo = ttk.Label(cabecalho_frame, text="Organização de Baixas", font=("Inconsolata", 16, "bold"), bootstyle=INVERSE, foreground='black', background='#5bc0de')
         titulo.pack(expand=True, padx=10, pady=10)
         
         frame_conteudo = ttk.Frame(self.tpl_org_baixas, padding=(20, 10))

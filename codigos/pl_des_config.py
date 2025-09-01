@@ -36,6 +36,7 @@ class CriarPlanilha:
         self.tpl_criar_planilha.title("Criar Nova Planilha de Desfazimento")
         self.tpl_criar_planilha.geometry("800x600")
         self.tpl_criar_planilha.transient(self.master)
+        self.tpl_criar_planilha.position_center()
         self.tpl_criar_planilha.grab_set()
 
         # Configuração da UI (cabeçalho, rodapé, corpo, etc.)...
@@ -64,7 +65,7 @@ class CriarPlanilha:
 
         lbl_titulo = ttk.Label(
             frm_cabecalho, text="Criar Nova Planilha de Desfazimento",
-            font=("Inconsolata", 18, "bold"), background='#5bc0de', foreground='black'
+            font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black'
         )
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
 
@@ -73,15 +74,15 @@ class CriarPlanilha:
 
         btn_voltar = ttk.Button(
             frm_rodape, text="<- Voltar",
-            command=self.tpl_criar_planilha.destroy, bootstyle="light-outline", style='custom.TButton'
+            command=self.tpl_criar_planilha.destroy, bootstyle="primary-outline",
         )
-        btn_voltar.pack(side=LEFT)
+        btn_voltar.pack(side=LEFT, padx=30, pady=10)
 
         btn_criar_continuar = ttk.Button(
             frm_rodape, text="Criar e Continuar",
-            command=self.confirmar_e_criar_arquivo, bootstyle="info", style='custom.TButton'
+            command=self.confirmar_e_criar_arquivo, bootstyle="success"
         )
-        btn_criar_continuar.pack(side=RIGHT)
+        btn_criar_continuar.pack(side=RIGHT, padx=30, pady=10)
 
         frm_corpo = ttk.Frame(self.tpl_criar_planilha, padding=(40, 30))
         frm_corpo.pack(expand=True, fill=BOTH)

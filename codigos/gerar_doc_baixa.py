@@ -46,7 +46,7 @@ class GerarDocBaixa:
         if self.brasao_para_gerarbaixa:
             lbl_brasao = ttk.Label(frame_cabecalho, image=self.brasao_para_gerarbaixa, style='Header.TFrame')
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
-        lbl_titulo = ttk.Label(frame_cabecalho, text="Gerar Documentos de Baixa", font=("Inconsolata", 18, "bold"), background='#5bc0de', foreground='black')
+        lbl_titulo = ttk.Label(frame_cabecalho, text="Gerar Documentos de Baixa", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True)
 
         # --- Frame Principal ---

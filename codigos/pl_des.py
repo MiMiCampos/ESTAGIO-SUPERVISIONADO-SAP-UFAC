@@ -36,7 +36,7 @@ class PlanilhaDesfazimento:
         style.configure('Header.TFrame', background='#5bc0de')
         style.configure(
             'custom.TButton', 
-            font=("Inconsolata", 14),
+            font=("Inconsolata", 12),
             borderwidth=1,
             padding=(10, 10),
             background='white',
@@ -80,7 +80,7 @@ class PlanilhaDesfazimento:
 
         lbl_titulo = ttk.Label(
             frm_cabecalho, text="Planilha de Desfazimento",
-            font=("Inconsolata", 18, "bold"), background='#5bc0de', foreground='black'
+            font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black'
         )
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
 
@@ -91,7 +91,7 @@ class PlanilhaDesfazimento:
             frm_rodape, text="<- Voltar",
             command=self.tpl_planilha_des.destroy, bootstyle="primary-outline"
         )
-        btn_voltar.pack(side=LEFT, padx=20)
+        btn_voltar.pack(side=LEFT, padx=40, pady=20)
 
         frm_corpo = ttk.Frame(self.tpl_planilha_des, padding=(50, 30))
         frm_corpo.pack(expand=True, fill=BOTH)

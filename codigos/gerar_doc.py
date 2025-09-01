@@ -73,7 +73,7 @@ class GerarDocumentos():
         if self.brasao_para_geradoc:
             lbl_brasao = ttk.Label(frame_cabecalho_geradoc, image=self.brasao_para_geradoc, style='Header.TFrame')
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
-        lbl_titulo = ttk.Label(frame_cabecalho_geradoc, text="Gerar Documentos", font=("Inconsolata", 18, "bold"), background='#5bc0de', foreground='black')
+        lbl_titulo = ttk.Label(frame_cabecalho_geradoc, text="Gerar Documentos", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
 
         # --- Rodapé ---

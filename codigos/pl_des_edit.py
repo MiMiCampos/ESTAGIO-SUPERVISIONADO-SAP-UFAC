@@ -35,6 +35,7 @@ class EdicaoPlanilha:
         self.toplevel_edicao.title("Editando Planilha de Desfazimento")
         self.toplevel_edicao.geometry("1200x700")
         self.toplevel_edicao.transient(self.janela_mestra)
+        self.toplevel_edicao.position_center()
         self.toplevel_edicao.grab_set()
 
         # Configuração da UI (cabeçalho, corpo, etc.)...
@@ -63,7 +64,7 @@ class EdicaoPlanilha:
 
         label_titulo_edicao = ttk.Label(
             frame_cabecalho_edicao, text="Planilha de Desfazimento",
-            font=("Inconsolata", 18, "bold"), background='#5bc0de', foreground='black'
+            font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black'
         )
         label_titulo_edicao.pack(side=LEFT, expand=True, pady=5)
 

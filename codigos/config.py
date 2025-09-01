@@ -103,7 +103,7 @@ class Configuracoes():
         titulo = ttk.Label(
             self.cabecalho_frame,
             text="Configurações do Sistema",
-            font=("Inconsolata", 15, "bold"),
+            font=("Inconsolata", 16, "bold"),
             bootstyle=INVERSE,
             foreground='black',
             background='#5bc0de'
