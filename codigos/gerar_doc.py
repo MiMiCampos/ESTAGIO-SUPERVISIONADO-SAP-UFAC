@@ -46,7 +46,7 @@ class GerarDocumentos():
     def carregar_recursos_geradoc(self):
         """Carrega as imagens necessárias para esta tela."""
         try:
-            imagem_brasao_geradoc = Image.open("imagens/brasao_UFAC.png").resize((40, 40))
+            imagem_brasao_geradoc = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao_para_geradoc = ImageTk.PhotoImage(imagem_brasao_geradoc)
         except Exception as e:
             print(f"Erro ao carregar brasão para Gerar Documentos: {e}")
@@ -71,8 +71,9 @@ class GerarDocumentos():
         frame_cabecalho_geradoc = ttk.Frame(self.toplevel_geradoc, style='Header.TFrame', padding=(10, 5))
         frame_cabecalho_geradoc.pack(fill=X, side=TOP)
         if self.brasao_para_geradoc:
-            lbl_brasao = ttk.Label(frame_cabecalho_geradoc, image=self.brasao_para_geradoc, style='Header.TFrame')
+            lbl_brasao = ttk.Label(frame_cabecalho_geradoc, image=self.brasao_para_geradoc)
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
+            
         lbl_titulo = ttk.Label(frame_cabecalho_geradoc, text="Gerar Documentos", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
 

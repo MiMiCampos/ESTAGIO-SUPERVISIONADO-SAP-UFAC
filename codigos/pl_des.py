@@ -16,19 +16,19 @@ class PlanilhaDesfazimento:
     def __init__(self, master):
         self.janela = master
         self.tpl_planilha_des = None # Mantém o controle da janela Toplevel
-        self.carregar_recursos()
-        
         # Instancia a tela de criação para ser chamada posteriormente
         self.tela_de_criacao = CriarPlanilha(self.janela)
+        
+        self.carregar_recursos()
+        
+        
 
     def carregar_recursos(self):
-        """Carrega as imagens necessárias e define os estilos."""
+        """Carrega a imagem do brasão."""
         try:
-            # Carrega o brasão da UFAC para o cabeçalho
-            brasao_img = Image.open("imagens/brasao_UFAC.png").resize((40, 40))
+            brasao_img = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao = ImageTk.PhotoImage(brasao_img)
-        except Exception as e:
-            print(f"Erro ao carregar imagem do brasão: {e}")
+        except Exception:
             self.brasao = None
 
         # ----- Estilos Customizados -----
@@ -75,8 +75,9 @@ class PlanilhaDesfazimento:
         frm_cabecalho.pack(fill=X, side=TOP)
 
         if self.brasao:
-            lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao, style='Header.TFrame')
-            lbl_brasao.pack(side=LEFT, padx=(5, 10))
+            lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao)
+            lbl_brasao.image = self.brasao 
+            lbl_brasao.pack(side=LEFT, padx=10, pady=5)
 
         lbl_titulo = ttk.Label(
             frm_cabecalho, text="Planilha de Desfazimento",
@@ -142,7 +143,7 @@ class PlanilhaDesfazimento:
                 dados_lidos.append([cell.value if cell.value is not None else "" for cell in linha])
 
         except Exception as e:
-            messagebox.show_error(title="Erro de Leitura", message=f"Não foi possível ler o arquivo Excel:\n{e}")
+            messagebox.showerror(title="Erro de Leitura", message=f"Não foi possível ler o arquivo Excel:\n{e}")
             return
             
         # Extrai o nome do arquivo para usar como título
@@ -152,3 +153,4 @@ class PlanilhaDesfazimento:
         self.tpl_planilha_des.destroy()
         tela_edicao = EdicaoPlanilha(self.janela, nome_planilha, caminho_arquivo_aberto=caminho_arquivo, dados_iniciais=dados_lidos)
         tela_edicao.exibir_tela()
+

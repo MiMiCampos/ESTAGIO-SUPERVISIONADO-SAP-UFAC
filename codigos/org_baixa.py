@@ -5,7 +5,7 @@ from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 
-# A importação de 'GerarDocBaixa' foi REMOVIDA daqui para evitar o ciclo.
+# A importação de 'GerarDocBaixa' será feita localmente para evitar importação circular.
 
 # ----- Dados Fictícios (usado apenas se a tela for aberta sem dados) -----
 def carregar_dados_agrupados_teste():
@@ -22,8 +22,8 @@ class OrganizacaoBaixas():
         self.nome_planilha_recebida = nome_planilha
         self.dados_brutos_recebidos = dados_para_agrupar
         self.brasao = None
-        self.check_vars = {} # Dicionário para guardar as variáveis dos checkboxes
-        self.dados_agrupados_na_tela = {} # Guarda os dados que estão sendo exibidos
+        self.check_vars = {}  # Dicionário para guardar as variáveis dos checkboxes
+        self.dados_agrupados_na_tela = {}  # Guarda os dados que estão sendo exibidos
         self._carregar_imagem_brasao()
 
     def _carregar_imagem_brasao(self):
@@ -37,11 +37,10 @@ class OrganizacaoBaixas():
     def _agrupar_dados(self, dados_brutos):
         """Processa a lista de bens e agrupa por Unidade e Servidor."""
         grupos = {}
-        # Índices baseados na estrutura da planilha: 5 = Unidade, 6 = Classificação (Status)
-        # O nome do servidor não está nos dados, então vamos criar um fictício por unidade.
+        # Índices: 5 = Unidade, 1 = Tombo, 2 = Descrição, 6 = Status
         for linha in dados_brutos:
             unidade = linha[5] if len(linha) > 5 else "N/A"
-            servidor = f"Servidor Responsável de {unidade}" # Servidor fictício
+            servidor = f"Servidor Responsável de {unidade}"  # Servidor fictício
             tombo = linha[1] if len(linha) > 1 else "N/A"
             descricao = linha[2] if len(linha) > 2 else "N/A"
             status = linha[6] if len(linha) > 6 else "N/A"
@@ -70,6 +69,7 @@ class OrganizacaoBaixas():
         # --- UI (Cabeçalho, corpo, etc.) ---
         style = ttk.Style()
         style.configure('MyHeader.TFrame', background='#5bc0de')
+
         cabecalho_frame = ttk.Frame(self.tpl_org_baixas, style='MyHeader.TFrame')
         cabecalho_frame.pack(fill=X)
         if self.brasao:
@@ -77,7 +77,7 @@ class OrganizacaoBaixas():
             brasao_label.image = self.brasao
             brasao_label.pack(side=LEFT, padx=10, pady=5)
         
-        titulo = ttk.Label(cabecalho_frame, text="Organização de Baixas", font=("Inconsolata", 16, "bold"), bootstyle=INVERSE, foreground='black', background='#5bc0de')
+        titulo = ttk.Label(cabecalho_frame, text="Organização de Baixas", font=("Inconsolata", 15, "bold"), bootstyle=INVERSE, foreground='black', background='#5bc0de')
         titulo.pack(expand=True, padx=10, pady=10)
         
         frame_conteudo = ttk.Frame(self.tpl_org_baixas, padding=(20, 10))
@@ -98,9 +98,9 @@ class OrganizacaoBaixas():
         resumo_frame = ttk.Frame(frame_conteudo)
         resumo_frame.pack(fill=X, pady=(0, 15), anchor='w')
         ttk.Label(resumo_frame, text="Resumo da planilha atual", foreground='#5bc0de', font=("Inconsolata", 12, "bold")).pack(anchor="w")
-        ttk.Label(resumo_frame, text=f"Nome da planilha: {nome_exibicao}", font=("Inconsolata", 12, "bold")).pack(anchor="w")
-        ttk.Label(resumo_frame, text=f"{total_tombos} tombos", font=("Inconsolata", 12, "bold")).pack(anchor="w")
-        ttk.Label(resumo_frame, text=f"{total_unidades} unidades/responsáveis", font=("Inconsolata", 12, "bold")).pack(anchor="w")
+        ttk.Label(resumo_frame, text=f"Nome da planilha: {nome_exibicao}", foreground='black', font=("Inconsolata", 12, "bold")).pack(anchor="w")
+        ttk.Label(resumo_frame, text=f"{total_tombos} tombos", foreground='black', font=("Inconsolata", 12, "bold")).pack(anchor="w")
+        ttk.Label(resumo_frame, text=f"{total_unidades} unidades/responsáveis", foreground='black', font=("Inconsolata", 12, "bold")).pack(anchor="w")
 
         # --- Área de Rolagem para os Grupos ---
         scl_frame_grupos = ScrolledFrame(frame_conteudo, autohide=True, bootstyle="light")
@@ -114,7 +114,6 @@ class OrganizacaoBaixas():
             info_frame = ttk.Frame(group_frame)
             info_frame.pack(fill=X, expand=True)
             
-            # Guarda a variável do checkbox para saber se foi selecionado
             check_var = tk.IntVar(value=1)
             chave_unica = (unidade, servidor)
             self.check_vars[chave_unica] = check_var
@@ -145,18 +144,17 @@ class OrganizacaoBaixas():
 
         dados_selecionados = {}
         for chave, var in self.check_vars.items():
-            if var.get() == 1: # Se o checkbox estiver marcado
+            if var.get() == 1:
                 dados_selecionados[chave] = self.dados_agrupados_na_tela[chave]
 
         if not dados_selecionados:
             Messagebox.show_warning("Nenhum grupo selecionado", "Por favor, selecione pelo menos um grupo para gerar os documentos.")
             return
 
-        # ***** CORREÇÃO ABAIXO *****
-        # 1. Destrói a janela atual para liberar o foco completamente.
+        # Destrói a janela atual para liberar o foco antes de abrir a próxima
         self.tpl_org_baixas.destroy()
         
-        # 2. Cria a nova tela passando a janela PAI da que foi destruída como 'master'.
-        #    Neste caso, 'self.janela' é a referência correta à janela anterior.
-        tela_geracao = GerarDocBaixa(self.janela, self.nome_planilha_recebida, dados_selecionados)
+        # Passa os dados para a próxima tela
+        tela_geracao = GerarDocBaixa(self.janela, self.nome_planilha_recebida, dados_selecionados, self.dados_brutos_recebidos)
         tela_geracao.exibir_tela()
+
