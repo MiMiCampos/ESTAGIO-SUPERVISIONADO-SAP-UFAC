@@ -12,8 +12,9 @@ import openpyxl
 from pl_des_edit import EdicaoPlanilha
 
 class CriarPlanilha:
-    def __init__(self, master):
+    def __init__(self, master, db_controller):
         self.master = master
+        self.db = db_controller
         self.tpl_criar_planilha = None
         self.carregar_recursos()
 
@@ -94,6 +95,13 @@ class CriarPlanilha:
         ano_atual = datetime.now().year
         self.ent_nome.insert(0, f"RELATÓRIO DE DESFAZIMENTO DE BENS MÓVEIS PATRIMONIAIS DE {ano_atual}")
         self.ent_nome.pack(fill=X, ipady=5, pady=(0, 20))
+        
+        # ----- NOVO CAMPO: Número do Processo ----- (VERIFICAR SE JÁ VAI TER O Nº DO PROCESSO)
+        lbl_processo = ttk.Label(frm_corpo, text="Número do Processo", font=("Inconsolata", 12, "bold"))
+        lbl_processo.pack(fill=X, anchor=W, pady=(0, 5))
+        self.ent_processo = ttk.Entry(frm_corpo, font=("Inconsolata", 11))
+        self.ent_processo.insert(0, f"23107.000000/{ano_atual}-00") # Exemplo de formato
+        self.ent_processo.pack(fill=X, ipady=5, pady=(0, 20))
 
         # ... (restante dos widgets do formulário)
         lbl_data = ttk.Label(frm_corpo, text="Data da Planilha", font=("Inconsolata", 12, "bold"))
@@ -108,7 +116,6 @@ class CriarPlanilha:
         self.ent_pasta.pack(side=LEFT, fill=X, expand=True, ipady=5)
         btn_selecionar = ttk.Button(frm_pasta, text="Selecionar Pasta", bootstyle="info-outline", style='custom.TButton', command=self.selecionar_pasta)
         btn_selecionar.pack(side=LEFT, padx=(5, 0))
-        # ... (checkboxes)
 
     def selecionar_pasta(self):
         """Abre uma caixa de diálogo para selecionar uma pasta."""
@@ -117,25 +124,42 @@ class CriarPlanilha:
             self.ent_pasta.delete(0, END)
             self.ent_pasta.insert(0, caminho)
 
+    # ----- MUDANÇA: Lógica de criação do arquivo e registro no BD -----
     def confirmar_e_criar_arquivo(self):
-        """Valida, pede confirmação, cria o arquivo .xlsx e abre a tela de edição."""
+        """Valida, cria o registro no BD, cria o arquivo .xlsx e abre a tela de edição."""
         nome_arquivo = self.ent_nome.get()
         pasta_destino = self.ent_pasta.get()
+        numero_processo = self.ent_processo.get()
+        data_selecionada = self.date_entry.entry.get() # Pega a data como string
         
-        if not nome_arquivo or not pasta_destino:
-            Messagebox.show_error(title="Erro de Validação", message="O Nome da Planilha e a Pasta de Salvamento são obrigatórios.")
+        if not all([nome_arquivo, pasta_destino, numero_processo, data_selecionada]):
+            Messagebox.show_error(title="Erro de Validação", message="Todos os campos são obrigatórios.")
+            return
+
+        # Converte a data string para o formato do MySQL (YYYY-MM-DD)
+        try:
+            data_formatada_bd = datetime.strptime(data_selecionada, "%d/%m/%Y").strftime("%Y-%m-%d")
+        except ValueError:
+            Messagebox.show_error(title="Erro de Data", message="Formato de data inválido. Use DD/MM/AAAA.")
             return
             
+        # ----- PASSO 1: INSERIR NO BANCO DE DADOS -----
+        novo_desfazimento_id = self.db.criar_novo_desfazimento(numero_processo, data_formatada_bd)
+        
+        if novo_desfazimento_id is None:
+            # O controlador já mostrou uma mensagem de erro, então apenas retornamos.
+            return
+
         caminho_completo = os.path.join(pasta_destino, f"{nome_arquivo}.xlsx")
         
         if os.path.exists(caminho_completo):
-            resposta_overwrite = Messagebox.yesno(title="Arquivo Existente", 
-                                                    message=f"O arquivo '{nome_arquivo}.xlsx' já existe.\nDeseja sobrescrevê-lo?")
-            if not resposta_overwrite:
+            resposta = Messagebox.yesno(title="Arquivo Existente", message=f"O arquivo '{nome_arquivo}.xlsx' já existe.\nDeseja sobrescrevê-lo?")
+            if not resposta:
+                # Aqui poderíamos deletar o registro de desfazimento recém-criado, mas por simplicidade vamos deixar.
                 return
 
+        # ----- PASSO 2: CRIAR O ARQUIVO LOCAL -----
         try:
-            # Cria um novo arquivo Excel em branco com o cabeçalho
             workbook = openpyxl.Workbook()
             sheet = workbook.active
             cabecalho = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 
@@ -146,7 +170,16 @@ class CriarPlanilha:
             Messagebox.show_error(title="Erro ao Criar Arquivo", message=f"Não foi possível criar o arquivo:\n{e}")
             return
 
-        # Fecha a janela atual e abre a de edição
+        # ----- PASSO 3: NAVEGAR PARA A TELA DE EDIÇÃO -----
         self.tpl_criar_planilha.destroy()
-        tela_de_edicao = EdicaoPlanilha(self.master, nome_arquivo, caminho_arquivo_aberto=caminho_completo, dados_iniciais=[])
+        
+        # Passa o controlador e o ID do desfazimento para a tela de edição
+        tela_de_edicao = EdicaoPlanilha(
+            self.master, 
+            nome_arquivo, 
+            caminho_arquivo_aberto=caminho_completo, 
+            dados_iniciais=[],
+            db_controller=self.db, # Passando o controlador
+            id_desfazimento=novo_desfazimento_id # Passando o ID
+        )
         tela_de_edicao.exibir_tela()

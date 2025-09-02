@@ -11,35 +11,36 @@ import openpyxl
 from visualizar_planilha import VisualizarPlanilha
 from org_baixa import OrganizacaoBaixas
 
-# ----- Dados Fictícios -----
-def carregar_planilhas_ficticias():
-    """
-    Simula o carregamento de planilhas de um banco de dados.
-    Cada planilha é um dicionário que contém seus metadados e seu conteúdo completo.
-    """
-    return [
-        {
-            "nome": "RELATÓRIO DE DESFAZIMENTO DE BENS MÓVEIS PATRIMONIAIS DE 2018",
-            "data": "01/18 - 12/18", "tombos": 1000,
-            "conteudo": [
-                ['1', '1001', 'Cadeira de Escritório', '10/01/2015', 'NF-111', 'CCET', 'BOM', 'Doação'],
-                ['2', '1002', 'Mesa de Reunião', '15/02/2016', 'NF-222', 'Administração', 'REGULAR', 'Leilão']
-            ]
-        },
-        {
-            "nome": "RELATÓRIO DE DESFAZIMENTO DE BENS MÓVEIS PATRIMONIAIS DE 2019",
-            "data": "01/19 - 12/19", "tombos": 1500,
-            "conteudo": [
-                ['1', '2001', 'Projetor Epson', '20/03/2017', 'NF-333', 'CCET', 'IRRECUPERÁVEL', 'Descarte'],
-                ['2', '2002', 'Computador Dell', '25/04/2018', 'NF-444', 'CCET', 'BOM', 'Doação']
-            ]
-        },
-    ]
+# # ----- Dados Fictícios ----- (REMOVER)
+# def carregar_planilhas_ficticias():
+#     """
+#     Simula o carregamento de planilhas de um banco de dados.
+#     Cada planilha é um dicionário que contém seus metadados e seu conteúdo completo.
+#     """
+#     return [
+#         {
+#             "nome": "RELATÓRIO DE DESFAZIMENTO DE BENS MÓVEIS PATRIMONIAIS DE 2018",
+#             "data": "01/18 - 12/18", "tombos": 1000,
+#             "conteudo": [
+#                 ['1', '1001', 'Cadeira de Escritório', '10/01/2015', 'NF-111', 'CCET', 'BOM', 'Doação'],
+#                 ['2', '1002', 'Mesa de Reunião', '15/02/2016', 'NF-222', 'Administração', 'REGULAR', 'Leilão']
+#             ]
+#         },
+#         {
+#             "nome": "RELATÓRIO DE DESFAZIMENTO DE BENS MÓVEIS PATRIMONIAIS DE 2019",
+#             "data": "01/19 - 12/19", "tombos": 1500,
+#             "conteudo": [
+#                 ['1', '2001', 'Projetor Epson', '20/03/2017', 'NF-333', 'CCET', 'IRRECUPERÁVEL', 'Descarte'],
+#                 ['2', '2002', 'Computador Dell', '25/04/2018', 'NF-444', 'CCET', 'BOM', 'Doação']
+#             ]
+#         },
+#     ]
 
 class GerarDocumentos():
-    # Este __init__ é simples e compatível com a chamada do tela_menu.py
-    def __init__(self, master):
+    # __init__ modificado para receber o controlador
+    def __init__(self, master, db_controller):
         self.janela_mestra_geradoc = master
+        self.db = db_controller # Armazena a referência ao controlador
         self.toplevel_geradoc = None
         self.carregar_recursos_geradoc()
 
@@ -110,14 +111,29 @@ class GerarDocumentos():
 
         ttk.Separator(frame_lista_planilhas).pack(fill=X, pady=(0, 10))
 
-        planilhas = carregar_planilhas_ficticias()
-        for planilha in planilhas:
-            self.criar_linha_planilha(frame_lista_planilhas, planilha)
+        # ----- Buscando os dados do banco -----
+        planilhas_do_banco = self.db.get_planilhas_finalizadas()
+        if not planilhas_do_banco:
+            ttk.Label(frame_lista_planilhas, text="Nenhuma planilha finalizada encontrada no banco de dados.").pack()
+        else:
+            for planilha in planilhas_do_banco:
+                self.criar_linha_planilha(frame_lista_planilhas, planilha)
 
     def criar_linha_planilha(self, parent, planilha_data):
         """Cria uma linha visual para uma planilha na lista."""
         frame_linha = ttk.Frame(parent)
         frame_linha.pack(fill=X, pady=5)
+        
+        # ----- Ajustamos os nomes das chaves para corresponder ao que vem do BD -----
+        self.nome = planilha_data.get('nome_planilha', 'N/A')
+        data_geracao = planilha_data.get('data_geracao', 'N/A')
+        # Formata a data para exibir apenas dia/mês/ano
+        if data_geracao and hasattr(data_geracao, 'strftime'):
+            self.data_formatada = data_geracao.strftime('%d/%m/%Y')
+        else:
+            self.data_formatada = 'N/A'
+
+        self.total_tombos = planilha_data.get('total_tombos', 0)
 
         ttk.Label(frame_linha, text=planilha_data['nome'], anchor=W).grid(row=0, column=0, sticky=EW)
         ttk.Label(frame_linha, text=planilha_data['data'], anchor=W).grid(row=0, column=1, sticky=EW, padx=10)
@@ -137,50 +153,19 @@ class GerarDocumentos():
         frame_linha.grid_columnconfigure(1, weight=1)
         frame_linha.grid_columnconfigure(2, weight=1)
         frame_linha.grid_columnconfigure(3, weight=2)
+        
+        # ----- Continuar a lógica abaixo -----
     
     def abrir_planilha_visualizacao(self, planilha):
-        """Abre a tela de visualização para a planilha selecionada."""
-        tela_visualizar = VisualizarPlanilha(self.toplevel_geradoc, planilha['nome'], planilha['conteudo'])
-        tela_visualizar.exibir_tela()
+        """Para funcionar de verdade, precisaríamos buscar o conteúdo da planilha."""
+        Messagebox.show_info("Funcionalidade em Desenvolvimento", "A lógica para buscar o conteúdo da planilha do arquivo e exibir precisa ser implementada.")
+        # Exemplo:
+        # conteudo = self.db.get_conteudo_planilha(planilha['id_planilha'])
+        # tela_visualizar = VisualizarPlanilha(self.toplevel_geradoc, planilha['nome_planilha'], conteudo)
+        # tela_visualizar.exibir_tela()
 
     def download_planilha(self, planilha):
-        """Pede confirmação e baixa a planilha como .xlsx."""
-        resposta = Messagebox.yesno(title="Confirmar Download", message=f"Deseja baixar a planilha '{planilha['nome']}'?")
-        if not resposta:
-            return
-
-        caminho_arquivo = filedialog.asksaveasfilename(
-            title="Salvar planilha como...",
-            defaultextension=".xlsx",
-            initialfile=planilha['nome'],
-            filetypes=[("Planilhas Excel", "*.xlsx")]
-        )
-        if not caminho_arquivo:
-            return
-
-        try:
-            workbook = openpyxl.Workbook()
-            sheet = workbook.active
-            sheet.title = "Relatório"
-            sheet.append(['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO'])
-            for linha in planilha['conteudo']:
-                sheet.append(linha)
-            workbook.save(caminho_arquivo)
-            Messagebox.ok(title="Sucesso", message=f"Planilha baixada com sucesso em:\n{caminho_arquivo}")
-        except Exception as e:
-            Messagebox.show_error(title="Erro", message=f"Não foi possível salvar o arquivo:\n{e}")
+        Messagebox.show_info("Funcionalidade em Desenvolvimento", "A lógica para recriar o arquivo .xlsx a partir dos dados do banco precisa ser implementada.")
 
     def navegar_para_baixas(self, planilha):
-        """Abre a tela de Organização de Baixas com os dados da planilha selecionada."""
-        # ***** CORREÇÃO ABAIXO *****
-        # 1. Destrói a janela atual para liberar o 'grab_set' completamente.
-        self.toplevel_geradoc.destroy()
-        
-        # 2. Cria a nova tela passando a janela de menu principal como 'master',
-        #    e não a janela que acabamos de destruir.
-        tela_baixas = OrganizacaoBaixas(
-            self.janela_mestra_geradoc, 
-            nome_planilha=planilha['nome'], 
-            dados_para_agrupar=planilha['conteudo']
-        )
-        tela_baixas.org_baixas()
+        Messagebox.show_info("Funcionalidade em Desenvolvimento", "A lógica para buscar os bens associados a esta planilha e navegar para a tela de baixas precisa ser implementada.")

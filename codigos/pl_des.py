@@ -13,16 +13,16 @@ from pl_des_config import CriarPlanilha
 from pl_des_edit import EdicaoPlanilha
 
 class PlanilhaDesfazimento:
-    def __init__(self, master):
+    def __init__(self, master, db_controller):
         self.janela = master
+        self.db = db_controller
         self.tpl_planilha_des = None # Mantém o controle da janela Toplevel
-        # Instancia a tela de criação para ser chamada posteriormente
-        self.tela_de_criacao = CriarPlanilha(self.janela)
+        
+        # ----- Passa o db_controller para a próxima tela -----
+        self.tela_de_criacao = CriarPlanilha(self.janela, self.db)
         
         self.carregar_recursos()
         
-        
-
     def carregar_recursos(self):
         """Carrega a imagem do brasão."""
         try:

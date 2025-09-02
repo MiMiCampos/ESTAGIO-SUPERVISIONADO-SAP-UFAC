@@ -2,6 +2,10 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
+
+# Novo controlador importado
+from banco_dados.db_controller import DBController
+
 from config import Configuracoes
 from gerar_doc import GerarDocumentos
 from org_baixa import OrganizacaoBaixas
@@ -13,12 +17,19 @@ class MenuInicial():
         self.janela.title("SAP-UFAC - Menu Inicial")
         self.janela.geometry("1000x700")
         self.janela.position_center()
+        
+        # ----- Única instância do controlador do banco de dados -----
+        self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
+        
+        # Garante que a conexão seja fechada quando a janela principal fechar
+        self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
 
         # ------ Chamando outras telas -----
-        self.config = Configuracoes(self.janela)
-        self.gerar_doc = GerarDocumentos(self.janela)
-        self.org_baixa = OrganizacaoBaixas(self.janela)
-        self.planilha_desf = PlanilhaDesfazimento(self.janela)
+        # Passando o controlador para as outras telas que precisam dele
+        self.config = Configuracoes(self.janela) # Por enquanto não precisa do controlador
+        self.gerar_doc = GerarDocumentos(self.janela, self.db_controller)
+        self.org_baixa = OrganizacaoBaixas(self.janela) # Recebe dados, não o controlador diretamente
+        self.planilha_desf = PlanilhaDesfazimento(self.janela, self.db_controller)
         
         # ----- Imagens dos botões iniciais -----
         try:
@@ -107,6 +118,12 @@ class MenuInicial():
         self.btn_configuracoes = ttk.Button(botoes_frame, command=self.config.configuracao, image=self.img_config)
         self.btn_configuracoes.grid(row=2, column=2, padx=10, pady=10)
         self.btn_configuracoes.configure(style='MyHeader.TButton')
+        
+    def fechar_aplicacao(self):
+        """Função para fechar a conexão com o BD antes de sair."""
+        if self.db_controller:
+            self.db_controller.close_connection()
+        self.janela.destroy()
 
 janela = ttk.Window()
 app = MenuInicial(janela)
