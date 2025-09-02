@@ -145,7 +145,7 @@ class GerarDocumentos():
 
     def download_planilha(self, planilha):
         """Pede confirmação e baixa a planilha como .xlsx."""
-        resposta = Messagebox.askyesno(title="Confirmar Download", message=f"Deseja baixar a planilha '{planilha['nome']}'?")
+        resposta = Messagebox.yesno(title="Confirmar Download", message=f"Deseja baixar a planilha '{planilha['nome']}'?")
         if not resposta:
             return
 
