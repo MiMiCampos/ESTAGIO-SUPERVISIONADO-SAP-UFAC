@@ -5,10 +5,8 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 import os
-# Importa a biblioteca para trabalhar com arquivos Excel
 import openpyxl
 
-# Importa as classes das telas seguintes
 from pl_des_config import CriarPlanilha
 from pl_des_edit import EdicaoPlanilha
 
@@ -16,9 +14,8 @@ class PlanilhaDesfazimento:
     def __init__(self, master, db_controller):
         self.janela = master
         self.db = db_controller
-        self.tpl_planilha_des = None # Mantém o controle da janela Toplevel
+        self.tpl_planilha_des = None
         
-        # ----- Passa o db_controller para a próxima tela -----
         self.tela_de_criacao = CriarPlanilha(self.janela, self.db)
         
         self.carregar_recursos()
@@ -31,7 +28,6 @@ class PlanilhaDesfazimento:
         except Exception:
             self.brasao = None
 
-        # ----- Estilos Customizados -----
         style = ttk.Style()
         style.configure('Header.TFrame', background='#5bc0de')
         style.configure(
@@ -53,24 +49,14 @@ class PlanilhaDesfazimento:
         if self.tpl_planilha_des and self.tpl_planilha_des.winfo_exists():
             self.tpl_planilha_des.lift()
             return
-
-        # Evita criar múltiplas janelas se o botão for clicado várias vezes
-        try:
-            if self.tpl_planilha_des.winfo_exists():
-                self.tpl_planilha_des.focus()
-                return
-        except AttributeError:
-            pass
         
         self.tpl_planilha_des = ttk.Toplevel(self.janela)
         self.tpl_planilha_des.title("Planilha de Desfazimento")
         self.tpl_planilha_des.geometry("800x600")
         self.tpl_planilha_des.position_center()
-        
         self.tpl_planilha_des.transient(self.janela)
         self.tpl_planilha_des.grab_set()
 
-        # Cabeçalho, rodapé e corpo da janela...
         frm_cabecalho = ttk.Frame(self.tpl_planilha_des, style='Header.TFrame', padding=(10, 5))
         frm_cabecalho.pack(fill=X, side=TOP)
 
@@ -103,7 +89,6 @@ class PlanilhaDesfazimento:
         )
         lbl_pergunta.pack(anchor=W, pady=(0, 20))
 
-        # Botões de Ação
         btn_criar = ttk.Button(
             frm_corpo, text="Criar Nova Planilha",
             style='custom.TButton',
@@ -114,43 +99,49 @@ class PlanilhaDesfazimento:
         btn_editar = ttk.Button(
             frm_corpo, text="Continuar Edição",
             style='custom.TButton',
-            command=self.editar_planilha # Comando chama a nova função
+            command=self.editar_planilha
         )
         btn_editar.pack(fill=X, pady=5, ipady=10)
 
     def editar_planilha(self):
-        """Abre um seletor de arquivos para carregar uma planilha XLSX."""
+        """Abre um seletor de arquivos para carregar uma planilha XLSX para edição."""
         caminho_arquivo = filedialog.askopenfilename(
             title="Selecione uma planilha para editar",
             filetypes=[("Planilhas Excel", "*.xlsx"), ("Todos os arquivos", "*.*")]
         )
         if not caminho_arquivo:
-            return # Usuário cancelou
+            return
 
+        # --- MUDANÇA ---
+        #    Esta parte precisa de uma lógica mais robusta para encontrar o 'id_desfazimento'
+        #    a partir do nome da planilha ou do processo. Por enquanto, estamos
+        #    deixando como 'None' para evitar erros, mas isso fará com que a
+        #    inserção de novos tombos falhe se não for ajustado.
+        id_desfazimento_encontrado = None # Placeholder
+        
+        nome_planilha = os.path.basename(caminho_arquivo)
+        
         dados_lidos = []
         try:
-            # Carrega o arquivo Excel
             workbook = openpyxl.load_workbook(caminho_arquivo)
             sheet = workbook.active
-            
-            # Itera sobre as linhas da planilha, pulando o cabeçalho
             iterador_linhas = iter(sheet.rows)
-            next(iterador_linhas)
-            
-            # Lê cada célula da linha e adiciona aos dados
+            next(iterador_linhas) # Pula o cabeçalho
             for linha in iterador_linhas:
-                # Garante que valores nulos sejam lidos como strings vazias
                 dados_lidos.append([cell.value if cell.value is not None else "" for cell in linha])
-
         except Exception as e:
             messagebox.showerror(title="Erro de Leitura", message=f"Não foi possível ler o arquivo Excel:\n{e}")
             return
             
-        # Extrai o nome do arquivo para usar como título
-        nome_planilha = os.path.basename(caminho_arquivo)
-        
-        # Fecha a janela atual e abre a de edição com os dados e o caminho do arquivo
         self.tpl_planilha_des.destroy()
-        tela_edicao = EdicaoPlanilha(self.janela, nome_planilha, caminho_arquivo_aberto=caminho_arquivo, dados_iniciais=dados_lidos)
+        
+        # --- CORREÇÃO: Passando o db_controller e o id_desfazimento ---
+        tela_edicao = EdicaoPlanilha(
+            self.janela, 
+            nome_planilha, 
+            caminho_arquivo_aberto=caminho_arquivo, 
+            dados_iniciais=dados_lidos,
+            db_controller=self.db,
+            id_desfazimento=id_desfazimento_encontrado
+            )
         tela_edicao.exibir_tela()
-
