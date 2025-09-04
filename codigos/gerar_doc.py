@@ -7,6 +7,8 @@ from PIL import Image, ImageTk
 import os
 import openpyxl
 from datetime import datetime
+from openpyxl.styles import Font, Alignment, Border, Side
+from utils.excel_formatador import FormatadorExcel
 
 from visualizar_planilha import VisualizarPlanilha
 from org_baixa import OrganizacaoBaixas
@@ -79,7 +81,6 @@ class GerarDocumentos():
         
         ttk.Separator(frame_lista_planilhas).pack(fill=X, pady=(0, 10))
 
-        # ----- Buscando os dados do banco -----
         planilhas_do_banco = self.db.get_planilhas_finalizadas()
         if not planilhas_do_banco:
             ttk.Label(frame_lista_planilhas, text="Nenhuma planilha finalizada encontrada no banco de dados.").pack()
@@ -92,7 +93,6 @@ class GerarDocumentos():
         frame_linha = ttk.Frame(parent)
         frame_linha.pack(fill=X, pady=5)
         
-        # --- CORREÇÃO: Usar os nomes de chaves corretos do dicionário do banco de dados ---
         nome = planilha_data.get('nome_planilha', 'N/A')
         data_geracao = planilha_data.get('data_geracao', 'N/A')
         
@@ -131,13 +131,47 @@ class GerarDocumentos():
 
         conteudo_planilha = self.db.get_bens_por_desfazimento(id_desfazimento)
         
+        # Fecha a janela atual para focar na nova
         self.toplevel_geradoc.destroy()
         
         tela_visualizar = VisualizarPlanilha(self.janela_mestra_geradoc, planilha.get('nome_planilha'), conteudo_planilha)
         tela_visualizar.exibir_tela()
 
     def download_planilha(self, planilha):
-        Messagebox.show_info("Funcionalidade em Desenvolvimento", "A lógica para recriar o ficheiro .xlsx a partir dos dados do banco precisa ser implementada.")
+        """Busca os dados da planilha e os salva em um ficheiro .xlsx usando o formatador central."""
+        id_desfazimento = planilha.get('id_desfazimento')
+        nome_planilha = planilha.get('nome_planilha', 'planilha_sem_nome')
+        
+        if id_desfazimento is None:
+            Messagebox.show_error("Erro", "Não foi possível encontrar o ID de desfazimento para esta planilha.")
+            return
+
+        dados_para_baixar = self.db.get_bens_por_desfazimento(id_desfazimento)
+        
+        if not dados_para_baixar:
+            Messagebox.show_info("Aviso", "Não há dados para baixar para esta planilha.")
+            return
+
+        caminho_arquivo = filedialog.asksaveasfilename(
+            title="Salvar planilha como...",
+            defaultextension=".xlsx",
+            initialfile=nome_planilha,
+            filetypes=[("Planilhas Excel", "*.xlsx")]
+        )
+        if not caminho_arquivo:
+            return
+
+        try:
+            workbook = openpyxl.Workbook()
+            sheet = workbook.active
+            
+            # Chama a nossa função central para fazer todo o trabalho de formatação!
+            FormatadorExcel.formatar_planilha_desfazimento(workbook, sheet, nome_planilha, dados_para_baixar)
+
+            workbook.save(caminho_arquivo)
+            Messagebox.ok(title="Sucesso", message=f"Planilha baixada com sucesso em:\n{caminho_arquivo}")
+        except Exception as e:
+            Messagebox.show_error(title="Erro ao Salvar", message=f"Não foi possível salvar o ficheiro:\n{e}")
 
     def navegar_para_baixas(self, planilha):
         """Busca os bens associados a esta planilha e navega para a tela de baixas."""

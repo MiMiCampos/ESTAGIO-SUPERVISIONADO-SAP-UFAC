@@ -5,6 +5,7 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
 import openpyxl
 from openpyxl.styles import Font, Alignment, Border, Side
+from utils.excel_formatador import FormatadorExcel
 
 class VisualizarPlanilha:
     def __init__(self, master, nome_planilha, dados_planilha):
@@ -27,7 +28,7 @@ class VisualizarPlanilha:
 
         frame_rodape_visualizar = ttk.Frame(self.toplevel_visualizar, padding=10)
         frame_rodape_visualizar.pack(fill=X, side=BOTTOM)
-        ttk.Button(frame_rodape_visualizar, text="<- Voltar", command=self.toplevel_visualizar.destroy, bootstyle="light-outline").pack(side=LEFT)
+        ttk.Button(frame_rodape_visualizar, text="<- Voltar", command=self.toplevel_visualizar.destroy, bootstyle="primary-outline").pack(side=LEFT)
         ttk.Button(frame_rodape_visualizar, text="Baixar Planilha (.xlsx)", command=self.baixar_planilha_visualizada, bootstyle="info").pack(side=RIGHT)
 
         frame_corpo_visualizar = ttk.Frame(self.toplevel_visualizar, padding=10)
@@ -62,7 +63,7 @@ class VisualizarPlanilha:
         tabela.pack(expand=True, fill=BOTH)
 
     def baixar_planilha_visualizada(self):
-        """Função para baixar a planilha que está sendo visualizada, com formatação completa."""
+        """Função para baixar a planilha que está sendo visualizada, com formatação centralizada."""
         caminho_arquivo = filedialog.asksaveasfilename(
             title="Salvar planilha como...",
             defaultextension=".xlsx",
@@ -75,53 +76,14 @@ class VisualizarPlanilha:
         try:
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-            sheet.title = "Relatório de Desfazimento"
             
-            # 1. Adiciona e formata o título principal
-            sheet.merge_cells('A1:H1')
-            titulo_cell = sheet['A1']
-            titulo_cell.value = self.nome_da_planilha_visualizada
-            titulo_cell.font = Font(bold=True, size=14, name='Times New Roman')
-            titulo_cell.alignment = Alignment(horizontal='center', vertical='center')
-
-            # 2. Adiciona o cabeçalho dos dados
-            cabecalho = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO']
-            sheet.append(cabecalho)
-
-            # 3. Adiciona os dados da planilha
-            for linha in self.dados_para_visualizar:
-                sheet.append(linha)
-
-            # --- MUDANÇA PRINCIPAL: Estilos com quebra de linha e larguras fixas ---
-            
-            # 4. Define os estilos
-            alinhamento_central_com_quebra = Alignment(horizontal='center', vertical='center', wrap_text=True)
-            borda_fina = Border(left=Side(style='thin'), 
-                                right=Side(style='thin'), 
-                                top=Side(style='thin'), 
-                                bottom=Side(style='thin'))
-            fonte_cabecalho = Font(bold=True, size=12, name='Times New Roman')
-            fonte_dados = Font(size=12, name='Times New Roman')
-            
-            # 5. Define larguras fixas para as colunas (A até H)
-            larguras = {'A': 15, 'B': 15, 'C': 40, 'D': 20, 'E': 25, 'F': 40, 'G': 20, 'H': 20}
-            for letra_coluna, largura in larguras.items():
-                sheet.column_dimensions[letra_coluna].width = largura
-
-            # 6. Formata o cabeçalho (linha 2)
-            sheet.row_dimensions[2].height = 40 # Aumenta a altura da linha do cabeçalho
-            for cell in sheet[2]:
-                cell.alignment = alinhamento_central_com_quebra
-                cell.border = borda_fina
-                cell.font = fonte_cabecalho
-
-            # 7. Formata as células de dados (a partir da linha 3)
-            # O ajuste da altura da linha será automático por causa do wrap_text=True
-            for row in sheet.iter_rows(min_row=3, max_row=sheet.max_row):
-                for cell in row:
-                    cell.alignment = alinhamento_central_com_quebra
-                    cell.border = borda_fina
-                    cell.font = fonte_dados
+            # Usa a mesma função central para formatar
+            FormatadorExcel.formatar_planilha_desfazimento(
+                workbook, 
+                sheet, 
+                self.nome_da_planilha_visualizada, 
+                self.dados_para_visualizar
+            )
 
             workbook.save(caminho_arquivo)
             Messagebox.ok(title="Sucesso", message=f"Planilha baixada com sucesso em:\n{caminho_arquivo}")

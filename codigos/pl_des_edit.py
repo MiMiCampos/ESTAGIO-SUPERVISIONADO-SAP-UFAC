@@ -6,6 +6,7 @@ from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 import openpyxl
 from datetime import datetime
+from utils.excel_formatador import FormatadorExcel
 
 class EdicaoPlanilha:
     def __init__(self, master, nome_planilha, caminho_arquivo_aberto=None, dados_iniciais=None, db_controller=None, id_desfazimento=None):
@@ -74,7 +75,7 @@ class EdicaoPlanilha:
         self.entry_numero_tombo.pack(side=LEFT, fill=X, expand=True)
         self.entry_numero_tombo.bind("<Return>", lambda event: self.adicionar_item_planilha())
 
-        botao_adicionar_tombo = ttk.Button( frame_input_tombos, text="Adicionar", bootstyle="info",style='custom.TButton', command=self.adicionar_item_planilha)
+        botao_adicionar_tombo = ttk.Button( frame_input_tombos, text="Adicionar", bootstyle="info", command=self.adicionar_item_planilha)
         botao_adicionar_tombo.pack(side=LEFT, padx=(10, 0))
 
         label_titulo_relatorio = ttk.Label(frame_corpo_edicao, text=self.nome_da_planilha_atual, font=("Inconsolata", 12, "bold"))
@@ -94,17 +95,17 @@ class EdicaoPlanilha:
         scrollbar_vertical.pack(side=RIGHT, fill=Y)
         self.tabela_desfazimento.pack(expand=True, fill=BOTH)
 
-        botao_voltar_edicao = ttk.Button(frame_botoes_inferiores, text="<- Voltar", command=self.toplevel_edicao.destroy, style='custom.TButton', bootstyle="light-outline")
-        botao_voltar_edicao.pack(side=LEFT)
+        botao_voltar_edicao = ttk.Button(frame_botoes_inferiores, text="<- Voltar", command=self.toplevel_edicao.destroy, bootstyle="primary-outline")
+        botao_voltar_edicao.pack(side=LEFT, padx=10)
         
-        botao_gerar_planilha = ttk.Button(frame_botoes_inferiores, text="Gerar Planilha", command=self.gerar_planilha_final, bootstyle="success", style='custom.TButton')
-        botao_gerar_planilha.pack(side=RIGHT, padx=(0, 10))
+        botao_gerar_planilha = ttk.Button(frame_botoes_inferiores, text="Gerar Planilha", command=self.gerar_planilha_final, bootstyle="info")
+        botao_gerar_planilha.pack(side=RIGHT, padx=(0, 10), ipadx=10)
         
-        botao_salvar_edicao = ttk.Button(frame_botoes_inferiores, text="Salvar", command=self.salvar_alteracoes, style='custom.TButton', bootstyle="info")
-        botao_salvar_edicao.pack(side=RIGHT, padx=(0, 10))
+        botao_salvar_edicao = ttk.Button(frame_botoes_inferiores, text="Salvar", command=self.salvar_alteracoes, bootstyle="success")
+        botao_salvar_edicao.pack(side=RIGHT, padx=(0, 10), ipadx=10)
 
-        botao_editar_item = ttk.Button(frame_botoes_inferiores, text="Editar", command=self.editar_item_selecionado, style='custom.TButton', bootstyle="info-outline")
-        botao_editar_item.pack(side=RIGHT, padx=(0, 10))
+        botao_editar_item = ttk.Button(frame_botoes_inferiores, text="Editar", command=self.editar_item_selecionado, bootstyle="info-outline")
+        botao_editar_item.pack(side=RIGHT, padx=(0, 10), ipadx=10)
 
         self._popular_tabela_com_dados_carregados()
 
@@ -201,22 +202,32 @@ class EdicaoPlanilha:
         botao_salvar_edicao_item.grid(row=len(colunas_nomes), column=0, columnspan=2, pady=15)
 
     def _salvar_dados_no_arquivo(self, caminho):
-        """Lógica interna para salvar os dados da tabela no ficheiro Excel."""
+        """
+        Salva os dados da tabela no ficheiro Excel com formatação padronizada.
+        """
         try:
-            workbook = openpyxl.Workbook()
+            workbook = openpyxl.load_workbook(caminho)
             sheet = workbook.active
-            sheet.title = "Relatório de Desfazimento"
-            cabecalho = [self.tabela_desfazimento.heading(c)['text'] for c in self.tabela_desfazimento['columns']]
-            sheet.append(cabecalho)
+            
+            dados_da_tabela = []
             for item_id in self.tabela_desfazimento.get_children():
-                sheet.append(self.tabela_desfazimento.item(item_id)['values'])
+                dados_da_tabela.append(self.tabela_desfazimento.item(item_id)['values'])
+            
+            # --- A CHAMADA ACONTECE AQUI ---
+            FormatadorExcel.formatar_planilha_desfazimento(
+                workbook, 
+                sheet, 
+                self.nome_da_planilha_atual, 
+                dados_da_tabela
+            )
+
             workbook.save(caminho)
             return True
         except Exception as e:
             Messagebox.show_error(title="Erro ao Salvar", message=f"Ocorreu um erro ao salvar o ficheiro:\n{e}")
             return False
 
-    # --- MUDANÇA PRINCIPAL: Conecta o salvamento ao banco de dados ---
+    # --- Conecta o salvamento ao banco de dados ---
     def salvar_alteracoes(self):
         """Salva as alterações no ficheiro atual e no banco de dados."""
         if not self.caminho_arquivo_atual:

@@ -73,43 +73,62 @@ class PlanilhaDesfazimento:
         btn_editar.pack(fill=X, pady=5, ipady=10)
 
     def editar_planilha(self):
-        """Abre um seletor de ficheiros para carregar uma planilha XLSX para edição."""
+        """
+        Abre um seletor de ficheiros. Tenta ler o ID da aba oculta (método novo e robusto).
+        Se não conseguir, tenta buscar pelo caminho do arquivo (método antigo, para compatibilidade).
+        """
         caminho_arquivo = filedialog.askopenfilename(
             title="Selecione uma planilha para editar",
             filetypes=[("Planilhas Excel", "*.xlsx"), ("Todos os arquivos", "*.*")]
         )
         if not caminho_arquivo: return
 
-        # --- MUDANÇA PRINCIPAL: Busca o ID do desfazimento a partir do ficheiro ---
-        id_desfazimento = self.db.get_desfazimento_por_caminho_planilha(caminho_arquivo)
-        if id_desfazimento is None:
-            messagebox.showerror("Processo não Encontrado", "Não foi encontrado um processo de desfazimento associado a este ficheiro.\n\n"
-                                 "Para continuar a edição, o ficheiro precisa de ter sido salvo anteriormente pelo sistema.")
-            return
-
-        nome_planilha = os.path.basename(caminho_arquivo).replace('.xlsx', '')
-        
+        id_desfazimento_final = None
         dados_lidos = []
+        
         try:
             workbook = openpyxl.load_workbook(caminho_arquivo)
+            
+            # --- TENTATIVA 1: MÉTODO NOVO (LER ID INTERNO) ---
+            if "sap_ufac_meta" in workbook.sheetnames:
+                id_sheet = workbook["sap_ufac_meta"]
+                id_desfazimento_final = id_sheet['B1'].value
+
+            # --- TENTATIVA 2: MÉTODO ANTIGO (COMPATIBILIDADE) ---
+            # Se o ID não foi encontrado na aba, tenta o método antigo
+            if id_desfazimento_final is None:
+                print("DEBUG: Não encontrou ID interno, tentando compatibilidade por caminho de arquivo...")
+                id_desfazimento_final = self.db.get_desfazimento_por_caminho_planilha(caminho_arquivo)
+
+            # Se mesmo após as duas tentativas o ID não for encontrado, o arquivo é inválido.
+            if id_desfazimento_final is None:
+                messagebox.showerror("Processo não Encontrado", 
+                                     "Não foi encontrado um processo de desfazimento associado a este ficheiro.\n\n"
+                                     "Se for uma planilha antiga, seu registro pode não existir mais no banco com o caminho atual. "
+                                     "Para novas planilhas, certifique-se de que foram salvas pelo sistema.")
+                return
+
+            # Continua a ler os dados da aba principal para exibir na tela
             sheet = workbook.active
             iterador_linhas = iter(sheet.rows)
-            next(iterador_linhas)
+            next(iterador_linhas) # Pula o cabeçalho
             for linha in iterador_linhas:
                 dados_lidos.append([cell.value if cell.value is not None else "" for cell in linha])
+        
         except Exception as e:
             messagebox.showerror(title="Erro de Leitura", message=f"Não foi possível ler o ficheiro Excel:\n{e}")
             return
             
         self.tpl_planilha_des.destroy()
         
-        # --- CORREÇÃO: Passa o db_controller e o id_desfazimento encontrado ---
+        nome_planilha = os.path.basename(caminho_arquivo).replace('.xlsx', '')
+        
         tela_edicao = EdicaoPlanilha(
             self.janela, 
             nome_planilha, 
             caminho_arquivo_aberto=caminho_arquivo, 
             dados_iniciais=dados_lidos,
             db_controller=self.db,
-            id_desfazimento=id_desfazimento
+            id_desfazimento=id_desfazimento_final # Passa o ID encontrado (seja pelo método novo ou antigo)
         )
         tela_edicao.exibir_tela()

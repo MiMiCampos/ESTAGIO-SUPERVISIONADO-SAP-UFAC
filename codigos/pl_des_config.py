@@ -132,12 +132,22 @@ class CriarPlanilha:
             sheet = workbook.active
             cabecalho = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO']
             sheet.append(cabecalho)
+            
+            # Cria uma nova aba (sheet) para guardar o ID
+            id_sheet = workbook.create_sheet(title="sap_ufac_meta")
+            id_sheet['A1'] = "id_desfazimento"
+            id_sheet['B1'] = novo_desfazimento_id  # Salva o ID retornado pelo banco
+            
+            # Oculta a aba para o usuário não ver
+            id_sheet.sheet_state = 'hidden'
+            # --- FIM DO CÓDIGO NOVO ---
+            
             workbook.save(caminho_completo)
         except Exception as e:
             Messagebox.show_error(title="Erro ao Criar Ficheiro", message=f"Não foi possível criar o ficheiro:\n{e}")
             return
 
-        # --- CORREÇÃO PRINCIPAL: Regista a planilha no banco de dados IMEDIATAMENTE ---
+        # --- Regista a planilha no banco de dados IMEDIATAMENTE ---
         self.db.salvar_ou_atualizar_planilha_finalizada(
             id_desfazimento=novo_desfazimento_id,
             nome_planilha=nome_arquivo,

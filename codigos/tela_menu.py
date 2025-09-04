@@ -10,6 +10,7 @@ from config import Configuracoes
 from gerar_doc import GerarDocumentos
 from org_baixa import OrganizacaoBaixas
 from pl_des import PlanilhaDesfazimento
+from utils.excel_formatador import FormatadorExcel
 
 class MenuInicial():
     def __init__(self, master):
@@ -31,6 +32,7 @@ class MenuInicial():
         self.gerar_doc = GerarDocumentos(self.janela, self.db_controller)
         self.org_baixa = OrganizacaoBaixas(self.janela) # Recebe dados, não o controlador diretamente
         self.planilha_desf = PlanilhaDesfazimento(self.janela, self.db_controller)
+        # self.formatador = FormatadorExcel(self.janela)
         
         # ----- Imagens dos botões iniciais -----
         try:
