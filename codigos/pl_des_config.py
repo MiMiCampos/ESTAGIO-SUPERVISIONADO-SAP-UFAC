@@ -8,7 +8,6 @@ from PIL import Image, ImageTk
 import os
 import openpyxl
 
-# Importa a classe da tela de edição
 from pl_des_edit import EdicaoPlanilha
 
 class CriarPlanilha:
@@ -40,22 +39,10 @@ class CriarPlanilha:
         self.tpl_criar_planilha.position_center()
         self.tpl_criar_planilha.grab_set()
 
-        # Configuração da UI (cabeçalho, rodapé, corpo, etc.)...
         style = ttk.Style()
         style.configure('Header.TFrame', background='#5bc0de')
-        style.configure(
-            'custom.TButton', 
-            font=("Inconsolata", 14),
-            borderwidth=1,
-            padding=(10, 10),
-            background='white',
-            foreground='#5bc0de'
-        )
-        style.map('custom.TButton',
-            bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')],
-            background=[('active', "#ececec"), ('!active', 'white')],
-            relief=[('pressed', 'solid'), ('!pressed', 'solid')]
-        )
+        style.configure('custom.TButton', font=("Inconsolata", 14), borderwidth=1, padding=(10, 10), background='white', foreground='#5bc0de')
+        style.map('custom.TButton', bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')], background=[('active', "#ececec"), ('!active', 'white')], relief=[('pressed', 'solid'), ('!pressed', 'solid')])
 
         frm_cabecalho = ttk.Frame(self.tpl_criar_planilha, style='Header.TFrame', padding=(10, 5))
         frm_cabecalho.pack(fill=X, side=TOP)
@@ -64,25 +51,16 @@ class CriarPlanilha:
             lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao, style='Header.TFrame')
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
 
-        lbl_titulo = ttk.Label(
-            frm_cabecalho, text="Criar Nova Planilha de Desfazimento",
-            font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black'
-        )
+        lbl_titulo = ttk.Label(frm_cabecalho, text="Criar Nova Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
 
         frm_rodape = ttk.Frame(self.tpl_criar_planilha, padding=10)
         frm_rodape.pack(fill=X, side=BOTTOM)
 
-        btn_voltar = ttk.Button(
-            frm_rodape, text="<- Voltar",
-            command=self.tpl_criar_planilha.destroy, bootstyle="primary-outline",
-        )
+        btn_voltar = ttk.Button(frm_rodape, text="<- Voltar", command=self.tpl_criar_planilha.destroy, bootstyle="primary-outline")
         btn_voltar.pack(side=LEFT, padx=30, pady=10)
 
-        btn_criar_continuar = ttk.Button(
-            frm_rodape, text="Criar e Continuar",
-            command=self.confirmar_e_criar_arquivo, bootstyle="success"
-        )
+        btn_criar_continuar = ttk.Button(frm_rodape, text="Criar e Continuar", command=self.confirmar_e_criar_arquivo, bootstyle="success")
         btn_criar_continuar.pack(side=RIGHT, padx=30, pady=10)
 
         frm_corpo = ttk.Frame(self.tpl_criar_planilha, padding=(40, 30))
@@ -96,14 +74,12 @@ class CriarPlanilha:
         self.ent_nome.insert(0, f"RELATÓRIO DE DESFAZIMENTO DE BENS MÓVEIS PATRIMONIAIS DE {ano_atual}")
         self.ent_nome.pack(fill=X, ipady=5, pady=(0, 20))
         
-        # ----- NOVO CAMPO: Número do Processo ----- (VERIFICAR SE JÁ VAI TER O Nº DO PROCESSO)
         lbl_processo = ttk.Label(frm_corpo, text="Número do Processo", font=("Inconsolata", 12, "bold"))
         lbl_processo.pack(fill=X, anchor=W, pady=(0, 5))
         self.ent_processo = ttk.Entry(frm_corpo, font=("Inconsolata", 11))
-        self.ent_processo.insert(0, f"23107.000000/{ano_atual}-00") # Exemplo de formato
+        self.ent_processo.insert(0, f"23107.000000/{ano_atual}-00")
         self.ent_processo.pack(fill=X, ipady=5, pady=(0, 20))
 
-        # ... (restante dos widgets do formulário)
         lbl_data = ttk.Label(frm_corpo, text="Data da Planilha", font=("Inconsolata", 12, "bold"))
         lbl_data.pack(fill=X, anchor=W, pady=(0, 5))
         self.date_entry = ttk.DateEntry(frm_corpo, bootstyle="info", dateformat="%d/%m/%Y")
@@ -124,62 +100,59 @@ class CriarPlanilha:
             self.ent_pasta.delete(0, END)
             self.ent_pasta.insert(0, caminho)
 
-    # ----- MUDANÇA: Lógica de criação do arquivo e registro no BD -----
     def confirmar_e_criar_arquivo(self):
-        """Valida, cria o registro no BD, cria o arquivo .xlsx e abre a tela de edição."""
-        nome_arquivo = self.ent_nome.get()
-        pasta_destino = self.ent_pasta.get()
-        numero_processo = self.ent_processo.get()
-        data_selecionada = self.date_entry.entry.get() # Pega a data como string
+        """Valida, cria o registro no BD, cria o ficheiro .xlsx, regista a planilha no BD e abre a tela de edição."""
+        nome_arquivo = self.ent_nome.get().strip()
+        pasta_destino = self.ent_pasta.get().strip()
+        numero_processo = self.ent_processo.get().strip()
+        data_selecionada = self.date_entry.entry.get()
         
         if not all([nome_arquivo, pasta_destino, numero_processo, data_selecionada]):
             Messagebox.show_error(title="Erro de Validação", message="Todos os campos são obrigatórios.")
             return
 
-        # Converte a data string para o formato do MySQL (YYYY-MM-DD)
         try:
             data_formatada_bd = datetime.strptime(data_selecionada, "%d/%m/%Y").strftime("%Y-%m-%d")
         except ValueError:
             Messagebox.show_error(title="Erro de Data", message="Formato de data inválido. Use DD/MM/AAAA.")
             return
             
-        # ----- PASSO 1: INSERIR NO BANCO DE DADOS -----
         novo_desfazimento_id = self.db.criar_novo_desfazimento(numero_processo, data_formatada_bd)
         
-        if novo_desfazimento_id is None:
-            # O controlador já mostrou uma mensagem de erro, então apenas retornamos.
-            return
+        if novo_desfazimento_id is None: return
 
         caminho_completo = os.path.join(pasta_destino, f"{nome_arquivo}.xlsx")
         
         if os.path.exists(caminho_completo):
-            resposta = Messagebox.yesno(title="Arquivo Existente", message=f"O arquivo '{nome_arquivo}.xlsx' já existe.\nDeseja sobrescrevê-lo?")
-            if not resposta:
-                # Aqui poderíamos deletar o registro de desfazimento recém-criado, mas por simplicidade vamos deixar.
-                return
+            resposta = Messagebox.yesno(title="Ficheiro Existente", message=f"O ficheiro '{nome_arquivo}.xlsx' já existe.\nDeseja sobrescrevê-lo?")
+            if not resposta: return
 
-        # ----- PASSO 2: CRIAR O ARQUIVO LOCAL -----
         try:
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-            cabecalho = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 
-                        'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO']
+            cabecalho = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO']
             sheet.append(cabecalho)
             workbook.save(caminho_completo)
         except Exception as e:
-            Messagebox.show_error(title="Erro ao Criar Arquivo", message=f"Não foi possível criar o arquivo:\n{e}")
+            Messagebox.show_error(title="Erro ao Criar Ficheiro", message=f"Não foi possível criar o ficheiro:\n{e}")
             return
 
-        # ----- PASSO 3: NAVEGAR PARA A TELA DE EDIÇÃO -----
+        # --- CORREÇÃO PRINCIPAL: Regista a planilha no banco de dados IMEDIATAMENTE ---
+        self.db.salvar_ou_atualizar_planilha_finalizada(
+            id_desfazimento=novo_desfazimento_id,
+            nome_planilha=nome_arquivo,
+            caminho=caminho_completo,
+            total_tombos=0 # A planilha começa com 0 tombos
+        )
+
         self.tpl_criar_planilha.destroy()
         
-        # Passa o controlador e o ID do desfazimento para a tela de edição
         tela_de_edicao = EdicaoPlanilha(
             self.master, 
             nome_arquivo, 
             caminho_arquivo_aberto=caminho_completo, 
             dados_iniciais=[],
-            db_controller=self.db, # Passando o controlador
-            id_desfazimento=novo_desfazimento_id # Passando o ID
+            db_controller=self.db,
+            id_desfazimento=novo_desfazimento_id
         )
         tela_de_edicao.exibir_tela()

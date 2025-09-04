@@ -16,6 +16,7 @@ class MenuInicial():
         self.janela = master
         self.janela.title("SAP-UFAC - Menu Inicial")
         self.janela.geometry("1000x700")
+        
         self.janela.position_center()
         
         # ----- Única instância do controlador do banco de dados -----

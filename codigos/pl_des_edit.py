@@ -14,7 +14,6 @@ class EdicaoPlanilha:
         self.caminho_arquivo_atual = caminho_arquivo_aberto
         self.dados_carregados = dados_iniciais
         
-        # Armazena as informações do banco de dados
         self.db = db_controller
         self.id_desfazimento_atual = id_desfazimento
         
@@ -46,19 +45,8 @@ class EdicaoPlanilha:
 
         style = ttk.Style()
         style.configure('Header.TFrame', background='#5bc0de')
-        style.configure(
-            'custom.TButton', 
-            font=("Inconsolata", 14),
-            borderwidth=1,
-            padding=(10, 10),
-            background='white',
-            foreground='#5bc0de'
-        )
-        style.map('custom.TButton',
-            bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')],
-            background=[('active', "#ececec"), ('!active', 'white')],
-            relief=[('pressed', 'solid'), ('!pressed', 'solid')]
-        )
+        style.configure( 'custom.TButton', font=("Inconsolata", 14), borderwidth=1, padding=(10, 10), background='white', foreground='#5bc0de')
+        style.map('custom.TButton', bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')], background=[('active', "#ececec"), ('!active', 'white')], relief=[('pressed', 'solid'), ('!pressed', 'solid')])
 
         frame_cabecalho_edicao = ttk.Frame(self.toplevel_edicao, style='Header.TFrame', padding=(10, 5))
         frame_cabecalho_edicao.pack(fill=X, side=TOP)
@@ -67,10 +55,7 @@ class EdicaoPlanilha:
             label_brasao_edicao = ttk.Label(frame_cabecalho_edicao, image=self.brasao_para_edicao, style='Header.TFrame')
             label_brasao_edicao.pack(side=LEFT, padx=(5, 10))
 
-        label_titulo_edicao = ttk.Label(
-            frame_cabecalho_edicao, text="Planilha de Desfazimento",
-            font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black'
-        )
+        label_titulo_edicao = ttk.Label(frame_cabecalho_edicao, text="Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
         label_titulo_edicao.pack(side=LEFT, expand=True, pady=5)
 
         frame_botoes_inferiores = ttk.Frame(self.toplevel_edicao, padding=10)
@@ -87,14 +72,9 @@ class EdicaoPlanilha:
 
         self.entry_numero_tombo = ttk.Entry(frame_input_tombos, font=("Inconsolata", 12), width=30)
         self.entry_numero_tombo.pack(side=LEFT, fill=X, expand=True)
-        # --- MUDANÇA: Adiciona o item ao pressionar Enter para melhor usabilidade ---
         self.entry_numero_tombo.bind("<Return>", lambda event: self.adicionar_item_planilha())
 
-
-        botao_adicionar_tombo = ttk.Button(
-            frame_input_tombos, text="Adicionar",
-            bootstyle="info",style='custom.TButton', command=self.adicionar_item_planilha
-        )
+        botao_adicionar_tombo = ttk.Button( frame_input_tombos, text="Adicionar", bootstyle="info",style='custom.TButton', command=self.adicionar_item_planilha)
         botao_adicionar_tombo.pack(side=LEFT, padx=(10, 0))
 
         label_titulo_relatorio = ttk.Label(frame_corpo_edicao, text=self.nome_da_planilha_atual, font=("Inconsolata", 12, "bold"))
@@ -104,7 +84,7 @@ class EdicaoPlanilha:
         self.tabela_desfazimento = ttk.Treeview(frame_corpo_edicao, columns=colunas, show='headings', bootstyle="info")
         
         headings = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO']
-        widths = [80, 100, 350, 120, 120, 200, 120, 120]
+        widths = [100, 100, 350, 120, 120, 200, 120, 120]
         for col, head, w in zip(colunas, headings, widths):
             self.tabela_desfazimento.heading(col, text=head)
             self.tabela_desfazimento.column(col, width=w, anchor=CENTER if col in ['ordem', 'tombo'] else W)
@@ -136,11 +116,15 @@ class EdicaoPlanilha:
             if self.dados_carregados:
                 self.numero_ordem_atual = len(self.dados_carregados) + 1
     
-    # --- MUDANÇA PRINCIPAL: MÉTODO CONECTADO AO BANCO DE DADOS ---
     def adicionar_item_planilha(self):
         """Busca o tombo no banco, o associa ao desfazimento e o adiciona na tabela da interface."""
         if not self.db:
             Messagebox.show_error("Erro Crítico", "A conexão com o banco de dados não foi estabelecida.")
+            return
+
+        if self.id_desfazimento_atual is None:
+            Messagebox.show_error("Erro de Processo", "Não há um processo de desfazimento ativo. \n\n"
+                                  "Se está a continuar uma edição, certifique-se que o ficheiro foi salvo anteriormente pelo sistema.")
             return
 
         numero_tombo = self.entry_numero_tombo.get().strip()
@@ -148,29 +132,30 @@ class EdicaoPlanilha:
             Messagebox.show_warning(title="Atenção", message="Por favor, digite um número de tombo.")
             return
 
-        # 1. Busca o bem no banco de dados
+        for item_id in self.tabela_desfazimento.get_children():
+            item_values = self.tabela_desfazimento.item(item_id)['values']
+            if str(item_values[1]) == numero_tombo:
+                Messagebox.show_warning("Tombo Duplicado", f"O tombo '{numero_tombo}' já foi adicionado a esta planilha.")
+                self.entry_numero_tombo.delete(0, END)
+                return
+
         bem_data = self.db.get_bem_by_tombo(numero_tombo)
         
-        # 2. Validações
         if not bem_data:
             Messagebox.show_warning("Tombo não encontrado", f"O bem de tombo '{numero_tombo}' não foi encontrado no banco de dados.")
             return
 
-        if bem_data.get('id_desfazimento') is not None and bem_data['id_desfazimento'] != self.id_desfazimento_atual:
+        id_desfazimento_no_banco = bem_data.get('id_desfazimento')
+        if id_desfazimento_no_banco is not None and id_desfazimento_no_banco != self.id_desfazimento_atual:
             Messagebox.show_warning("Bem em Uso", f"O tombo '{numero_tombo}' já está associado a outro processo de desfazimento.")
             return
 
-        # 3. Associa o bem ao desfazimento atual no banco
-        sucesso = self.db.associar_bem_a_desfazimento(numero_tombo, self.id_desfazimento_atual)
-        
-        if not sucesso:
-            # A mensagem de erro já foi exibida pelo controlador
-            return
+        if id_desfazimento_no_banco is None:
+            sucesso = self.db.associar_bem_a_desfazimento(numero_tombo, self.id_desfazimento_atual)
+            if not sucesso: return
 
-        # 4. Formata os dados para exibição na tabela (Treeview)
         data_aq_formatada = bem_data['data_aquisicao'].strftime('%d/%m/%Y') if bem_data.get('data_aquisicao') else 'N/A'
 
-        # Prepara a linha com os dados na ordem correta das colunas da tabela
         valores_linha = (
             self.numero_ordem_atual,
             bem_data.get('tombo', 'N/A'),
@@ -178,17 +163,15 @@ class EdicaoPlanilha:
             data_aq_formatada,
             bem_data.get('nota_fiscal', 'N/A'),
             bem_data.get('nome_unidade', 'N/A'),
-            'IRRECUPERÁVEL', # Valor padrão definido no UPDATE do DBController
-            'ALIENAÇÃO/LEILÃO'  # Valor padrão definido no UPDATE do DBController
+            'Irrecuperável', 'Alienação/Leilão'
         )
 
-        # 5. Insere a nova linha na tabela da interface
         self.tabela_desfazimento.insert('', END, values=valores_linha)
         self.numero_ordem_atual += 1
         self.entry_numero_tombo.delete(0, END)
 
     def editar_item_selecionado(self):
-        # Esta função pode ser melhorada para editar os dados no banco também
+        """Abre uma janela para editar o item selecionado."""
         item_selecionado_id = self.tabela_desfazimento.focus()
         if not item_selecionado_id:
             Messagebox.show_warning(title="Atenção", message="Nenhum item selecionado para editar.")
@@ -213,12 +196,12 @@ class EdicaoPlanilha:
         def salvar_edicao():
             novos_valores = [campos_entrada[i].get() for i in range(len(colunas_nomes))]
             self.tabela_desfazimento.item(item_selecionado_id, values=novos_valores)
-            # Aqui iria a lógica para salvar a edição no banco de dados também
             janela_edicao_item.destroy()
         botao_salvar_edicao_item = ttk.Button(frame_edicao_campos, text="Salvar Alterações", command=salvar_edicao, bootstyle="success")
         botao_salvar_edicao_item.grid(row=len(colunas_nomes), column=0, columnspan=2, pady=15)
 
-    def _salvar_dados_no_arquivo(self, caminho, mensagem_sucesso):
+    def _salvar_dados_no_arquivo(self, caminho):
+        """Lógica interna para salvar os dados da tabela no ficheiro Excel."""
         try:
             workbook = openpyxl.Workbook()
             sheet = workbook.active
@@ -228,19 +211,42 @@ class EdicaoPlanilha:
             for item_id in self.tabela_desfazimento.get_children():
                 sheet.append(self.tabela_desfazimento.item(item_id)['values'])
             workbook.save(caminho)
-            Messagebox.ok(title="Sucesso", message=mensagem_sucesso)
+            return True
         except Exception as e:
-            Messagebox.show_error(title="Erro ao Salvar", message=f"Ocorreu um erro ao salvar o arquivo:\n{e}")
+            Messagebox.show_error(title="Erro ao Salvar", message=f"Ocorreu um erro ao salvar o ficheiro:\n{e}")
+            return False
 
+    # --- MUDANÇA PRINCIPAL: Conecta o salvamento ao banco de dados ---
     def salvar_alteracoes(self):
+        """Salva as alterações no ficheiro atual e no banco de dados."""
         if not self.caminho_arquivo_atual:
-            Messagebox.show_error(title="Erro", message="Nenhum arquivo associado a esta planilha.")
+            Messagebox.show_error(title="Erro", message="Nenhum ficheiro associado a esta planilha.")
             return
-        self._salvar_dados_no_arquivo(self.caminho_arquivo_atual, "Os dados foram salvos.")
 
+        if self._salvar_dados_no_arquivo(self.caminho_arquivo_atual):
+            total_tombos = len(self.tabela_desfazimento.get_children())
+            self.db.salvar_ou_atualizar_planilha_finalizada(
+                id_desfazimento=self.id_desfazimento_atual,
+                nome_planilha=self.nome_da_planilha_atual,
+                caminho=self.caminho_arquivo_atual,
+                total_tombos=total_tombos
+            )
+            Messagebox.ok(title="Sucesso", message="Os dados foram salvos.")
+
+    # --- MUDANÇA PRINCIPAL: Conecta o salvamento ao banco de dados ---
     def gerar_planilha_final(self):
+        """Salva as alterações no ficheiro atual e no banco de dados, com uma mensagem final."""
         if not self.caminho_arquivo_atual:
-            Messagebox.show_error(title="Erro", message="Nenhum arquivo associado a esta planilha.")
+            Messagebox.show_error(title="Erro", message="Nenhum ficheiro associado a esta planilha.")
             return
-        mensagem = f"Planilha gerada com sucesso em:\n{self.caminho_arquivo_atual}"
-        self._salvar_dados_no_arquivo(self.caminho_arquivo_atual, mensagem)
+            
+        if self._salvar_dados_no_arquivo(self.caminho_arquivo_atual):
+            total_tombos = len(self.tabela_desfazimento.get_children())
+            self.db.salvar_ou_atualizar_planilha_finalizada(
+                id_desfazimento=self.id_desfazimento_atual,
+                nome_planilha=self.nome_da_planilha_atual,
+                caminho=self.caminho_arquivo_atual,
+                total_tombos=total_tombos
+            )
+            mensagem = f"Planilha gerada com sucesso em:\n{self.caminho_arquivo_atual}"
+            Messagebox.ok(title="Sucesso", message=mensagem)

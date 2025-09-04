@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
@@ -15,9 +14,7 @@ class PlanilhaDesfazimento:
         self.janela = master
         self.db = db_controller
         self.tpl_planilha_des = None
-        
         self.tela_de_criacao = CriarPlanilha(self.janela, self.db)
-        
         self.carregar_recursos()
         
     def carregar_recursos(self):
@@ -30,19 +27,8 @@ class PlanilhaDesfazimento:
 
         style = ttk.Style()
         style.configure('Header.TFrame', background='#5bc0de')
-        style.configure(
-            'custom.TButton', 
-            font=("Inconsolata", 12),
-            borderwidth=1,
-            padding=(10, 10),
-            background='white',
-            foreground="#000000"
-        )
-        style.map('custom.TButton',
-            bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')],
-            background=[('active', "#ececec"), ('!active', 'white')],
-            relief=[('pressed', 'solid'), ('!pressed', 'solid')],
-        )
+        style.configure('custom.TButton', font=("Inconsolata", 12), borderwidth=1, padding=(10, 10), background='white', foreground="#000000")
+        style.map('custom.TButton', bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')], background=[('active', "#ececec"), ('!active', 'white')], relief=[('pressed', 'solid'), ('!pressed', 'solid')])
 
     def planilha_des(self):
         """Cria e exibe a janela da Planilha de Desfazimento."""
@@ -65,83 +51,65 @@ class PlanilhaDesfazimento:
             lbl_brasao.image = self.brasao 
             lbl_brasao.pack(side=LEFT, padx=10, pady=5)
 
-        lbl_titulo = ttk.Label(
-            frm_cabecalho, text="Planilha de Desfazimento",
-            font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black'
-        )
+        lbl_titulo = ttk.Label(frm_cabecalho, text="Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
 
         frm_rodape = ttk.Frame(self.tpl_planilha_des, padding=10)
         frm_rodape.pack(fill=X, side=BOTTOM)
 
-        btn_voltar = ttk.Button(
-            frm_rodape, text="<- Voltar",
-            command=self.tpl_planilha_des.destroy, bootstyle="primary-outline"
-        )
+        btn_voltar = ttk.Button(frm_rodape, text="<- Voltar", command=self.tpl_planilha_des.destroy, bootstyle="primary-outline")
         btn_voltar.pack(side=LEFT, padx=40, pady=20)
 
         frm_corpo = ttk.Frame(self.tpl_planilha_des, padding=(50, 30))
         frm_corpo.pack(expand=True, fill=BOTH)
 
-        lbl_pergunta = ttk.Label(
-            frm_corpo, text="O que você quer fazer?",
-            font=("Inconsolata", 14)
-        )
+        lbl_pergunta = ttk.Label(frm_corpo, text="O que você quer fazer?", font=("Inconsolata", 14))
         lbl_pergunta.pack(anchor=W, pady=(0, 20))
 
-        btn_criar = ttk.Button(
-            frm_corpo, text="Criar Nova Planilha",
-            style='custom.TButton',
-            command=self.tela_de_criacao.criar
-        )
+        btn_criar = ttk.Button(frm_corpo, text="Criar Nova Planilha", style='custom.TButton', command=self.tela_de_criacao.criar)
         btn_criar.pack(fill=X, pady=5, ipady=10)
 
-        btn_editar = ttk.Button(
-            frm_corpo, text="Continuar Edição",
-            style='custom.TButton',
-            command=self.editar_planilha
-        )
+        btn_editar = ttk.Button(frm_corpo, text="Continuar Edição", style='custom.TButton', command=self.editar_planilha)
         btn_editar.pack(fill=X, pady=5, ipady=10)
 
     def editar_planilha(self):
-        """Abre um seletor de arquivos para carregar uma planilha XLSX para edição."""
+        """Abre um seletor de ficheiros para carregar uma planilha XLSX para edição."""
         caminho_arquivo = filedialog.askopenfilename(
             title="Selecione uma planilha para editar",
             filetypes=[("Planilhas Excel", "*.xlsx"), ("Todos os arquivos", "*.*")]
         )
-        if not caminho_arquivo:
+        if not caminho_arquivo: return
+
+        # --- MUDANÇA PRINCIPAL: Busca o ID do desfazimento a partir do ficheiro ---
+        id_desfazimento = self.db.get_desfazimento_por_caminho_planilha(caminho_arquivo)
+        if id_desfazimento is None:
+            messagebox.showerror("Processo não Encontrado", "Não foi encontrado um processo de desfazimento associado a este ficheiro.\n\n"
+                                 "Para continuar a edição, o ficheiro precisa de ter sido salvo anteriormente pelo sistema.")
             return
 
-        # --- MUDANÇA ---
-        #    Esta parte precisa de uma lógica mais robusta para encontrar o 'id_desfazimento'
-        #    a partir do nome da planilha ou do processo. Por enquanto, estamos
-        #    deixando como 'None' para evitar erros, mas isso fará com que a
-        #    inserção de novos tombos falhe se não for ajustado.
-        id_desfazimento_encontrado = None # Placeholder
-        
-        nome_planilha = os.path.basename(caminho_arquivo)
+        nome_planilha = os.path.basename(caminho_arquivo).replace('.xlsx', '')
         
         dados_lidos = []
         try:
             workbook = openpyxl.load_workbook(caminho_arquivo)
             sheet = workbook.active
             iterador_linhas = iter(sheet.rows)
-            next(iterador_linhas) # Pula o cabeçalho
+            next(iterador_linhas)
             for linha in iterador_linhas:
                 dados_lidos.append([cell.value if cell.value is not None else "" for cell in linha])
         except Exception as e:
-            messagebox.showerror(title="Erro de Leitura", message=f"Não foi possível ler o arquivo Excel:\n{e}")
+            messagebox.showerror(title="Erro de Leitura", message=f"Não foi possível ler o ficheiro Excel:\n{e}")
             return
             
         self.tpl_planilha_des.destroy()
         
-        # --- CORREÇÃO: Passando o db_controller e o id_desfazimento ---
+        # --- CORREÇÃO: Passa o db_controller e o id_desfazimento encontrado ---
         tela_edicao = EdicaoPlanilha(
             self.janela, 
             nome_planilha, 
             caminho_arquivo_aberto=caminho_arquivo, 
             dados_iniciais=dados_lidos,
             db_controller=self.db,
-            id_desfazimento=id_desfazimento_encontrado
-            )
+            id_desfazimento=id_desfazimento
+        )
         tela_edicao.exibir_tela()
