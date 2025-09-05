@@ -11,9 +11,10 @@ import openpyxl
 from pl_des_edit import EdicaoPlanilha
 
 class CriarPlanilha:
-    def __init__(self, master, db_controller):
+    def __init__(self, master, db_controller, menu_principal):
         self.master = master
         self.db = db_controller
+        self.menu_principal = menu_principal
         self.tpl_criar_planilha = None
         self.carregar_recursos()
 
@@ -155,6 +156,14 @@ class CriarPlanilha:
             total_tombos=0 # A planilha começa com 0 tombos
         )
 
+        # --- NOVO: Define esta planilha como a ativa no menu principal ---
+        info_nova_planilha = {
+            'id_desfazimento': novo_desfazimento_id,
+            'caminho': caminho_completo,
+            'nome': nome_arquivo
+        }
+        self.menu_principal.definir_planilha_ativa(info_nova_planilha)
+        
         self.tpl_criar_planilha.destroy()
         
         tela_de_edicao = EdicaoPlanilha(

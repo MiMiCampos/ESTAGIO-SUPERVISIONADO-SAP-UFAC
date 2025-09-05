@@ -2,6 +2,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
+from ttkbootstrap.dialogs import Messagebox
 
 # Novo controlador importado
 from banco_dados.db_controller import DBController
@@ -22,7 +23,7 @@ class MenuInicial():
         
         # ----- Única instância do controlador do banco de dados -----
         self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
-        
+                
         # Garante que a conexão seja fechada quando a janela principal fechar
         self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
 
@@ -31,8 +32,7 @@ class MenuInicial():
         self.config = Configuracoes(self.janela) # Por enquanto não precisa do controlador
         self.gerar_doc = GerarDocumentos(self.janela, self.db_controller)
         self.org_baixa = OrganizacaoBaixas(self.janela) # Recebe dados, não o controlador diretamente
-        self.planilha_desf = PlanilhaDesfazimento(self.janela, self.db_controller)
-        # self.formatador = FormatadorExcel(self.janela)
+        self.planilha_desf = PlanilhaDesfazimento(self.janela, self.db_controller, self)
         
         # ----- Imagens dos botões iniciais -----
         try:
@@ -110,7 +110,7 @@ class MenuInicial():
         self.btn_planilha_des.grid(row=1, column=1, padx=10, pady=10)
         self.btn_planilha_des.configure(style='MyHeader.TButton')
 
-        self.btn_org_baixas = ttk.Button(botoes_frame, command=self.org_baixa.org_baixas, image=self.img_baixas)
+        self.btn_org_baixas = ttk.Button(botoes_frame, command=self.abrir_organizacao_baixas_da_ultima_planilha, image=self.img_baixas)
         self.btn_org_baixas.grid(row=1, column=2, padx=10, pady=10)
         self.btn_org_baixas.configure(style='MyHeader.TButton')
 
@@ -121,6 +121,33 @@ class MenuInicial():
         self.btn_configuracoes = ttk.Button(botoes_frame, command=self.config.configuracao, image=self.img_config)
         self.btn_configuracoes.grid(row=2, column=2, padx=10, pady=10)
         self.btn_configuracoes.configure(style='MyHeader.TButton')
+   
+    # --- NOVO: Método para o botão de Organização de Baixas ---
+    def abrir_organizacao_baixas_da_ultima_planilha(self):
+        """
+        Abre a tela de organização de baixas com os dados da ÚLTIMA planilha criada no banco.
+        """
+        print("INFO: Buscando última planilha no BD para organizar baixas...")
+        ultima_planilha_info = self.db_controller.get_ultima_planilha_criada()
+
+        if ultima_planilha_info is None:
+            Messagebox.show_warning("Nenhuma Planilha Encontrada", 
+                                    "Não há nenhuma planilha registrada no banco de dados para organizar.")
+            return
+            
+        id_desfazimento = ultima_planilha_info['id_desfazimento']
+        dados_brutos = self.db_controller.get_bens_por_desfazimento(id_desfazimento)
+        
+        if not dados_brutos:
+            Messagebox.show_info("Planilha Vazia", "A última planilha criada ainda não contém nenhum bem para organizar.")
+            return
+
+        tela_baixas = OrganizacaoBaixas(
+            self.janela,
+            nome_planilha=ultima_planilha_info['nome'],
+            dados_para_agrupar=dados_brutos
+        )
+        tela_baixas.org_baixas()
         
     def fechar_aplicacao(self):
         """Função para fechar a conexão com o BD antes de sair."""

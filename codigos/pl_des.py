@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
+from ttkbootstrap.dialogs import Messagebox
 import os
 import openpyxl
 
@@ -10,11 +11,12 @@ from pl_des_config import CriarPlanilha
 from pl_des_edit import EdicaoPlanilha
 
 class PlanilhaDesfazimento:
-    def __init__(self, master, db_controller):
+    def __init__(self, master, db_controller, menu_principal):
         self.janela = master
         self.db = db_controller
+        self.menu_principal = menu_principal  # <-- Guarda a referência do menu
         self.tpl_planilha_des = None
-        self.tela_de_criacao = CriarPlanilha(self.janela, self.db)
+        self.tela_de_criacao = CriarPlanilha(self.janela, self.db, self.menu_principal)
         self.carregar_recursos()
         
     def carregar_recursos(self):
@@ -74,61 +76,55 @@ class PlanilhaDesfazimento:
 
     def editar_planilha(self):
         """
-        Abre um seletor de ficheiros. Tenta ler o ID da aba oculta (método novo e robusto).
-        Se não conseguir, tenta buscar pelo caminho do arquivo (método antigo, para compatibilidade).
+        Busca a última planilha criada no banco de dados e a abre para edição.
         """
-        caminho_arquivo = filedialog.askopenfilename(
-            title="Selecione uma planilha para editar",
-            filetypes=[("Planilhas Excel", "*.xlsx"), ("Todos os arquivos", "*.*")]
-        )
-        if not caminho_arquivo: return
+        print("INFO: Botão 'Continuar Edição' clicado. Buscando última planilha no BD...")
+        ultima_planilha_info = self.db.get_ultima_planilha_criada()
 
-        id_desfazimento_final = None
+        if ultima_planilha_info is None:
+            Messagebox.show_info("Nenhuma Planilha Encontrada",
+                                "Não há nenhuma planilha registrada no banco de dados. Por favor, crie uma nova primeiro.")
+            return
+
+        caminho_arquivo = ultima_planilha_info['caminho']
         dados_lidos = []
-        
         try:
             workbook = openpyxl.load_workbook(caminho_arquivo)
-            
-            # --- TENTATIVA 1: MÉTODO NOVO (LER ID INTERNO) ---
-            if "sap_ufac_meta" in workbook.sheetnames:
-                id_sheet = workbook["sap_ufac_meta"]
-                id_desfazimento_final = id_sheet['B1'].value
-
-            # --- TENTATIVA 2: MÉTODO ANTIGO (COMPATIBILIDADE) ---
-            # Se o ID não foi encontrado na aba, tenta o método antigo
-            if id_desfazimento_final is None:
-                print("DEBUG: Não encontrou ID interno, tentando compatibilidade por caminho de arquivo...")
-                id_desfazimento_final = self.db.get_desfazimento_por_caminho_planilha(caminho_arquivo)
-
-            # Se mesmo após as duas tentativas o ID não for encontrado, o arquivo é inválido.
-            if id_desfazimento_final is None:
-                messagebox.showerror("Processo não Encontrado", 
-                                     "Não foi encontrado um processo de desfazimento associado a este ficheiro.\n\n"
-                                     "Se for uma planilha antiga, seu registro pode não existir mais no banco com o caminho atual. "
-                                     "Para novas planilhas, certifique-se de que foram salvas pelo sistema.")
-                return
-
-            # Continua a ler os dados da aba principal para exibir na tela
             sheet = workbook.active
             iterador_linhas = iter(sheet.rows)
-            next(iterador_linhas) # Pula o cabeçalho
-            for linha in iterador_linhas:
-                dados_lidos.append([cell.value if cell.value is not None else "" for cell in linha])
-        
+
+            # --- Pula as duas primeiras linhas ---
+            # Pula a linha do título (ex: "RELATÓRIO...")
+            next(iterador_linhas)
+            # Pula a linha do cabeçalho (ex: "Nº DE ORDEM", "TOMBO"...)
+            next(iterador_linhas)
+
+            # --- Força renumeração sequencial ---
+            # Itera pelas linhas de dados, atribuindo o número de ordem correto
+            for i, linha in enumerate(iterador_linhas, start=1):
+                valores = [cell.value if cell.value is not None else "" for cell in linha]
+                
+                # Garante que a primeira coluna seja sempre o número sequencial correto
+                if valores: # Evita erro se a linha estiver completamente vazia
+                    valores[0] = i
+                
+                dados_lidos.append(valores)
+
+        except FileNotFoundError:
+             Messagebox.showerror(title="Arquivo não Encontrado", message=f"O arquivo da última planilha não foi encontrado no caminho esperado:\n{caminho_arquivo}\n\nEle pode ter sido movido ou deletado.")
+             return
         except Exception as e:
-            messagebox.showerror(title="Erro de Leitura", message=f"Não foi possível ler o ficheiro Excel:\n{e}")
+            Messagebox.showerror(title="Erro de Leitura", message=f"Não foi possível ler o ficheiro:\n{e}")
             return
-            
+
         self.tpl_planilha_des.destroy()
-        
-        nome_planilha = os.path.basename(caminho_arquivo).replace('.xlsx', '')
-        
+
         tela_edicao = EdicaoPlanilha(
-            self.janela, 
-            nome_planilha, 
-            caminho_arquivo_aberto=caminho_arquivo, 
+            self.janela,
+            ultima_planilha_info['nome'],
+            caminho_arquivo_aberto=caminho_arquivo,
             dados_iniciais=dados_lidos,
             db_controller=self.db,
-            id_desfazimento=id_desfazimento_final # Passa o ID encontrado (seja pelo método novo ou antigo)
+            id_desfazimento=ultima_planilha_info['id_desfazimento']
         )
         tela_edicao.exibir_tela()

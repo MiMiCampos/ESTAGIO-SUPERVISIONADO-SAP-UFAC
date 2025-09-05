@@ -152,6 +152,37 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro ao Salvar", f"Erro ao salvar registro da planilha: {err}")
             self.conn.rollback()
+            
+    def get_ultima_planilha_criada(self):
+        """
+        Busca a planilha mais recente registrada no banco de dados.
+        A mais recente é identificada pelo maior 'id_planilha' (auto-incremento).
+        Retorna um dicionário com os dados da planilha ou None se não houver nenhuma.
+        """
+        if not self.conn: return None
+        try:
+            # A query busca pelas colunas que precisamos, ordena pela ID decrescente e pega só a primeira.
+            query = """
+                SELECT id_desfazimento, nome_planilha, caminho_arquivo_planilha 
+                FROM PlanilhaFinalizada 
+                ORDER BY id_planilha DESC 
+                LIMIT 1
+            """
+            self.cursor.execute(query)
+            resultado = self.cursor.fetchone()
+            
+            # Renomeia as chaves do dicionário para consistência com o que já temos
+            if resultado:
+                return {
+                    'id_desfazimento': resultado['id_desfazimento'],
+                    'nome': resultado['nome_planilha'],
+                    'caminho': resultado['caminho_arquivo_planilha']
+                }
+            return None
+            
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar a última planilha: {err}")
+            return None
 
     def close_connection(self):
         """Fecha a conexão com o banco de dados."""
