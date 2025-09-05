@@ -37,13 +37,16 @@ class OrganizacaoBaixas():
     def _agrupar_dados(self, dados_brutos):
         """Processa a lista de bens e agrupa por Unidade e Servidor."""
         grupos = {}
-        # Índices: 5 = Unidade, 1 = Tombo, 2 = Descrição, 6 = Status
+        # --- ÍNDICES ---
+        # 5 = Unidade, 6 = Servidor, 1 = Tombo, 2 = Descrição, 7 = Status
         for linha in dados_brutos:
-            unidade = linha[5] if len(linha) > 5 else "N/A"
-            servidor = f"Servidor Responsável de {unidade}"  # Servidor fictício
+            unidade = linha[5] if len(linha) > 5 else "Unidade não informada"
+            # Agora pegamos o nome real do servidor da coluna 6
+            servidor = linha[6] if len(linha) > 6 and linha[6] else "Servidor não informado"
+            
             tombo = linha[1] if len(linha) > 1 else "N/A"
             descricao = linha[2] if len(linha) > 2 else "N/A"
-            status = linha[6] if len(linha) > 6 else "N/A"
+            status = linha[7] if len(linha) > 7 else "Irrecuperável" # Padrão
             
             chave = (unidade, servidor)
             if chave not in grupos:

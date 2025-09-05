@@ -93,6 +93,7 @@ class DBController:
         """Busca todos os bens associados a um id_desfazimento específico."""
         if not self.conn: return []
         try:
+            # --- QUERY SQL CORRIGIDA ---
             query = """
                 SELECT 
                     NULL as 'Nº DE ORDEM',
@@ -101,10 +102,12 @@ class DBController:
                     b.data_aquisicao AS 'DATA DA AQUISIÇÃO',
                     b.nota_fiscal AS 'DOCUMENTO FISCAL',
                     u.nome_unidade AS 'UNIDADE RESPONSÁVEL',
+                    Servidor.nome_servidor AS 'SERVIDOR RESPONSÁVEL', -- <-- Corrigido de s.nome_servidor
                     b.classificacao AS 'CLASSIFICAÇÃO',
                     b.destinacao AS 'DESTINAÇÃO'
                 FROM Bem b
                 LEFT JOIN Unidade u ON b.id_unidade = u.id_unidade
+                LEFT JOIN Servidor ON b.id_servidor = Servidor.id_servidor -- <-- Corrigido de Servidor s ON ...
                 WHERE b.id_desfazimento = %s
             """
             self.cursor.execute(query, (id_desfazimento,))
@@ -113,13 +116,12 @@ class DBController:
             for i, row in enumerate(resultados):
                 linha = list(row.values())
                 linha[0] = i + 1
-                # --- CORREÇÃO: Usar a classe 'date' diretamente ---
                 if isinstance(linha[3], date):
                     linha[3] = linha[3].strftime('%d/%m/%Y')
                 dados_formatados.append(linha)
             return dados_formatados
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha: {err}")
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
             return []
 
     def get_desfazimento_por_caminho_planilha(self, caminho_arquivo):
