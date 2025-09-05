@@ -195,6 +195,8 @@ CREATE TABLE Desfazimento (
     numero_processo VARCHAR(100) UNIQUE
 );
 
+SELECT * FROM Desfazimento;
+
 -- TABELA DE DOCUMENTOS DE BAIXA:
 CREATE TABLE DocumentoDeBaixa (
     id_documento INT PRIMARY KEY AUTO_INCREMENT,
@@ -203,6 +205,8 @@ CREATE TABLE DocumentoDeBaixa (
     id_desfazimento INT,
     FOREIGN KEY (id_desfazimento) REFERENCES Desfazimento(id_desfazimento)
 );
+
+SELECT * FROM DocumentoDeBaixa;
 
 -- TABELA DE BENS PATRIMONIAIS:
 CREATE TABLE Bem (

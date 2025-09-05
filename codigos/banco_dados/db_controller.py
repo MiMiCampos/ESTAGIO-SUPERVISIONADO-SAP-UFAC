@@ -72,7 +72,7 @@ class DBController:
             return self.cursor.lastrowid
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_DUP_ENTRY:
-                 Messagebox.show_error("Processo Duplicado", f"O número de processo '{numero_processo}' já existe.")
+                Messagebox.show_error("Processo Duplicado", f"O número de processo '{numero_processo}' já existe.")
             else:
                 Messagebox.show_error("Erro no Banco de Dados", f"Não foi possível criar o processo de desfazimento:\n{err}")
             self.conn.rollback()

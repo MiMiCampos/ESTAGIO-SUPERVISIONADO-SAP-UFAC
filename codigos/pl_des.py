@@ -111,8 +111,8 @@ class PlanilhaDesfazimento:
                 dados_lidos.append(valores)
 
         except FileNotFoundError:
-             Messagebox.show_error(title="Arquivo não Encontrado", message=f"O arquivo da última planilha não foi encontrado no caminho esperado:\n{caminho_arquivo}\n\nEle pode ter sido movido ou deletado.")
-             return
+            Messagebox.show_error(title="Arquivo não Encontrado", message=f"O arquivo da última planilha não foi encontrado no caminho esperado:\n{caminho_arquivo}\n\nEle pode ter sido movido ou deletado.")
+            return
         except Exception as e:
             Messagebox.show_error(title="Erro de Leitura", message=f"Não foi possível ler o ficheiro:\n{e}")
             return
