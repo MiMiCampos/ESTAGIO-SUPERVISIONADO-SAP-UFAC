@@ -22,7 +22,7 @@ class VisualizarPlanilha:
 
         self.toplevel_visualizar = ttk.Toplevel(self.janela_mestra_visualizar)
         self.toplevel_visualizar.title(f"Visualizando: {self.nome_da_planilha_visualizada}")
-        self.toplevel_visualizar.geometry("1300x600")
+        self.toplevel_visualizar.geometry("1400x600")
         self.toplevel_visualizar.transient(self.janela_mestra_visualizar)
         # self.toplevel_visualizar.grab_set()
         
@@ -51,8 +51,11 @@ class VisualizarPlanilha:
         tabela = ttk.Treeview(frame_tabela_visualizar, columns=colunas, show='headings', bootstyle="info")
 
         headings = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO']
-        for col, head in zip(colunas, headings):
-            tabela.heading(col, text=head)
+        larguras = [100, 100, 350, 150, 150, 250, 120, 120]
+
+        for col, head, w in zip(colunas, headings, larguras):
+            tabela.heading(col, text=head, anchor=CENTER)
+            tabela.column(col, width=w, anchor=CENTER) # Define a largura e centraliza o conteúdo
         
         for linha in self.dados_para_visualizar:
             tabela.insert('', END, values=linha)

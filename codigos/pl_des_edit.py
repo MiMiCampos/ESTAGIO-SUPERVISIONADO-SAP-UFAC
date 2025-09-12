@@ -85,10 +85,11 @@ class EdicaoPlanilha:
         self.tabela_desfazimento = ttk.Treeview(frame_corpo_edicao, columns=colunas, show='headings', bootstyle="info")
         
         headings = ['Nº DE ORDEM', 'TOMBO', 'DESCRIÇÃO DO BEM', 'DATA DA AQUISIÇÃO', 'DOCUMENTO FISCAL', 'UNIDADE RESPONSÁVEL', 'CLASSIFICAÇÃO', 'DESTINAÇÃO']
-        widths = [100, 100, 350, 120, 120, 200, 120, 120]
-        for col, head, w in zip(colunas, headings, widths):
-            self.tabela_desfazimento.heading(col, text=head)
-            self.tabela_desfazimento.column(col, width=w, anchor=CENTER if col in ['ordem', 'tombo'] else W)
+        larguras = [100, 100, 350, 150, 150, 250, 120, 120]
+
+        for col, head, w in zip(colunas, headings, larguras):
+            self.tabela_desfazimento.heading(col, text=head, anchor=CENTER)
+            self.tabela_desfazimento.column(col, width=w, anchor=CENTER) # Define a largura e centraliza tudo
 
         scrollbar_vertical = ttk.Scrollbar(frame_corpo_edicao, orient=VERTICAL, command=self.tabela_desfazimento.yview)
         self.tabela_desfazimento.configure(yscrollcommand=scrollbar_vertical.set)
