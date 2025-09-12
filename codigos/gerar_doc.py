@@ -129,7 +129,7 @@ class GerarDocumentos():
             Messagebox.show_error("Erro", "Não foi possível encontrar o ID de desfazimento para esta planilha.")
             return
 
-        conteudo_planilha = self.db.get_bens_por_desfazimento(id_desfazimento)
+        conteudo_planilha = self.db.get_bens_para_visualizacao(id_desfazimento)
         
         # Fecha a janela atual para focar na nova
         self.toplevel_geradoc.destroy()

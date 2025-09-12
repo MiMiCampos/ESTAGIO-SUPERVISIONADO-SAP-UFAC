@@ -22,7 +22,7 @@ class VisualizarPlanilha:
 
         self.toplevel_visualizar = ttk.Toplevel(self.janela_mestra_visualizar)
         self.toplevel_visualizar.title(f"Visualizando: {self.nome_da_planilha_visualizada}")
-        self.toplevel_visualizar.geometry("1100x600")
+        self.toplevel_visualizar.geometry("1300x600")
         self.toplevel_visualizar.transient(self.janela_mestra_visualizar)
         # self.toplevel_visualizar.grab_set()
         

@@ -4,35 +4,23 @@ from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 from ttkbootstrap.dialogs import Messagebox
 
-# Novo controlador importado
+# O controlador do banco de dados continua sendo importado aqui
 from banco_dados.db_controller import DBController
 
-from config import Configuracoes
-from gerar_doc import GerarDocumentos
-from org_baixa import OrganizacaoBaixas
-from pl_des import PlanilhaDesfazimento
-from utils.excel_formatador import FormatadorExcel
-
 class MenuInicial():
-    def __init__(self, master):
+    # O __init__ agora recebe 'dados_usuario' após o login
+    def __init__(self, master, dados_usuario):
         self.janela = master
+        self.dados_usuario = dados_usuario  # Guarda os dados do usuário logado
         self.janela.title("SAP-UFAC - Menu Inicial")
         self.janela.geometry("1100x700")
-        
         self.janela.position_center()
         
-        # ----- Única instância do controlador do banco de dados -----
+        # Instância do controlador do banco de dados
         self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
                 
         # Garante que a conexão seja fechada quando a janela principal fechar
         self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
-
-        # ------ Chamando outras telas -----
-        # Passando o controlador para as outras telas que precisam dele
-        self.config = Configuracoes(self.janela) # Por enquanto não precisa do controlador
-        self.gerar_doc = GerarDocumentos(self.janela, self.db_controller)
-        self.org_baixa = OrganizacaoBaixas(self.janela) # Recebe dados, não o controlador diretamente
-        self.planilha_desf = PlanilhaDesfazimento(self.janela, self.db_controller, self)
         
         # ----- Imagens dos botões iniciais -----
         try:
@@ -42,21 +30,17 @@ class MenuInicial():
             self.img_config = ImageTk.PhotoImage(Image.open("imagens/botao_config.png").resize((300, 175)))
         except Exception as e:
             print(f"Erro ao carregar ícones: {e}")
-            # Define como None para o programa não quebrar se não achar a imagem
-            self.icon_planilha = self.icon_baixas = self.icon_docs = self.icon_config = None
+            self.img_planilha = self.img_baixas = self.img_docs = self.img_config = None
         
-        # ----- Estilo de cor customizada para o cabeçalho e o rodapé -----
+        # ----- Estilos (mantidos como no original) -----
         style_azul = ttk.Style()
         style_azul.configure('MyHeader.TFrame', background='#5bc0de')
-
-        # ----- Estilo de cor customizada para os botões -----
         style_azul_btn = ttk.Style()
         style_azul_btn.configure('MyHeader.TButton', font = ("Inconsolata", 26), background='white', foreground="#000000", borderwidth=5, padding=10, bordercolor='#5bc0de')
 
         # ----- Cabeçalho azul claro -----
-        self.frm_cabecalho = ttk.Frame(self.janela)
+        self.frm_cabecalho = ttk.Frame(self.janela, style='MyHeader.TFrame')
         self.frm_cabecalho.pack(fill=X)
-        self.frm_cabecalho.configure(style='MyHeader.TFrame')
 
         # ----- Inserindo o brasão da UFAC -----
         try:
@@ -74,65 +58,70 @@ class MenuInicial():
             font=("Inconsolata", 16, "bold"),            
             bootstyle=INVERSE,
             foreground='black',
-            background='#5bc0de' # Azulzinho padrão da ferramenta
+            background='#5bc0de'
         )
         self.lbl_titulo.pack(expand=True, padx=10, pady=10)
 
         # ----- Rodapé azul claro -----
-        self.frm_rodape = ttk.Frame(self.janela)
+        self.frm_rodape = ttk.Frame(self.janela, style='MyHeader.TFrame')
         self.frm_rodape.pack(fill=X, ipady=30, side=BOTTOM)
-        self.frm_rodape.configure(style='MyHeader.TFrame')
 
         # ----- Área de botões -----
         botoes_frame = ttk.Frame(self.janela)
-        # O frame dos botões se expande para preencher a janela
         botoes_frame.pack(pady=10, padx=20, expand=True, fill=BOTH)
         
-        # RESPONSIVIDADE: Centraliza o conteúdo em vez de expandi-lo.
-        # As colunas 0 e 3 (nas bordas) irão expandir, absorvendo o espaço.
         botoes_frame.grid_columnconfigure((0, 3), weight=1)
-        # As colunas 1 e 2 (onde os botões estão) não irão expandir.
         botoes_frame.grid_columnconfigure((1, 2), weight=0)
-
-        # As linhas 0 e 4 (nas bordas) irão expandir para centralizar verticalmente.
         botoes_frame.grid_rowconfigure((0, 4), weight=1)
-        # As linhas 1, 2 e 3 (para o conteúdo) não irão expandir.
         botoes_frame.grid_rowconfigure((1, 2, 3), weight=0)
 
-        # ----- Mensagem de boas-vindas (MOVIDA PARA DENTRO DO GRID) -----
-        lbl_bem_vindo = ttk.Label(botoes_frame, text="BEM VINDO!", font=("Inconsolata", 15, "bold"))
-        lbl_bem_vindo.grid(row=0, column=0, columnspan=4, pady=(0, 20))
+        # ----- Mensagem de boas-vindas com o nome do usuário -----
+        nome_usuario = self.dados_usuario['nome_completo']
+        lbl_bem_vindo = ttk.Label(botoes_frame, text=f"BEM VINDO, {nome_usuario}!", font=("Inconsolata", 15, "bold"))
+        lbl_bem_vindo.grid(row=0, column=1, columnspan=2, pady=(0, 20))
 
-        # ----- Criando botões -----
-        # Os botões estão nas colunas/linhas centrais (1 e 2)
-        # e não usam 'sticky' para não expandir.
-        self.btn_planilha_des = ttk.Button(botoes_frame, command=self.planilha_desf.planilha_des, image=self.img_planilha)
+        # ----- LÓGICA DE PERMISSÕES PARA OS BOTÕES -----
+        perfil = self.dados_usuario['perfil']
+
+        # Botão Planilha de Desfazimento (Acessível a todos)
+        self.btn_planilha_des = ttk.Button(botoes_frame, command=self.abrir_planilha_des, image=self.img_planilha, style='MyHeader.TButton')
         self.btn_planilha_des.grid(row=1, column=1, padx=10, pady=10)
-        self.btn_planilha_des.configure(style='MyHeader.TButton')
 
-        self.btn_org_baixas = ttk.Button(botoes_frame, command=self.abrir_organizacao_baixas_da_ultima_planilha, image=self.img_baixas)
+        # Botão Organização de Baixas (Não acessível para Estagiário)
+        self.btn_org_baixas = ttk.Button(botoes_frame, command=self.abrir_organizacao_baixas, image=self.img_baixas, style='MyHeader.TButton')
         self.btn_org_baixas.grid(row=1, column=2, padx=10, pady=10)
-        self.btn_org_baixas.configure(style='MyHeader.TButton')
+        if perfil == 'Estagiário':
+            self.btn_org_baixas.config(state=DISABLED)
 
-        self.btn_gerar_docs = ttk.Button(botoes_frame, command=self.gerar_doc.gerar_doc, image=self.img_docs)
+        # Botão Gerar Documentos (Não acessível para Estagiário)
+        self.btn_gerar_docs = ttk.Button(botoes_frame, command=self.abrir_gerar_docs, image=self.img_docs, style='MyHeader.TButton')
         self.btn_gerar_docs.grid(row=2, column=1, padx=10, pady=10)
-        self.btn_gerar_docs.configure(style='MyHeader.TButton')
+        if perfil == 'Estagiário':
+            self.btn_gerar_docs.config(state=DISABLED)
 
-        self.btn_configuracoes = ttk.Button(botoes_frame, command=self.config.configuracao, image=self.img_config)
+        # Botão Configurações (Acessível apenas para Administrador)
+        self.btn_configuracoes = ttk.Button(botoes_frame, command=self.abrir_config, image=self.img_config, style='MyHeader.TButton')
         self.btn_configuracoes.grid(row=2, column=2, padx=10, pady=10)
-        self.btn_configuracoes.configure(style='MyHeader.TButton')
-   
-    # --- NOVO: Método para o botão de Organização de Baixas ---
-    def abrir_organizacao_baixas_da_ultima_planilha(self):
-        """
-        Abre a tela de organização de baixas com os dados da ÚLTIMA planilha criada no banco.
-        """
-        print("INFO: Buscando última planilha no BD para organizar baixas...")
+        if perfil != 'Administrador':
+            self.btn_configuracoes.config(state=DISABLED)
+            
+        # NOVO: Botão para Gerenciar Usuários (Apenas Administrador)
+        if perfil == 'Administrador':
+            self.btn_gerenciar_usuarios = ttk.Button(botoes_frame, text="Gerenciar Usuários", command=self.abrir_gerenciamento_usuarios, bootstyle="info-outline")
+            self.btn_gerenciar_usuarios.grid(row=3, column=1, columnspan=2, ipady=5, padx=8, sticky="ew")
+
+    # MÉTODOS PARA ABRIR AS TELAS (COM IMPORTAÇÃO LOCAL)
+    
+    def abrir_planilha_des(self):
+        from pl_des import PlanilhaDesfazimento
+        PlanilhaDesfazimento(self.janela, self.db_controller, self).planilha_des()
+
+    def abrir_organizacao_baixas(self):
+        from org_baixa import OrganizacaoBaixas
         ultima_planilha_info = self.db_controller.get_ultima_planilha_criada()
 
         if ultima_planilha_info is None:
-            Messagebox.show_warning("Nenhuma Planilha Encontrada", 
-                                    "Não há nenhuma planilha registrada no banco de dados para organizar.")
+            Messagebox.show_warning("Nenhuma Planilha Encontrada", "Não há nenhuma planilha registrada no banco de dados para organizar.")
             return
             
         id_desfazimento = ultima_planilha_info['id_desfazimento']
@@ -149,12 +138,39 @@ class MenuInicial():
         )
         tela_baixas.org_baixas()
         
+    def abrir_gerar_docs(self):
+        from gerar_doc import GerarDocumentos
+        GerarDocumentos(self.janela, self.db_controller).gerar_doc()
+
+    def abrir_config(self):
+        from config import Configuracoes
+        Configuracoes(self.janela).configuracao()
+
+    def abrir_gerenciamento_usuarios(self):
+        # A tela de gerenciamento de usuários será implementada em um próximo passo
+        Messagebox.show_info("Em Construção", "A tela de gerenciamento de usuários ainda será implementada.")
+        print("Abrindo gerenciamento de usuários...")
+
     def fechar_aplicacao(self):
         """Função para fechar a conexão com o BD antes de sair."""
         if self.db_controller:
             self.db_controller.close_connection()
         self.janela.destroy()
 
-janela = ttk.Window()
-app = MenuInicial(janela)
-janela.mainloop()
+# ===================================================================
+# PONTO DE ENTRADA PRINCIPAL DA APLICAÇÃO
+# ===================================================================
+if __name__ == "__main__":
+    # A aplicação agora importa e inicia a TELA DE LOGIN primeiro.
+    # O MenuInicial só será chamado pela TelaLogin após a autenticação.
+    
+    from banco_dados.db_controller import DBController
+    from login import TelaLogin
+
+    janela_login = ttk.Window(themename="litera")
+    db_conn = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
+    
+    # Inicia a aplicação apenas se a conexão com o banco for bem-sucedida
+    if db_conn.conn:
+        app = TelaLogin(janela_login, db_conn)
+        janela_login.mainloop()

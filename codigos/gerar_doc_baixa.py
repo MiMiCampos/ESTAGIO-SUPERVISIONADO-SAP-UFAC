@@ -35,10 +35,10 @@ class GerarDocBaixa:
         """Cria e exibe a janela de geração de documentos de baixa."""
         self.toplevel_gerarbaixa = ttk.Toplevel(self.janela_mestra_gerarbaixa)
         self.toplevel_gerarbaixa.title("Gerar Documentos de Baixa")
-        self.toplevel_gerarbaixa.geometry("800x750")
+        self.toplevel_gerarbaixa.geometry("1100x750")
         self.toplevel_gerarbaixa.position_center()
         self.toplevel_gerarbaixa.transient(self.janela_mestra_gerarbaixa)
-        # self.toplevel_gerarbaixa.grab_set()
+        self.toplevel_gerarbaixa.grab_set()
 
         # --- Estilos da Janela ---
         style = ttk.Style()

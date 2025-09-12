@@ -123,6 +123,40 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
             return []
+        
+    # NOVO MÉTODO - Específico para a tela de visualização
+    def get_bens_para_visualizacao(self, id_desfazimento):
+        """Busca os bens para a tela de visualização (sem o nome do servidor)."""
+        if not self.conn: return []
+        try:
+            # Esta query tem apenas as 8 colunas necessárias para a visualização
+            query = """
+                SELECT 
+                    NULL as 'Nº DE ORDEM',
+                    b.tombo AS 'TOMBO',
+                    b.descricao AS 'DESCRIÇÃO DO BEM',
+                    b.data_aquisicao AS 'DATA DA AQUISIÇÃO',
+                    b.nota_fiscal AS 'DOCUMENTO FISCAL',
+                    u.nome_unidade AS 'UNIDADE RESPONSÁVEL',
+                    b.classificacao AS 'CLASSIFICAÇÃO',
+                    b.destinacao AS 'DESTINAÇÃO'
+                FROM Bem b
+                LEFT JOIN Unidade u ON b.id_unidade = u.id_unidade
+                WHERE b.id_desfazimento = %s
+            """
+            self.cursor.execute(query, (id_desfazimento,))
+            resultados = self.cursor.fetchall()
+            dados_formatados = []
+            for i, row in enumerate(resultados):
+                linha = list(row.values())
+                linha[0] = i + 1
+                if isinstance(linha[3], date):
+                    linha[3] = linha[3].strftime('%d/%m/%Y')
+                dados_formatados.append(linha)
+            return dados_formatados
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
+            return []
 
     def get_desfazimento_por_caminho_planilha(self, caminho_arquivo):
         """Busca o id_desfazimento a partir do caminho do arquivo salvo."""
@@ -192,3 +226,16 @@ class DBController:
             self.cursor.close()
             self.conn.close()
             print("Conexão com o banco de dados fechada.")
+            
+    # Dentro da classe DBController, adicione este método:
+
+    def verificar_usuario(self, cpf, senha_hash):
+        """Verifica se um usuário com o CPF e hash de senha fornecidos existe."""
+        if not self.conn: return None
+        try:
+            query = "SELECT id_usuario, nome_completo, perfil FROM Usuario WHERE cpf = %s AND senha_hash = %s"
+            self.cursor.execute(query, (cpf, senha_hash))
+            return self.cursor.fetchone() # Retorna os dados do usuário ou None
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Autenticação", f"Erro ao verificar usuário: {err}")
+            return None
