@@ -17,7 +17,7 @@ class MenuInicial():
     def __init__(self, master):
         self.janela = master
         self.janela.title("SAP-UFAC - Menu Inicial")
-        self.janela.geometry("1000x700")
+        self.janela.geometry("1100x700")
         
         self.janela.position_center()
         
@@ -71,7 +71,7 @@ class MenuInicial():
         # ----- Título do sistema -----
         self.lbl_titulo = ttk.Label(self.frm_cabecalho, 
             text="SISTEMA DE AUTOMAÇÃO PATRIMONIAL DA UNIVERSIDADE FEDERAL DO ACRE (SAP-UFAC)",
-            font=("Inconsolata", 15, "bold"),            
+            font=("Inconsolata", 16, "bold"),            
             bootstyle=INVERSE,
             foreground='black',
             background='#5bc0de' # Azulzinho padrão da ferramenta

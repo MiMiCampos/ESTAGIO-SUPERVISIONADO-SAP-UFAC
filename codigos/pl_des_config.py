@@ -36,9 +36,9 @@ class CriarPlanilha:
         self.tpl_criar_planilha = ttk.Toplevel(self.master)
         self.tpl_criar_planilha.title("Criar Nova Planilha de Desfazimento")
         self.tpl_criar_planilha.geometry("800x600")
-        self.tpl_criar_planilha.transient(self.master)
         self.tpl_criar_planilha.position_center()
-        self.tpl_criar_planilha.grab_set()
+        self.tpl_criar_planilha.transient(self.master)
+        # self.tpl_criar_planilha.grab_set()
 
         style = ttk.Style()
         style.configure('Header.TFrame', background='#5bc0de')

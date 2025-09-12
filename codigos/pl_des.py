@@ -43,7 +43,7 @@ class PlanilhaDesfazimento:
         self.tpl_planilha_des.geometry("800x600")
         self.tpl_planilha_des.position_center()
         self.tpl_planilha_des.transient(self.janela)
-        self.tpl_planilha_des.grab_set()
+        # self.tpl_planilha_des.grab_set()
 
         frm_cabecalho = ttk.Frame(self.tpl_planilha_des, style='Header.TFrame', padding=(10, 5))
         frm_cabecalho.pack(fill=X, side=TOP)

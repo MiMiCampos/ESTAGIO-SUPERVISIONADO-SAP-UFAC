@@ -39,10 +39,10 @@ class EdicaoPlanilha:
 
         self.toplevel_edicao = ttk.Toplevel(self.janela_mestra)
         self.toplevel_edicao.title("Editando Planilha de Desfazimento")
-        self.toplevel_edicao.geometry("1200x700")
-        self.toplevel_edicao.transient(self.janela_mestra)
+        self.toplevel_edicao.geometry("1500x700")
         self.toplevel_edicao.position_center()
-        self.toplevel_edicao.grab_set()
+        self.toplevel_edicao.transient(self.janela_mestra)
+        # self.toplevel_edicao.grab_set()
 
         style = ttk.Style()
         style.configure('Header.TFrame', background='#5bc0de')

@@ -38,7 +38,7 @@ class GerarDocBaixa:
         self.toplevel_gerarbaixa.geometry("800x750")
         self.toplevel_gerarbaixa.position_center()
         self.toplevel_gerarbaixa.transient(self.janela_mestra_gerarbaixa)
-        self.toplevel_gerarbaixa.grab_set()
+        # self.toplevel_gerarbaixa.grab_set()
 
         # --- Estilos da Janela ---
         style = ttk.Style()

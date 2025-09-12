@@ -24,7 +24,10 @@ class VisualizarPlanilha:
         self.toplevel_visualizar.title(f"Visualizando: {self.nome_da_planilha_visualizada}")
         self.toplevel_visualizar.geometry("1100x600")
         self.toplevel_visualizar.transient(self.janela_mestra_visualizar)
-        self.toplevel_visualizar.grab_set()
+        # self.toplevel_visualizar.grab_set()
+        
+        self.toplevel_visualizar.position_center()
+
 
         frame_rodape_visualizar = ttk.Frame(self.toplevel_visualizar, padding=10)
         frame_rodape_visualizar.pack(fill=X, side=BOTTOM)

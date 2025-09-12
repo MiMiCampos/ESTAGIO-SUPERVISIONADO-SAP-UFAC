@@ -40,7 +40,7 @@ class GerarDocumentos():
         self.toplevel_geradoc.geometry("1000x700")
         self.toplevel_geradoc.position_center()
         self.toplevel_geradoc.transient(self.janela_mestra_geradoc)
-        self.toplevel_geradoc.grab_set()
+        # self.toplevel_geradoc.grab_set()
 
         style = ttk.Style()
         style.configure('Header.TFrame', background='#5bc0de')
