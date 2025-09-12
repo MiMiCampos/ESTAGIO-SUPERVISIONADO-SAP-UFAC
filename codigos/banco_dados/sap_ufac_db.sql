@@ -294,3 +294,20 @@ CREATE TABLE PlanilhaFinalizada (
 );
 
 SELECT * FROM PlanilhaFinalizada;
+
+-- TABELA DE USUÁRIOS:
+CREATE TABLE Usuario (
+    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
+    nome_completo VARCHAR(255) NOT NULL,
+    cpf VARCHAR(14) NOT NULL UNIQUE, -- Formato: 123.456.789-10
+    senha_hash VARCHAR(255) NOT NULL,
+    perfil ENUM('Administrador', 'Servidor', 'Estagiário') NOT NULL
+);
+
+-- INSERÇÃO DO USUÁRIO ADMINISTRADOR PADRÃO
+-- CPF: 000.000.000-00
+-- Senha: admin
+INSERT INTO Usuario (nome_completo, cpf, senha_hash, perfil) VALUES
+('Administrador Padrão', '000.000.000-00', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Administrador');
+
+SELECT * FROM Usuario;
