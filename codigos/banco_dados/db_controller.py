@@ -227,8 +227,6 @@ class DBController:
             self.conn.close()
             print("Conexão com o banco de dados fechada.")
             
-    # Dentro da classe DBController, adicione este método:
-
     def verificar_usuario(self, cpf, senha_hash):
         """Verifica se um usuário com o CPF e hash de senha fornecidos existe."""
         if not self.conn: return None
@@ -239,3 +237,82 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Autenticação", f"Erro ao verificar usuário: {err}")
             return None
+        
+    def listar_usuarios(self):
+        """Busca todos os usuários cadastrados, exceto o admin padrão se necessário."""
+        if not self.conn: return []
+        try:
+            # A query retorna todos os campos para exibição e edição
+            query = "SELECT id_usuario, nome_completo, cpf, perfil FROM Usuario"
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao listar usuários: {err}")
+            return []
+
+    def cpf_existe(self, cpf, id_usuario_excluir=None):
+        """Verifica se um CPF já existe no banco, opcionalmente ignorando um usuário."""
+        if not self.conn: return False
+        try:
+            query = "SELECT id_usuario FROM Usuario WHERE cpf = %s"
+            params = [cpf]
+            if id_usuario_excluir:
+                query += " AND id_usuario != %s"
+                params.append(id_usuario_excluir)
+            
+            self.cursor.execute(query, tuple(params))
+            return self.cursor.fetchone() is not None
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Verificação", f"Erro ao verificar CPF: {err}")
+            return True # Retorna True para prevenir inserção em caso de erro
+
+    def cadastrar_usuario(self, nome, cpf, senha_hash, perfil):
+        """Insere um novo usuário no banco de dados."""
+        if not self.conn: return False
+        try:
+            query = "INSERT INTO Usuario (nome_completo, cpf, senha_hash, perfil) VALUES (%s, %s, %s, %s)"
+            self.cursor.execute(query, (nome, cpf, senha_hash, perfil))
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Cadastro", f"Não foi possível cadastrar o usuário:\n{err}")
+            self.conn.rollback()
+            return False
+
+    def atualizar_usuario(self, id_usuario, nome, cpf, perfil):
+        """Atualiza os dados de um usuário existente (não mexe na senha)."""
+        if not self.conn: return False
+        try:
+            query = "UPDATE Usuario SET nome_completo = %s, cpf = %s, perfil = %s WHERE id_usuario = %s"
+            self.cursor.execute(query, (nome, cpf, perfil, id_usuario))
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Atualização", f"Não foi possível atualizar o usuário:\n{err}")
+            self.conn.rollback()
+            return False
+
+    def deletar_usuario(self, id_usuario):
+        """Remove um usuário do banco de dados."""
+        if not self.conn: return False
+        try:
+            query = "DELETE FROM Usuario WHERE id_usuario = %s"
+            self.cursor.execute(query, (id_usuario,))
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro ao Deletar", f"Não foi possível deletar o usuário:\n{err}")
+            self.conn.rollback()
+            return False
+        
+    def get_todos_servidores(self):
+        """Busca o nome de todos os servidores cadastrados na tabela Servidor."""
+        if not self.conn: return []
+        try:
+            query = "SELECT nome_servidor FROM Servidor ORDER BY nome_servidor ASC"
+            self.cursor.execute(query)
+            # Extrai apenas os nomes da lista de dicionários retornada
+            return [servidor['nome_servidor'] for servidor in self.cursor.fetchall()]
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao listar servidores: {err}")
+            return []

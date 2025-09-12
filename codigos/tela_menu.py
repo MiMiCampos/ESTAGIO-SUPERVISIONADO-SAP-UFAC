@@ -99,11 +99,9 @@ class MenuInicial():
         if perfil == 'Estagiário':
             self.btn_gerar_docs.config(state=DISABLED)
 
-        # Botão Configurações (Acessível apenas para Administrador)
+        # Botão Configurações (Acessível apenas para todos)
         self.btn_configuracoes = ttk.Button(botoes_frame, command=self.abrir_config, image=self.img_config, style='MyHeader.TButton')
         self.btn_configuracoes.grid(row=2, column=2, padx=10, pady=10)
-        if perfil != 'Administrador':
-            self.btn_configuracoes.config(state=DISABLED)
             
         # NOVO: Botão para Gerenciar Usuários (Apenas Administrador)
         if perfil == 'Administrador':
@@ -147,9 +145,8 @@ class MenuInicial():
         Configuracoes(self.janela).configuracao()
 
     def abrir_gerenciamento_usuarios(self):
-        # A tela de gerenciamento de usuários será implementada em um próximo passo
-        Messagebox.show_info("Em Construção", "A tela de gerenciamento de usuários ainda será implementada.")
-        print("Abrindo gerenciamento de usuários...")
+        from admin import GerenciadorUsuarios
+        GerenciadorUsuarios(self.janela, self.db_controller, self.dados_usuario).exibir_tela()
 
     def fechar_aplicacao(self):
         """Função para fechar a conexão com o BD antes de sair."""
