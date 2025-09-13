@@ -78,7 +78,7 @@ class GerenciadorUsuarios:
         # Espaçamento de 10px para o botão à sua direita (Excluir)
         btn_editar.pack(side=RIGHT, padx=(0, 10))
 
-        btn_adicionar = ttk.Button(frame_rodape, text="Adicionar Novo", command=lambda: self._abrir_janela_edicao(), bootstyle="success")
+        btn_adicionar = ttk.Button(frame_rodape, text="Novo Usuário", command=lambda: self._abrir_janela_edicao(), bootstyle="success")
         # Espaçamento de 10px para o botão à sua direita (Editar)
         btn_adicionar.pack(side=RIGHT, padx=(0, 10))
 
@@ -112,7 +112,7 @@ class GerenciadorUsuarios:
             Messagebox.show_warning("Nenhum usuário selecionado", "Por favor, selecione um usuário na lista para excluir.")
             return
 
-        id_usuario_para_deletar = self.tabela.item(item_selecionado_id)['values'][0]
+        id_usuario_para_deletar = int(self.tabela.item(item_selecionado_id)['values'][0])
         
         if id_usuario_para_deletar == self.usuario_logado['id_usuario']:
             Messagebox.show_error("Ação Inválida", "Você não pode excluir o seu próprio usuário.")
@@ -121,11 +121,11 @@ class GerenciadorUsuarios:
         nome_usuario = self.tabela.item(item_selecionado_id)['values'][1]
         resposta = Messagebox.yesno("Confirmar Exclusão", f"Tem certeza que deseja excluir o usuário '{nome_usuario}'?\nEsta ação não pode ser desfeita.")
 
-        if resposta == "Yes":
+        if resposta == "Sim":
             if self.db.deletar_usuario(id_usuario_para_deletar):
                 Messagebox.ok("Sucesso", "Usuário excluído com sucesso.")
                 self._popular_tabela()
-
+                
     def _abrir_janela_edicao(self, dados_usuario=None):
         """Abre uma janela para adicionar ou editar um usuário."""
         modo_edicao = dados_usuario is not None
@@ -158,6 +158,29 @@ class GerenciadorUsuarios:
         ttk.Label(frame, text="CPF:").grid(row=1, column=0, sticky=W, pady=5, padx=(0,10))
         ent_cpf = ttk.Entry(frame, style='Form.TEntry', width=40)
         ent_cpf.grid(row=1, column=1, sticky=EW, pady=(0, 10))
+
+        # --- Nova função para formatar o CPF neste diálogo ---
+        def _formatar_cpf_dialog(event=None):
+            texto_atual = ent_cpf.get()
+            numeros = "".join(filter(str.isdigit, texto_atual))
+            numeros = numeros[:11]
+
+            formatado = ""
+            if len(numeros) > 9:
+                formatado = f"{numeros[:3]}.{numeros[3:6]}.{numeros[6:9]}-{numeros[9:]}"
+            elif len(numeros) > 6:
+                formatado = f"{numeros[:3]}.{numeros[3:6]}.{numeros[6:]}"
+            elif len(numeros) > 3:
+                formatado = f"{numeros[:3]}.{numeros[3:]}"
+            else:
+                formatado = numeros
+            
+            ent_cpf.delete(0, END)
+            ent_cpf.insert(0, formatado)
+            ent_cpf.icursor(END)
+
+        # --- Conectar a função ao campo de CPF ---
+        ent_cpf.bind("<KeyRelease>", _formatar_cpf_dialog)
 
         lbl_senha = ttk.Label(frame, text="Senha:")
         lbl_senha.grid(row=2, column=0, sticky=W, pady=5, padx=(0,10))

@@ -4,16 +4,15 @@ from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 from ttkbootstrap.dialogs import Messagebox
 
-# O controlador do banco de dados continua sendo importado aqui
 from banco_dados.db_controller import DBController
+from login import TelaLogin
 
 class MenuInicial():
-    # O __init__ agora recebe 'dados_usuario' após o login
     def __init__(self, master, dados_usuario):
         self.janela = master
         self.dados_usuario = dados_usuario  # Guarda os dados do usuário logado
         self.janela.title("SAP-UFAC - Menu Inicial")
-        self.janela.geometry("1100x700")
+        self.janela.geometry("1100x750")
         self.janela.position_center()
         
         # Instância do controlador do banco de dados
@@ -36,7 +35,7 @@ class MenuInicial():
         style_azul = ttk.Style()
         style_azul.configure('MyHeader.TFrame', background='#5bc0de')
         style_azul_btn = ttk.Style()
-        style_azul_btn.configure('MyHeader.TButton', font = ("Inconsolata", 26), background='white', foreground="#000000", borderwidth=5, padding=10, bordercolor='#5bc0de')
+        style_azul_btn.configure('MyHeader.TButton', font = ("Inconsolata", 14, "bold"), background='white', foreground="#5bc0de", borderwidth=5, padding=10, bordercolor='#5bc0de')
 
         # ----- Cabeçalho azul claro -----
         self.frm_cabecalho = ttk.Frame(self.janela, style='MyHeader.TFrame')
@@ -64,7 +63,11 @@ class MenuInicial():
 
         # ----- Rodapé azul claro -----
         self.frm_rodape = ttk.Frame(self.janela, style='MyHeader.TFrame')
-        self.frm_rodape.pack(fill=X, ipady=30, side=BOTTOM)
+        self.frm_rodape.pack(fill=X, ipady=15, side=BOTTOM, pady=(0, 20))
+        
+        # ----- Botão de Logout -----
+        btn_logout = ttk.Button(self.frm_rodape, text="Sair (Logout)", command=self._fazer_logout, bootstyle="info-outline")
+        btn_logout.pack(side=RIGHT, padx=20)
 
         # ----- Área de botões -----
         botoes_frame = ttk.Frame(self.janela)
@@ -105,11 +108,19 @@ class MenuInicial():
             
         # NOVO: Botão para Gerenciar Usuários (Apenas Administrador)
         if perfil == 'Administrador':
-            self.btn_gerenciar_usuarios = ttk.Button(botoes_frame, text="Gerenciar Usuários", command=self.abrir_gerenciamento_usuarios, bootstyle="info-outline")
+            self.btn_gerenciar_usuarios = ttk.Button(botoes_frame, text="Gerenciar Usuários", command=self.abrir_gerenciamento_usuarios, style="MyHeader.TButton")
             self.btn_gerenciar_usuarios.grid(row=3, column=1, columnspan=2, ipady=5, padx=8, sticky="ew")
 
     # MÉTODOS PARA ABRIR AS TELAS (COM IMPORTAÇÃO LOCAL)
     
+    def _fazer_logout(self):
+        """Limpa a janela do menu e recarrega a tela de login."""
+        for widget in self.janela.winfo_children():
+            widget.destroy()
+        
+        # Recria a tela de login na mesma janela
+        TelaLogin(self.janela, self.db_controller)
+
     def abrir_planilha_des(self):
         from pl_des import PlanilhaDesfazimento
         PlanilhaDesfazimento(self.janela, self.db_controller, self).planilha_des()

@@ -294,13 +294,26 @@ class DBController:
 
     def deletar_usuario(self, id_usuario):
         """Remove um usuário do banco de dados."""
-        if not self.conn: return False
+        print(f"--- DEBUG DB: Método deletar_usuario chamado com ID: {id_usuario} ---") # RASTREADOR
+        if not self.conn: 
+            print("--- DEBUG DB: Sem conexão. Retornando False. ---") # RASTREADOR
+            return False
         try:
             query = "DELETE FROM Usuario WHERE id_usuario = %s"
             self.cursor.execute(query, (id_usuario,))
+            print(f"--- DEBUG DB: Query executada. Linhas afetadas (rowcount): {self.cursor.rowcount} ---") # RASTREADOR
+            
+            if self.cursor.rowcount == 0:
+                print("--- DEBUG DB: Nenhuma linha afetada. Desfazendo e retornando False. ---") # RASTREADOR
+                self.conn.rollback()
+                Messagebox.show_warning("Aviso", "Nenhum usuário foi encontrado com o ID fornecido. Nenhuma alteração foi feita.")
+                return False
+
+            print("--- DEBUG DB: Linhas afetadas > 0. Comitando e retornando True. ---") # RASTREADOR
             self.conn.commit()
             return True
         except mysql.connector.Error as err:
+            print(f"--- DEBUG DB: Ocorreu um erro de SQL: {err} ---") # RASTREADOR
             Messagebox.show_error("Erro ao Deletar", f"Não foi possível deletar o usuário:\n{err}")
             self.conn.rollback()
             return False
