@@ -304,10 +304,26 @@ CREATE TABLE Usuario (
     perfil ENUM('Administrador', 'Servidor', 'Estagiário') NOT NULL
 );
 
--- INSERÇÃO DO USUÁRIO ADMINISTRADOR PADRÃO
+-- INSERÇÃO DO USUÁRIO ADMINISTRADOR PADRÃO:
 -- CPF: 000.000.000-00
 -- Senha: admin
 INSERT INTO Usuario (nome_completo, cpf, senha_hash, perfil) VALUES
 ('Administrador Padrão', '000.000.000-00', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Administrador');
 
 SELECT * FROM Usuario;
+
+-- TABELA DE CONFIGURAÇÕES:
+CREATE TABLE Configuracao (
+    chave VARCHAR(50) PRIMARY KEY,
+    valor VARCHAR(255)
+);
+
+-- INSERÇÃO DOS VALORES PADRÃO:
+INSERT INTO Configuracao (chave, valor) VALUES
+('tema', 'Claro'),
+('pasta_padrao', ''),
+('formato_padrao', '.pdf'),
+('salvar_auto', '1'), -- 1 para True (ligado), 0 para False (desligado)
+('lembrar_configs', '1');
+
+SELECT * FROM Configuracao;

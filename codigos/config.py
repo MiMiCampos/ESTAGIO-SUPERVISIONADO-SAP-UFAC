@@ -3,237 +3,113 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 from tkinter import filedialog
+from ttkbootstrap.dialogs import Messagebox
 
 class Configuracoes():
-    def __init__(self, master):
-        self.janela = master
-        self.pasta_selecionada_var = ttk.StringVar(value="Nenhuma pasta selecionada")
-    
-    def importar_documentos(self):
-        """Abre uma janela para o usuário selecionar um arquivo."""
-        # Define os tipos de arquivos que podem ser abertos
-        tipos_de_arquivo = (
-            ("Documentos de Planilha", "*.xlsx;*.xls;*.csv"),
-            ("Todos os arquivos", "*.*")
-        )
-        caminho_arquivo = filedialog.askopenfilename(
-            title="Selecione o documento de tombos para importar",
-            filetypes=tipos_de_arquivo
-        )
-        if caminho_arquivo:
-            print(f"Arquivo selecionado para importação: {caminho_arquivo}")
-            # Aqui você colocaria a lógica para processar o arquivo
-        else:
-            print("Nenhum arquivo selecionado.")
+    def __init__(self, master, db_controller):
+        self.janela_mestra = master # Guarda a referência da janela principal
+        self.db = db_controller
+        self.tpl_config = None
+        
+        self.tema_var = tk.StringVar()
+        self.pasta_selecionada_var = tk.StringVar()
+        self.formato_var = tk.StringVar()
+        self.salvar_auto_var = tk.BooleanVar()
+        self.lembrar_var = tk.BooleanVar()
 
-    def mudar_tema(self, event):
-        """Muda o tema da aplicação com base na seleção do Combobox."""
-        tema_selecionado = self.combo_tema.get()
+    def _carregar_configuracoes(self):
+        """Carrega as configurações do banco e atualiza os widgets."""
+        configs = self.db.get_todas_configuracoes()
+        
+        self.tema_var.set(configs.get('tema', 'Claro'))
+        self.pasta_selecionada_var.set(configs.get('pasta_padrao', 'Nenhuma pasta selecionada'))
+        self.formato_var.set(configs.get('formato_padrao', '.pdf'))
+        self.salvar_auto_var.set(configs.get('salvar_auto', '1') == '1')
+        self.lembrar_var.set(configs.get('lembrar_configs', '1') == '1')
+        
+        # Aplica o tema na própria janela de configurações ao abrir
         style = ttk.Style()
-        if tema_selecionado == 'Claro':
-            style.theme_use('litera')
-            print("Tema alterado para: Claro (litera)")
-        elif tema_selecionado == 'Escuro':
-            style.theme_use('darkly')
-            print("Tema alterado para: Escuro (darkly)")
+        style.theme_use('litera' if self.tema_var.get() == 'Claro' else 'darkly')
+
+    def _salvar_configuracoes(self):
+        """Pega os valores dos widgets, salva no banco e aplica o tema em tempo real."""
+        try:
+            self.db.set_configuracao('tema', self.tema_var.get())
+            self.db.set_configuracao('pasta_padrao', self.pasta_selecionada_var.get())
+            self.db.set_configuracao('formato_padrao', self.formato_var.get())
+            self.db.set_configuracao('salvar_auto', '1' if self.salvar_auto_var.get() else '0')
+            self.db.set_configuracao('lembrar_configs', '1' if self.lembrar_var.get() else '0')
+            
+            # --- LÓGICA PARA ATUALIZAR O TEMA EM TEMPO REAL ---
+            tema_selecionado = self.tema_var.get()
+            nome_tema_ttk = 'litera' if tema_selecionado == 'Claro' else 'darkly'
+            
+            # Pega a instância do estilo da janela principal e aplica o novo tema
+            self.janela_mestra.style.theme_use(nome_tema_ttk)
+
+            Messagebox.ok("Sucesso", "Configurações salvas com sucesso!", parent=self.tpl_config)
+            self.tpl_config.destroy()
+        except Exception as e:
+            Messagebox.show_error("Erro", f"Ocorreu um erro ao salvar as configurações:\n{e}", parent=self.tpl_config)
 
     def selecionar_pasta(self):
-        """Abre uma janela para o usuário selecionar uma pasta."""
         caminho_pasta = filedialog.askdirectory(title="Selecione a pasta padrão")
         if caminho_pasta:
-            self.pasta_selecionada_var.set(caminho_pasta) # Atualiza a variável
-            print(f"Pasta padrão selecionada: {caminho_pasta}")
-        else:
-            print("Nenhuma pasta selecionada.")
-            
-    def opcao_alterada(self, nome_opcao, valor):
-        """Função genérica para imprimir a mudança de estado das outras opções."""
-        print(f"Opção '{nome_opcao}' alterada para: {valor}")
-        
-    def configuracao(self):
-        # Evita criar múltiplas janelas se o botão for clicado várias vezes
-        try:
-            if self.tpl_config.winfo_exists():
-                self.tpl_config.focus()
-                return
-        except AttributeError:
-            pass
+            self.pasta_selecionada_var.set(caminho_pasta)
 
-        self.tpl_config = ttk.Toplevel(self.janela)
+    def configuracao(self):
+        if self.tpl_config and self.tpl_config.winfo_exists():
+            self.tpl_config.focus()
+            return
+
+        self.tpl_config = ttk.Toplevel(self.janela_mestra)
         self.tpl_config.title("Configurações")
         self.tpl_config.geometry("800x600")
         self.tpl_config.position_center()
-        
-        # ----- Instância do Style UMA VEZ no início -----
+        self.tpl_config.transient(self.janela_mestra)
+
+        self._carregar_configuracoes()
+
         style = ttk.Style()
-        
-        # ----- Estilo de cor customizada para o cabeçalho -----
         style.configure('MyHeader.TFrame', background='#5bc0de')
         
-        # ----- Estilo customizado para as fontes dos botões -----
-        style.configure(
-            "Fonte.light.TButton", # Nome do estilo customizado, com o 'light', para continuar meio cinza
-            font=("Inclusive Sans", 12))
-        
-        # ===== Estilo customizado para as fontes dos combobox =====
-        # 1. Para a LISTA SUSPENSA (o menu que abre)
-        self.janela.option_add('*TCombobox*Listbox.font', ('Inclusive Sans', 12))
-        
-        # 2. Para o CAMPO DE TEXTO (o que fica visível)
-        style.configure(
-            'TCombobox', # Aplicado diretamente ao tipo base
-            font=('Inclusive Sans', 12))
-
-        # ----- Cabeçalho azul claro -----
-        self.cabecalho_frame = ttk.Frame(self.tpl_config)
-        self.cabecalho_frame.pack(fill=X)
-        self.cabecalho_frame.configure(style='MyHeader.TFrame')
-    
-        # ----- Inserindo o brasão da UFAC -----
+        cabecalho_frame = ttk.Frame(self.tpl_config, style='MyHeader.TFrame', padding=10)
+        cabecalho_frame.pack(fill=X)
         try:
             brasao_img = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao = ImageTk.PhotoImage(brasao_img)
-            brasao_label = ttk.Label(self.cabecalho_frame, image=self.brasao)
-            brasao_label.pack(side=LEFT, padx=10, pady=5)
-        except:
-            brasao_label = ttk.Label(self.cabecalho_frame, text="[BRASÃO]")
-            brasao_label.pack(side=LEFT, padx=10, pady=5)
-            
-        # ----- Título da tela -----
-        titulo = ttk.Label(
-            self.cabecalho_frame,
-            text="Configurações do Sistema",
-            font=("Inconsolata", 16, "bold"),
-            bootstyle=INVERSE,
-            foreground='black',
-            background='#5bc0de'
-        )
-        titulo.pack(expand=True, padx=10, pady=10)
+            ttk.Label(cabecalho_frame, image=self.brasao, style='MyHeader.TFrame').pack(side=LEFT, padx=10)
+        except: pass
+        ttk.Label(cabecalho_frame, text="Configurações do Sistema", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black').pack(expand=True)
         
-        # ===== INÍCIO DA INTEGRAÇÃO DO CONTEÚDO DA TELA =====
-        
-        # ----- Frame principal para o conteúdo abaixo do cabeçalho -----
-        frame_principal = ttk.Frame(self.tpl_config)
-        frame_principal.pack(fill=BOTH, expand=True, padx=30, pady=30)
-
-        # ----- Labelframe para agrupar as opções com uma borda -----
-        frame_config = ttk.Labelframe(frame_principal, text="", padding=20)
+        frame_principal = ttk.Frame(self.tpl_config, padding=30)
+        frame_principal.pack(fill=BOTH, expand=True)
+        frame_config = ttk.Labelframe(frame_principal, text="Opções", padding=20)
         frame_config.pack(fill=BOTH, expand=True)
-
-        # Configurando o layout em grid para alinhar os itens
-        frame_config.grid_columnconfigure(0, weight=1)  # Coluna dos textos (expande)
-        frame_config.grid_columnconfigure(1, weight=0)  # Coluna dos botões (não expande)
-
-        # ----- Opção 1: Importar documentos -----
-        self.lbl_importar = ttk.Label(frame_config, 
-            text="Importar documentos de tombos", 
-            font=("Inclusive Sans", 12))
-        self.lbl_importar.grid(row=0, column=0, sticky='w', pady=10)
+        frame_config.grid_columnconfigure(0, weight=1)
         
-        self.btn_importar = ttk.Button(frame_config,
-            text="Importar",
-            style="Fonte.light.TButton", command=self.importar_documentos)
-        self.btn_importar.grid(row=0, column=1, sticky='ew', padx=5)
+        ttk.Label(frame_config, text="Tema", font=("Inclusive Sans", 12)).grid(row=1, column=0, sticky='w', pady=10)
+        combo_tema = ttk.Combobox(frame_config, values=['Claro', 'Escuro'], state="readonly", textvariable=self.tema_var)
+        combo_tema.grid(row=1, column=1, sticky='ew', padx=5)
 
-        # ----- Opção 2: Tema -----
-        self.lbl_tema = ttk.Label(frame_config, 
-            text="Tema", 
-            font=("Inclusive Sans", 12))
-        self.lbl_tema.grid(row=1, column=0, sticky='w', pady=10)
-        
-        self.combo_tema = ttk.Combobox(frame_config, 
-            values=['Claro', 'Escuro'], 
-            state="readonly")
-        self.combo_tema.set("Claro")
-        self.combo_tema.grid(row=1, column=1, sticky='ew', padx=5)
-        self.combo_tema.bind("<<ComboboxSelected>>", self.mudar_tema)
+        ttk.Label(frame_config, text="Pasta padrão para salvar planilhas e documentos", font=("Inclusive Sans", 12)).grid(row=2, column=0, sticky='w', pady=10)
+        btn_pasta = ttk.Button(frame_config, text="Selecionar pasta", command=self.selecionar_pasta, bootstyle="secondary-outline")
+        btn_pasta.grid(row=2, column=1, sticky='ew', padx=5)
+        ttk.Label(frame_config, textvariable=self.pasta_selecionada_var, font=("Inclusive Sans", 9), bootstyle="secondary").grid(row=3, column=0, columnspan=2, sticky='w')
 
-        # ----- Opção 3: Pasta Padrão -----
-        self.lbl_pasta = ttk.Label(frame_config, 
-            text="Pasta padrão para salvar planilhas e documentos", font=("Inclusive Sans", 12))
-        self.lbl_pasta.grid(row=2, column=0, sticky='w', pady=10)
-        
-        self.btn_pasta = ttk.Button(frame_config, 
-            text="Selecionar pasta", 
-            style="Fonte.light.TButton", command=self.selecionar_pasta)
-        self.btn_pasta.grid(row=2, column=1, sticky='ew', padx=5)
-        
-        # Label para mostrar a pasta que foi selecionada
-        self.lbl_caminho_pasta = ttk.Label(frame_config, 
-            textvariable=self.pasta_selecionada_var, 
-            font=("Inclusive Sans", 9), 
-            bootstyle="secondary")
-        self.lbl_caminho_pasta.grid(row=3, column=0, columnspan=2, sticky='w', pady=(0, 10))
+        ttk.Label(frame_config, text="Formato padrão de documentos", font=("Inclusive Sans", 12)).grid(row=4, column=0, sticky='w', pady=10)
+        combo_formato = ttk.Combobox(frame_config, values=['.pdf', '.docx'], state="readonly", textvariable=self.formato_var)
+        combo_formato.grid(row=4, column=1, sticky='ew', padx=5)
 
-        # ----- Opção 4: Formato Padrão -----
-        self.lbl_formato = ttk.Label(frame_config, 
-            text="Formato padrão de documentos", 
-            font=("Inclusive Sans", 12))
-        self.lbl_formato.grid(row=3, column=0, sticky='w', pady=10)
-        
-        self.combo_formato = ttk.Combobox(frame_config, 
-            values=['.pdf', '.docx', '.xlsx'], 
-            state="readonly")
-        self.combo_formato.set(".pdf")
-        self.combo_formato.grid(row=3, column=1, sticky='ew', padx=5)
-        self.combo_formato.bind("<<ComboboxSelected>>", 
-            lambda event: self.opcao_alterada("Formato", self.combo_formato.get()))
+        ttk.Label(frame_config, text="Salvar automaticamente após adicionar tombos", font=("Inclusive Sans", 12)).grid(row=5, column=0, sticky='w', pady=10)
+        check_salvar_auto = ttk.Checkbutton(frame_config, bootstyle="round-toggle", variable=self.salvar_auto_var)
+        check_salvar_auto.grid(row=5, column=1, sticky='e', padx=5)
 
-        # ----- Opção 5: Salvar Automaticamente (Switch) -----
-        self.lbl_salvar_auto = ttk.Label(frame_config, 
-            text="Salvar automaticamente após adicionar tombos", 
-            font=("Inclusive Sans", 12))
-        self.lbl_salvar_auto.grid(row=4, column=0, sticky='w', pady=10)
-        self.salvar_auto_var = ttk.BooleanVar(value=True)
-        
-        self.check_salvar_auto = ttk.Checkbutton(frame_config,
-            bootstyle="round-toggle",
-            variable=self.salvar_auto_var,
-            command=lambda: self.opcao_alterada("Salvar Auto", self.salvar_auto_var.get()))
-        self.check_salvar_auto.invoke()
-        self.check_salvar_auto.grid(row=4, column=1, sticky='e', padx=5, pady=10)
+        ttk.Label(frame_config, text="Lembrar configurações anteriores", font=("Inclusive Sans", 12)).grid(row=6, column=0, sticky='w', pady=10)
+        check_lembrar = ttk.Checkbutton(frame_config, bootstyle="round-toggle", variable=self.lembrar_var)
+        check_lembrar.grid(row=6, column=1, sticky='e', padx=5)
 
-        # ----- Opção 6: Lembrar Configurações (Switch) -----
-        self.lbl_lembrar = ttk.Label(frame_config, 
-            text="Lembrar configurações anteriores", 
-            font=("Inclusive Sans", 12))
-        self.lbl_lembrar.grid(row=5, column=0, sticky='w', pady=10)
-        self.lembrar_var = ttk.BooleanVar(value=True)
-        
-        self.check_lembrar = ttk.Checkbutton(frame_config, 
-            bootstyle="round-toggle", 
-            variable=self.lembrar_var,
-            command=lambda: self.opcao_alterada("Lembrar Configs", self.lembrar_var.get()))
-        self.check_lembrar.grid(row=5, column=1, sticky='e', padx=5, pady=10)
-
-        # ----- Botão de Voltar -----
-        btn_voltar = ttk.Button(
-            frame_principal,
-            text="<- Voltar",
-            bootstyle="primary-outline",
-            command=self.tpl_config.destroy
-        )
-        btn_voltar.pack(side=LEFT, pady=(20, 0))
-
-# ----- Bloco para Teste da Janela (PADRONIZADO) -----
-if __name__ == "__main__":
-    
-    class AppTeste:
-        def __init__(self, master):
-            self.janela = master
-            self.janela.title("App de Teste para Configurações")
-            self.janela.geometry("400x200")
-            
-            self.tela_config = Configuracoes(self.janela)
-
-            btn_abrir = ttk.Button(
-                self.janela,
-                text="Abrir Tela de Configurações",
-                command=self.tela_config.configuracao,
-                bootstyle="primary"
-            )
-            btn_abrir.pack(expand=True)
-
-    janela_teste = ttk.Window(themename="litera")
-    app = AppTeste(janela_teste)
-    janela_teste.mainloop()
+        frame_rodape = ttk.Frame(frame_principal, padding=(0, 20))
+        frame_rodape.pack(fill=X, side=BOTTOM)
+        ttk.Button(frame_rodape, text="<- Voltar", command=self.tpl_config.destroy, bootstyle="primary-outline").pack(side=LEFT)
+        ttk.Button(frame_rodape, text="Salvar Configurações", command=self._salvar_configuracoes, bootstyle="success").pack(side=RIGHT)

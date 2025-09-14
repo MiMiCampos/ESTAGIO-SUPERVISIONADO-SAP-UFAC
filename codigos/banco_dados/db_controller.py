@@ -1,7 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
 from ttkbootstrap.dialogs import Messagebox
-# --- CORREÇÃO: Importar 'date' e 'datetime' explicitamente ---
 from datetime import datetime, date
 
 class DBController:
@@ -93,7 +92,6 @@ class DBController:
         """Busca todos os bens associados a um id_desfazimento específico."""
         if not self.conn: return []
         try:
-            # --- QUERY SQL CORRIGIDA ---
             query = """
                 SELECT 
                     NULL as 'Nº DE ORDEM',
@@ -124,7 +122,7 @@ class DBController:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
             return []
         
-    # NOVO MÉTODO - Específico para a tela de visualização
+    # Específico para a tela de visualização
     def get_bens_para_visualizacao(self, id_desfazimento):
         """Busca os bens para a tela de visualização (sem o nome do servidor)."""
         if not self.conn: return []
@@ -329,3 +327,33 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao listar servidores: {err}")
             return []
+    
+    def get_todas_configuracoes(self):
+        """Busca todas as configurações e retorna como um dicionário."""
+        if not self.conn: return {}
+        try:
+            query = "SELECT chave, valor FROM Configuracao"
+            self.cursor.execute(query)
+            # Transforma a lista de {'chave': k, 'valor': v} em um único dicionário {k: v}
+            return {item['chave']: item['valor'] for item in self.cursor.fetchall()}
+        except mysql.connector.Error as err:
+            print(f"Erro ao buscar configurações: {err}")
+            return {}
+
+    def set_configuracao(self, chave, valor):
+        """Salva ou atualiza uma configuração no banco de dados."""
+        if not self.conn: return False
+        try:
+            # Este comando insere uma nova linha, ou atualiza o 'valor' se a 'chave' já existir
+            query = """
+                INSERT INTO Configuracao (chave, valor)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE valor = VALUES(valor)
+            """
+            self.cursor.execute(query, (chave, valor))
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro ao Salvar", f"Não foi possível salvar a configuração '{chave}':\n{err}")
+            self.conn.rollback()
+            return False
