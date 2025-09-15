@@ -4,6 +4,7 @@ from ttkbootstrap.dialogs import Messagebox
 from datetime import datetime, date
 
 class DBController:
+    # ... (todo o resto do seu código __init__, get_bem_by_tombo, etc., permanece igual) ...
     def __init__(self, host, user, password, database):
         """Tenta conectar ao banco de dados MySQL ao ser instanciado."""
         try:
@@ -78,10 +79,21 @@ class DBController:
             return None
 
     def get_planilhas_finalizadas(self):
-        """Busca todas as planilhas finalizadas, incluindo o id_desfazimento associado."""
+        """Busca todas as planilhas finalizadas, incluindo o número do processo associado."""
         if not self.conn: return []
         try:
-            query = "SELECT id_planilha, nome_planilha, data_geracao, total_tombos, id_desfazimento FROM PlanilhaFinalizada ORDER BY data_geracao DESC"
+            query = """
+                SELECT 
+                    pf.id_planilha, 
+                    pf.nome_planilha, 
+                    pf.data_geracao, 
+                    pf.total_tombos, 
+                    pf.id_desfazimento,
+                    d.numero_processo
+                FROM PlanilhaFinalizada pf
+                JOIN Desfazimento d ON pf.id_desfazimento = d.id_desfazimento
+                ORDER BY pf.data_geracao DESC
+            """
             self.cursor.execute(query)
             return self.cursor.fetchall()
         except mysql.connector.Error as err:
@@ -92,6 +104,7 @@ class DBController:
         """Busca todos os bens associados a um id_desfazimento específico."""
         if not self.conn: return []
         try:
+            # QUERY FINAL - Usa os nomes de coluna confirmados do seu BD
             query = """
                 SELECT 
                     NULL as 'Nº DE ORDEM',
@@ -100,12 +113,14 @@ class DBController:
                     b.data_aquisicao AS 'DATA DA AQUISIÇÃO',
                     b.nota_fiscal AS 'DOCUMENTO FISCAL',
                     u.nome_unidade AS 'UNIDADE RESPONSÁVEL',
-                    Servidor.nome_servidor AS 'SERVIDOR RESPONSÁVEL', -- <-- Corrigido de s.nome_servidor
+                    s.nome_servidor AS 'SERVIDOR RESPONSÁVEL',
                     b.classificacao AS 'CLASSIFICAÇÃO',
-                    b.destinacao AS 'DESTINAÇÃO'
+                    b.destinacao AS 'DESTINAÇÃO',
+                    b.valor_aquisicao AS 'VALOR',
+                    b.forma_ingresso AS 'FORMA_DE_INGRESSO'
                 FROM Bem b
                 LEFT JOIN Unidade u ON b.id_unidade = u.id_unidade
-                LEFT JOIN Servidor ON b.id_servidor = Servidor.id_servidor -- <-- Corrigido de Servidor s ON ...
+                LEFT JOIN Servidor s ON b.id_servidor = s.id_servidor
                 WHERE b.id_desfazimento = %s
             """
             self.cursor.execute(query, (id_desfazimento,))
@@ -114,20 +129,26 @@ class DBController:
             for i, row in enumerate(resultados):
                 linha = list(row.values())
                 linha[0] = i + 1
+                # Formata a data se ela existir
                 if isinstance(linha[3], date):
                     linha[3] = linha[3].strftime('%d/%m/%Y')
+                # Formata o valor para o padrão monetário brasileiro
+                if isinstance(linha[9], (float, int, str)):
+                    try:
+                        valor_numerico = float(linha[9])
+                        linha[9] = f"{valor_numerico:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                    except (ValueError, TypeError):
+                        linha[9] = '0,00'
                 dados_formatados.append(linha)
             return dados_formatados
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
             return []
-        
-    # Específico para a tela de visualização
+
     def get_bens_para_visualizacao(self, id_desfazimento):
         """Busca os bens para a tela de visualização (sem o nome do servidor)."""
         if not self.conn: return []
         try:
-            # Esta query tem apenas as 8 colunas necessárias para a visualização
             query = """
                 SELECT 
                     NULL as 'Nº DE ORDEM',
@@ -188,14 +209,9 @@ class DBController:
             self.conn.rollback()
             
     def get_ultima_planilha_criada(self):
-        """
-        Busca a planilha mais recente registrada no banco de dados.
-        A mais recente é identificada pelo maior 'id_planilha' (auto-incremento).
-        Retorna um dicionário com os dados da planilha ou None se não houver nenhuma.
-        """
+        """Busca a planilha mais recente registrada no banco de dados."""
         if not self.conn: return None
         try:
-            # A query busca pelas colunas que precisamos, ordena pela ID decrescente e pega só a primeira.
             query = """
                 SELECT id_desfazimento, nome_planilha, caminho_arquivo_planilha 
                 FROM PlanilhaFinalizada 
@@ -205,7 +221,6 @@ class DBController:
             self.cursor.execute(query)
             resultado = self.cursor.fetchone()
             
-            # Renomeia as chaves do dicionário para consistência com o que já temos
             if resultado:
                 return {
                     'id_desfazimento': resultado['id_desfazimento'],
@@ -213,7 +228,6 @@ class DBController:
                     'caminho': resultado['caminho_arquivo_planilha']
                 }
             return None
-            
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar a última planilha: {err}")
             return None
@@ -231,16 +245,15 @@ class DBController:
         try:
             query = "SELECT id_usuario, nome_completo, perfil FROM Usuario WHERE cpf = %s AND senha_hash = %s"
             self.cursor.execute(query, (cpf, senha_hash))
-            return self.cursor.fetchone() # Retorna os dados do usuário ou None
+            return self.cursor.fetchone()
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Autenticação", f"Erro ao verificar usuário: {err}")
             return None
         
     def listar_usuarios(self):
-        """Busca todos os usuários cadastrados, exceto o admin padrão se necessário."""
+        """Busca todos os usuários cadastrados."""
         if not self.conn: return []
         try:
-            # A query retorna todos os campos para exibição e edição
             query = "SELECT id_usuario, nome_completo, cpf, perfil FROM Usuario"
             self.cursor.execute(query)
             return self.cursor.fetchall()
@@ -262,7 +275,7 @@ class DBController:
             return self.cursor.fetchone() is not None
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Verificação", f"Erro ao verificar CPF: {err}")
-            return True # Retorna True para prevenir inserção em caso de erro
+            return True
 
     def cadastrar_usuario(self, nome, cpf, senha_hash, perfil):
         """Insere um novo usuário no banco de dados."""
@@ -292,26 +305,18 @@ class DBController:
 
     def deletar_usuario(self, id_usuario):
         """Remove um usuário do banco de dados."""
-        print(f"--- DEBUG DB: Método deletar_usuario chamado com ID: {id_usuario} ---") # RASTREADOR
         if not self.conn: 
-            print("--- DEBUG DB: Sem conexão. Retornando False. ---") # RASTREADOR
             return False
         try:
             query = "DELETE FROM Usuario WHERE id_usuario = %s"
             self.cursor.execute(query, (id_usuario,))
-            print(f"--- DEBUG DB: Query executada. Linhas afetadas (rowcount): {self.cursor.rowcount} ---") # RASTREADOR
-            
             if self.cursor.rowcount == 0:
-                print("--- DEBUG DB: Nenhuma linha afetada. Desfazendo e retornando False. ---") # RASTREADOR
                 self.conn.rollback()
-                Messagebox.show_warning("Aviso", "Nenhum usuário foi encontrado com o ID fornecido. Nenhuma alteração foi feita.")
+                Messagebox.show_warning("Aviso", "Nenhum usuário foi encontrado com o ID fornecido.")
                 return False
-
-            print("--- DEBUG DB: Linhas afetadas > 0. Comitando e retornando True. ---") # RASTREADOR
             self.conn.commit()
             return True
         except mysql.connector.Error as err:
-            print(f"--- DEBUG DB: Ocorreu um erro de SQL: {err} ---") # RASTREADOR
             Messagebox.show_error("Erro ao Deletar", f"Não foi possível deletar o usuário:\n{err}")
             self.conn.rollback()
             return False
@@ -322,38 +327,68 @@ class DBController:
         try:
             query = "SELECT nome_servidor FROM Servidor ORDER BY nome_servidor ASC"
             self.cursor.execute(query)
-            # Extrai apenas os nomes da lista de dicionários retornada
             return [servidor['nome_servidor'] for servidor in self.cursor.fetchall()]
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao listar servidores: {err}")
             return []
-    
+
+    # >>> NOVA FUNÇÃO ADICIONADA AQUI <<<
+    def get_proximo_numero_termo(self):
+        """Busca o próximo ID da tabela de documentos para gerar um número de termo sequencial."""
+        if not self.conn: return "000000"
+        try:
+            # Esta query busca o próximo valor do AUTO_INCREMENT da tabela
+            db_name = self.conn.database
+            query = f"""
+                SELECT AUTO_INCREMENT 
+                FROM information_schema.TABLES 
+                WHERE TABLE_SCHEMA = '{db_name}' 
+                AND TABLE_NAME = 'DocumentoDeBaixa'
+            """
+            self.cursor.execute(query)
+            resultado = self.cursor.fetchone()
+            
+            # Formata o número com 6 dígitos (ex: 1 -> "000001")
+            proximo_id = resultado.get('AUTO_INCREMENT', 1) if resultado else 1
+            return f"{proximo_id:06d}"
+            
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar próximo número do termo: {err}")
+            return "000000"
+        
+    # Adicione esta função dentro da classe DBController em db_controller.py
+
     def get_todas_configuracoes(self):
-        """Busca todas as configurações e retorna como um dicionário."""
-        if not self.conn: return {}
+        """Busca todas as configurações da tabela Configuracao e retorna um dicionário."""
+        if not self.conn:
+            return {}  # Retorna um dicionário vazio se não houver conexão
+        
+        configs = {}
         try:
             query = "SELECT chave, valor FROM Configuracao"
             self.cursor.execute(query)
-            # Transforma a lista de {'chave': k, 'valor': v} em um único dicionário {k: v}
-            return {item['chave']: item['valor'] for item in self.cursor.fetchall()}
+            resultados = self.cursor.fetchall()
+            
+            # Transforma a lista de resultados em um dicionário único (ex: {'tema': 'Claro'})
+            for item in resultados:
+                configs[item['chave']] = item['valor']
+            
+            return configs
         except mysql.connector.Error as err:
-            print(f"Erro ao buscar configurações: {err}")
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar configurações: {err}")
             return {}
+        
+    # Em db_controller.py, adicione esta função
 
-    def set_configuracao(self, chave, valor):
-        """Salva ou atualiza uma configuração no banco de dados."""
-        if not self.conn: return False
+    def get_processo_por_id_desfazimento(self, id_desfazimento):
+        """Busca o número do processo usando o ID de desfazimento."""
+        if not self.conn or not id_desfazimento:
+            return None
         try:
-            # Este comando insere uma nova linha, ou atualiza o 'valor' se a 'chave' já existir
-            query = """
-                INSERT INTO Configuracao (chave, valor)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE valor = VALUES(valor)
-            """
-            self.cursor.execute(query, (chave, valor))
-            self.conn.commit()
-            return True
+            query = "SELECT numero_processo FROM Desfazimento WHERE id_desfazimento = %s"
+            self.cursor.execute(query, (id_desfazimento,))
+            resultado = self.cursor.fetchone()
+            return resultado['numero_processo'] if resultado else None
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro ao Salvar", f"Não foi possível salvar a configuração '{chave}':\n{err}")
-            self.conn.rollback()
-            return False
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar número do processo: {err}")
+            return None

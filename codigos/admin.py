@@ -121,11 +121,13 @@ class GerenciadorUsuarios:
         nome_usuario = self.tabela.item(item_selecionado_id)['values'][1]
         resposta = Messagebox.yesno("Confirmar Exclusão", f"Tem certeza que deseja excluir o usuário '{nome_usuario}'?\nEsta ação não pode ser desfeita.")
 
-        if resposta == "Yes":
+        if resposta == "Sim":
             if self.db.deletar_usuario(id_usuario_para_deletar):
                 Messagebox.ok("Sucesso", "Usuário excluído com sucesso.")
                 self._popular_tabela()
                 
+    # Em admin.py, substitua toda esta função:
+
     def _abrir_janela_edicao(self, dados_usuario=None):
         """Abre uma janela para adicionar ou editar um usuário."""
         modo_edicao = dados_usuario is not None
@@ -215,6 +217,7 @@ class GerenciadorUsuarios:
             else:
                 ent_nome_estagiario.insert(0, dados_usuario['nome_completo'])
                 combo_nome_servidor.grid_remove()
+                ent_nome_estagiario.grid() # <<<<<<< LINHA DA CORREÇÃO
 
             ent_cpf.insert(0, dados_usuario['cpf'])
 

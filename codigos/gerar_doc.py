@@ -173,15 +173,27 @@ class GerarDocumentos():
         except Exception as e:
             Messagebox.show_error(title="Erro ao Salvar", message=f"Não foi possível salvar o ficheiro:\n{e}")
 
+    # Em gerar_doc.py
+
+    # Em gerar_doc.py
+
     def navegar_para_baixas(self, planilha):
         """Busca os bens associados a esta planilha e navega para a tela de baixas."""
+        
+        # --- DEBUG INÍCIO ---
+        print("\n--- PASSO 1: INICIANDO EM gerar_doc.py ---")
+        print(f"[DEBUG] Dados completos da planilha selecionada: {planilha}")
         id_desfazimento = planilha.get('id_desfazimento')
+        numero_processo = planilha.get('numero_processo')
+        print(f"[DEBUG] ID de Desfazimento extraído: {id_desfazimento}")
+        print(f"[DEBUG] Número do Processo extraído: {numero_processo}")
+        # --- DEBUG FIM ---
+
         if id_desfazimento is None:
             Messagebox.show_error("Erro", "Não foi possível encontrar o ID de desfazimento para esta planilha.")
             return
 
         dados_brutos_dos_bens = self.db.get_bens_por_desfazimento(id_desfazimento)
-
         if not dados_brutos_dos_bens:
             Messagebox.show_info("Aviso", "Nenhum bem associado a esta planilha foi encontrado para organizar a baixa.")
             return
@@ -191,6 +203,8 @@ class GerarDocumentos():
         tela_baixas = OrganizacaoBaixas(
             self.janela_mestra_geradoc,
             nome_planilha=planilha.get('nome_planilha'),
-            dados_para_agrupar=dados_brutos_dos_bens
+            dados_para_agrupar=dados_brutos_dos_bens,
+            numero_processo=numero_processo,
+            id_desfazimento=id_desfazimento
         )
         tela_baixas.org_baixas()
