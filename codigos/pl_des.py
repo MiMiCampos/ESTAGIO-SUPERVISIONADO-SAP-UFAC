@@ -9,6 +9,7 @@ import openpyxl
 
 from pl_des_config import CriarPlanilha
 from pl_des_edit import EdicaoPlanilha
+from utils.path_helper import resource_path
 
 class PlanilhaDesfazimento:
     def __init__(self, master, db_controller, menu_principal):

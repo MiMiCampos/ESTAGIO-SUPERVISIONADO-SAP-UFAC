@@ -4,129 +4,146 @@ from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 from ttkbootstrap.dialogs import Messagebox
 
-# Imports para as telas que serão abertas a partir do menu
-from pl_des import PlanilhaDesfazimento
-from org_baixa import OrganizacaoBaixas
-from gerar_doc import GerarDocumentos
-from config import Configuracoes
-from admin import GerenciadorUsuarios
+from banco_dados.db_controller import DBController
+from utils.path_helper import resource_path
 
 class MenuInicial():
-    """
-    Esta classe é responsável por criar e gerenciar todos os widgets
-    da tela do menu principal.
-    """
-    def __init__(self, master, db_controller, dados_usuario, logout_callback):
-        self.master = master
-        self.db_controller = db_controller
+    # Em tela_menu.py, substitua a função __init__ inteira por esta.
+
+    def __init__(self, master, dados_usuario, on_logout):
+        self.janela = master
         self.dados_usuario = dados_usuario
-        self.logout_callback = logout_callback # Função para deslogar
+        self.on_logout = on_logout
+        self.janela.title("SAP-UFAC - Menu Inicial")
         
-        self.master.title("SAP-UFAC - Menu Inicial")
-        self.master.geometry("1100x800")
-        self.master.position_center()
+        self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
+        self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
         
-        self._carregar_imagens()
-        self._criar_widgets()
-
-    def _carregar_imagens(self):
-        """Carrega todas as imagens necessárias para o menu em atributos da classe."""
         try:
-            self.img_planilha = ImageTk.PhotoImage(Image.open("imagens/botao_planilha_desf.png").resize((300, 175)))
-            self.img_baixas = ImageTk.PhotoImage(Image.open("imagens/botao_organizacao_baixas.png").resize((300, 175)))
-            self.img_docs = ImageTk.PhotoImage(Image.open("imagens/botao_gerar_docs.png").resize((300, 175)))
-            self.img_config = ImageTk.PhotoImage(Image.open("imagens/botao_config.png").resize((300, 175)))
-            self.brasao = ImageTk.PhotoImage(Image.open("imagens/brasao_UFAC.png").resize((50, 50)))
+            # >>> A CORREÇÃO ESTÁ AQUI: Adicionamos master=self.janela <<<
+            # Dizemos a cada imagem que sua "dona" é a janela do Menu Principal.
+            img_data_planilha = Image.open(resource_path("imagens/botao_planilha_desf.png")).resize((300, 175))
+            self.img_planilha = ImageTk.PhotoImage(img_data_planilha, master=self.janela)
+
+            img_data_baixas = Image.open(resource_path("imagens/botao_organizacao_baixas.png")).resize((300, 175))
+            self.img_baixas = ImageTk.PhotoImage(img_data_baixas, master=self.janela)
+
+            img_data_docs = Image.open(resource_path("imagens/botao_gerar_docs.png")).resize((300, 175))
+            self.img_docs = ImageTk.PhotoImage(img_data_docs, master=self.janela)
+
+            img_data_config = Image.open(resource_path("imagens/botao_config.png")).resize((300, 175))
+            self.img_config = ImageTk.PhotoImage(img_data_config, master=self.janela)
+
         except Exception as e:
-            print(f"Erro ao carregar ícones do menu: {e}")
-            self.img_planilha = self.img_baixas = self.img_docs = self.img_config = self.brasao = None
-
-    def _criar_widgets(self):
-        """Cria e posiciona todos os widgets do menu na tela."""
-        style = ttk.Style()
-        style.configure('MyHeader.TFrame', background='#5bc0de')
-        style.configure('MyHeader.TButton', font=("Inconsolata", 14, "bold"), background='white', foreground="#5bc0de", borderwidth=5, padding=10, bordercolor='#5bc0de')
-
-        # --- Criação dos Frames Principais ---
-        frm_cabecalho = ttk.Frame(self.master, style='MyHeader.TFrame')
-        frm_rodape = ttk.Frame(self.master, style='MyHeader.TFrame')
-        botoes_frame = ttk.Frame(self.master)
-
-        # --- Preenche o Cabeçalho ---
-        if self.brasao:
-            lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao)
-            lbl_brasao.image = self.brasao
-            lbl_brasao.pack(side=LEFT, padx=10, pady=5)
-        lbl_titulo = ttk.Label(frm_cabecalho, 
-            text="SISTEMA DE AUTOMAÇÃO PATRIMONIAL DA UNIVERSIDADE FEDERAL DO ACRE (SAP-UFAC)",
-            font=("Inconsolata", 16, "bold"), bootstyle=INVERSE, foreground='black', background='#5bc0de')
-        lbl_titulo.pack(expand=True, padx=10, pady=10)
-
-        # --- Preenche o Rodapé ---
-        btn_logout = ttk.Button(frm_rodape, text="Sair (Logout)", command=self.logout_callback, bootstyle="info-outline")
-        btn_logout.pack(side=RIGHT, padx=20, pady=10)
-
-        # --- Preenche o Corpo (botoes_frame) ---
-        botoes_frame.grid_columnconfigure((0, 3), weight=1)
-        botoes_frame.grid_rowconfigure((0, 4), weight=1)
-        botoes_frame.grid_columnconfigure((1, 2), weight=0)
-        botoes_frame.grid_rowconfigure((1, 2, 3), weight=0)
+            Messagebox.show_error("Erro Crítico de Imagem", f"Não foi possível carregar os ícones dos botões.\n\nCausa provável: {e}")
+            self.img_planilha = self.img_baixas = self.img_docs = self.img_config = None
         
+        self.frm_cabecalho = ttk.Frame(self.janela, bootstyle="info")
+        self.frm_cabecalho.pack(fill=X)
+
+        try:
+            # Aplicando a mesma correção para o brasão
+            brasao_img_data = Image.open(resource_path("imagens/brasao_UFAC.png")).resize((50, 50))
+            self.brasao = ImageTk.PhotoImage(brasao_img_data, master=self.janela)
+            brasao_label = ttk.Label(self.frm_cabecalho, image=self.brasao, bootstyle="info")
+            brasao_label.pack(side=LEFT, padx=10, pady=5)
+        except:
+            brasao_label = ttk.Label(self.frm_cabecalho, text="[BRASÃO]", bootstyle="inverse-info")
+            brasao_label.pack(side=LEFT, padx=10, pady=5)
+        
+        self.lbl_titulo = ttk.Label(self.frm_cabecalho, 
+            text="SISTEMA DE AUTOMAÇÃO PATRIMONIAL DA UNIVERSIDADE FEDERAL DO ACRE (SAP-UFAC)",
+            font=("Inconsolata", 16, "bold"),
+            bootstyle="inverse-info"
+        )
+        self.lbl_titulo.pack(expand=True, padx=10, pady=10)
+
+        self.frm_rodape = ttk.Frame(self.janela, bootstyle="info")
+        self.frm_rodape.pack(fill=X, ipady=15, side=BOTTOM)
+        
+        btn_logout = ttk.Button(self.frm_rodape, text="Sair (Logout)", command=self._fazer_logout, bootstyle="info-outline")
+        btn_logout.pack(side=RIGHT, padx=20)
+
+        botoes_frame = ttk.Frame(self.janela)
+        botoes_frame.pack(pady=10, padx=20, expand=True, fill=BOTH)
+        
+        botoes_frame.grid_columnconfigure((0, 3), weight=1)
+        botoes_frame.grid_columnconfigure((1, 2), weight=0)
+        botoes_frame.grid_rowconfigure((0, 4), weight=1)
+        botoes_frame.grid_rowconfigure((1, 2, 3), weight=0)
+
         nome_usuario = self.dados_usuario['nome_completo']
         lbl_bem_vindo = ttk.Label(botoes_frame, text=f"BEM VINDO, {nome_usuario}!", font=("Inconsolata", 15, "bold"))
         lbl_bem_vindo.grid(row=0, column=1, columnspan=2, pady=(0, 20))
-        
+
         perfil = self.dados_usuario['perfil']
 
-        # Botões com imagens e controle de permissão
-        btn_planilha_des = ttk.Button(botoes_frame, command=self.abrir_planilha_des, image=self.img_planilha, style='MyHeader.TButton')
-        btn_planilha_des.grid(row=1, column=1, padx=10, pady=10)
-        btn_planilha_des.image = self.img_planilha
+        # O resto do código não precisa de alterações, pois a referência já está correta
+        self.btn_planilha_des = ttk.Button(botoes_frame, command=self.abrir_planilha_des, image=self.img_planilha, bootstyle="light")
+        self.btn_planilha_des.image = self.img_planilha
+        self.btn_planilha_des.grid(row=1, column=1, padx=10, pady=10)
 
-        btn_org_baixas = ttk.Button(botoes_frame, command=self.abrir_organizacao_baixas, image=self.img_baixas, style='MyHeader.TButton')
-        btn_org_baixas.grid(row=1, column=2, padx=10, pady=10)
-        btn_org_baixas.image = self.img_baixas
-        if perfil == 'Estagiário': btn_org_baixas.config(state=DISABLED)
+        self.btn_org_baixas = ttk.Button(botoes_frame, command=self.abrir_organizacao_baixas, image=self.img_baixas, bootstyle="light")
+        self.btn_org_baixas.image = self.img_baixas
+        self.btn_org_baixas.grid(row=1, column=2, padx=10, pady=10)
+        if perfil == 'Estagiário':
+            self.btn_org_baixas.config(state=DISABLED)
 
-        btn_gerar_docs = ttk.Button(botoes_frame, command=self.abrir_gerar_docs, image=self.img_docs, style='MyHeader.TButton')
-        btn_gerar_docs.grid(row=2, column=1, padx=10, pady=10)
-        btn_gerar_docs.image = self.img_docs
-        if perfil == 'Estagiário': btn_gerar_docs.config(state=DISABLED)
+        self.btn_gerar_docs = ttk.Button(botoes_frame, command=self.abrir_gerar_docs, image=self.img_docs, bootstyle="light")
+        self.btn_gerar_docs.image = self.img_docs
+        self.btn_gerar_docs.grid(row=2, column=1, padx=10, pady=10)
+        if perfil == 'Estagiário':
+            self.btn_gerar_docs.config(state=DISABLED)
 
-        btn_configuracoes = ttk.Button(botoes_frame, command=self.abrir_config, image=self.img_config, style='MyHeader.TButton')
-        btn_configuracoes.grid(row=2, column=2, padx=10, pady=10)
-        btn_configuracoes.image = self.img_config
-        
+        self.btn_configuracoes = ttk.Button(botoes_frame, command=self.abrir_config, image=self.img_config, bootstyle="light")
+        self.btn_configuracoes.image = self.img_config
+        self.btn_configuracoes.grid(row=2, column=2, padx=10, pady=10)
+            
         if perfil == 'Administrador':
-            btn_gerenciar_usuarios = ttk.Button(botoes_frame, text="Gerenciar Usuários", command=self.abrir_gerenciamento_usuarios, style="MyHeader.TButton")
-            btn_gerenciar_usuarios.grid(row=3, column=1, columnspan=2, pady=20, sticky="ew")
+            self.btn_gerenciar_usuarios = ttk.Button(botoes_frame, text="Gerenciar Usuários", command=self.abrir_gerenciamento_usuarios, bootstyle="secondary")
+            self.btn_gerenciar_usuarios.grid(row=3, column=1, columnspan=2, ipady=5, padx=8, sticky="ew")
 
-        # --- Ordem de Empacotamento Final ---
-        frm_cabecalho.pack(side=TOP, fill=X)
-        frm_rodape.pack(side=BOTTOM, fill=X)
-        botoes_frame.pack(expand=True, fill=BOTH, padx=20, pady=10)
+    def _fazer_logout(self):
+        # A função de logout agora é muito mais simples: ela apenas "avisa" o chefe (main.py)
+        self.on_logout()
 
-    # --- Métodos para abrir as outras telas ---
     def abrir_planilha_des(self):
-        PlanilhaDesfazimento(self.master, self.db_controller, self).planilha_des()
+        from pl_des import PlanilhaDesfazimento
+        PlanilhaDesfazimento(self.janela, self.db_controller, self).planilha_des()
 
     def abrir_organizacao_baixas(self):
+        from org_baixa import OrganizacaoBaixas
         ultima_planilha_info = self.db_controller.get_ultima_planilha_criada()
-        if not ultima_planilha_info:
-            Messagebox.show_warning("Nenhuma Planilha Encontrada", "Não há nenhuma planilha registrada.")
+        if ultima_planilha_info is None:
+            Messagebox.show_warning("Nenhuma Planilha Encontrada", "Não há nenhuma planilha registrada no banco de dados para organizar.")
             return
-        dados_brutos = self.db_controller.get_bens_por_desfazimento(ultima_planilha_info['id_desfazimento'])
+        id_desfazimento = ultima_planilha_info['id_desfazimento']
+        dados_brutos = self.db_controller.get_bens_por_desfazimento(id_desfazimento)
         if not dados_brutos:
-            Messagebox.show_info("Planilha Vazia", "A última planilha não contém nenhum bem.")
+            Messagebox.show_info("Planilha Vazia", "A última planilha criada ainda não contém nenhum bem para organizar.")
             return
-        tela_baixas = OrganizacaoBaixas(self.master, nome_planilha=ultima_planilha_info['nome'], dados_para_agrupar=dados_brutos)
+        tela_baixas = OrganizacaoBaixas(
+            self.janela,
+            nome_planilha=ultima_planilha_info['nome'],
+            dados_para_agrupar=dados_brutos,
+            numero_processo=ultima_planilha_info['numero_processo'],
+            id_desfazimento=id_desfazimento
+        )
         tela_baixas.org_baixas()
         
     def abrir_gerar_docs(self):
-        GerarDocumentos(self.master, self.db_controller).gerar_doc()
+        from gerar_doc import GerarDocumentos
+        GerarDocumentos(self.janela, self.db_controller).gerar_doc()
 
     def abrir_config(self):
-        Configuracoes(self.master, self.db_controller).configuracao()
+        from config import Configuracoes
+        Configuracoes(self.janela, self.db_controller).configuracao()
 
     def abrir_gerenciamento_usuarios(self):
-        GerenciadorUsuarios(self.master, self.db_controller, self.dados_usuario).exibir_tela()
+        from admin import GerenciadorUsuarios
+        GerenciadorUsuarios(self.janela, self.db_controller, self.dados_usuario).exibir_tela()
+
+    def fechar_aplicacao(self):
+        if self.db_controller:
+            self.db_controller.close_connection()
+        self.janela.destroy()

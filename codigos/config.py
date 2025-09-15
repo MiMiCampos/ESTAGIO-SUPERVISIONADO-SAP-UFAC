@@ -4,10 +4,11 @@ from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 from tkinter import filedialog
 from ttkbootstrap.dialogs import Messagebox
+from utils.path_helper import resource_path
 
 class Configuracoes():
     def __init__(self, master, db_controller):
-        self.janela_mestra = master # Guarda a referência da janela principal
+        self.janela_mestra = master
         self.db = db_controller
         self.tpl_config = None
         
@@ -27,7 +28,6 @@ class Configuracoes():
         self.salvar_auto_var.set(configs.get('salvar_auto', '1') == '1')
         self.lembrar_var.set(configs.get('lembrar_configs', '1') == '1')
         
-        # Aplica o tema na própria janela de configurações ao abrir
         style = ttk.Style()
         style.theme_use('litera' if self.tema_var.get() == 'Claro' else 'darkly')
 
@@ -40,12 +40,14 @@ class Configuracoes():
             self.db.set_configuracao('salvar_auto', '1' if self.salvar_auto_var.get() else '0')
             self.db.set_configuracao('lembrar_configs', '1' if self.lembrar_var.get() else '0')
             
-            # --- LÓGICA PARA ATUALIZAR O TEMA EM TEMPO REAL ---
+            # --- LÓGICA CORRIGIDA E MAIS ROBUSTA ---
             tema_selecionado = self.tema_var.get()
             nome_tema_ttk = 'litera' if tema_selecionado == 'Claro' else 'darkly'
             
-            # Pega a instância do estilo da janela principal e aplica o novo tema
-            self.janela_mestra.style.theme_use(nome_tema_ttk)
+            # Pega a instância de estilo GLOBAL da aplicação e aplica o tema.
+            # Isso afeta todas as janelas e é mais seguro.
+            style = ttk.Style()
+            style.theme_use(nome_tema_ttk)
 
             Messagebox.ok("Sucesso", "Configurações salvas com sucesso!", parent=self.tpl_config)
             self.tpl_config.destroy()

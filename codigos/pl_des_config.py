@@ -9,6 +9,7 @@ import os
 import openpyxl
 
 from pl_des_edit import EdicaoPlanilha
+from utils.path_helper import resource_path
 
 class CriarPlanilha:
     def __init__(self, master, db_controller, menu_principal):

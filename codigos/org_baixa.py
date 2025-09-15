@@ -5,6 +5,7 @@ from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 from gerar_doc_baixa import GerarDocBaixa # Importação movida para o topo
+from utils.path_helper import resource_path
 
 class OrganizacaoBaixas():
     def __init__(self, master, nome_planilha=None, dados_para_agrupar=None, numero_processo=None, id_desfazimento=None):

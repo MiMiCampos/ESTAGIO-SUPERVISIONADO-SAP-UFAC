@@ -10,6 +10,7 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph
+from utils.path_helper import resource_path
 
 class GeradorDeTermo:
     @staticmethod

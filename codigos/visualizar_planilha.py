@@ -6,6 +6,7 @@ from ttkbootstrap.dialogs import Messagebox
 import openpyxl
 from openpyxl.styles import Font, Alignment, Border, Side
 from utils.excel_formatador import FormatadorExcel
+from utils.path_helper import resource_path
 
 class VisualizarPlanilha:
     def __init__(self, master, nome_planilha, dados_planilha):

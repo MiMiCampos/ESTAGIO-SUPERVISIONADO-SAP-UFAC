@@ -392,3 +392,23 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar número do processo: {err}")
             return None
+
+    def set_configuracao(self, chave, valor):
+        """Salva ou atualiza uma chave de configuração no banco de dados."""
+        if not self.conn:
+            return False
+        try:
+            # Este comando insere uma nova configuração.
+            # Se a 'chave' já existir, ele atualiza o 'valor' em vez de dar erro.
+            query = """
+                INSERT INTO Configuracao (chave, valor) 
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE valor = VALUES(valor)
+            """
+            self.cursor.execute(query, (chave, valor))
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro ao Salvar", f"Não foi possível salvar a configuração '{chave}':\n{err}")
+            self.conn.rollback()
+            return False

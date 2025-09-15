@@ -1,5 +1,6 @@
 import openpyxl
 from openpyxl.styles import Font, Alignment, Border, Side
+from utils.path_helper import resource_path
 
 class FormatadorExcel:
     """

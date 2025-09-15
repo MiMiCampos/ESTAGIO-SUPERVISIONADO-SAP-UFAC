@@ -9,6 +9,7 @@ import openpyxl
 from datetime import datetime
 from openpyxl.styles import Font, Alignment, Border, Side
 from utils.excel_formatador import FormatadorExcel
+from utils.path_helper import resource_path
 
 from visualizar_planilha import VisualizarPlanilha
 from org_baixa import OrganizacaoBaixas

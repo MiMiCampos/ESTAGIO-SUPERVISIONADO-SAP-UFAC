@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 import os
 from utils.gerador_termo import GeradorDeTermo
 from banco_dados.db_controller import DBController
+from utils.path_helper import resource_path
 
 class GerarDocBaixa:
     def __init__(self, master, nome_planilha_base, dados_selecionados, dados_brutos_para_voltar, numero_processo, id_desfazimento):
@@ -125,6 +126,8 @@ class GerarDocBaixa:
         if Messagebox.yesno("Confirmar Geração", "Você confirma a geração do documento com as informações fornecidas?") == "Sim":
             self._gerar_arquivo()
 
+    # Em gerar_doc_baixa.py, substitua esta função inteira
+
     def _gerar_arquivo(self):
         formato = self.formato_var.get()
         pasta = self.entry_pasta_destino.get()
@@ -145,20 +148,36 @@ class GerarDocBaixa:
         }
 
         try:
+            # --- INÍCIO DO NOVO BLOCO DE TESTE ---
+            
+            # 1. Tenta gerar o arquivo
+            print(f"[DEBUG] Tentando gerar o arquivo em: {caminho_completo}")
             GeradorDeTermo.gerar(
                 formato=formato,
                 caminho_completo=caminho_completo,
                 dados_gerais=dados_gerais,
                 dados_agrupados=self.dados_selecionados_para_gerar
             )
-            Messagebox.ok("Sucesso", f"Documento gerado com sucesso em:\n{caminho_completo}")
-        
+            print("[DEBUG] Comando de geração concluído. Verificando se o arquivo existe...")
+
+            # 2. Verifica se o arquivo realmente foi criado no disco
+            if os.path.exists(caminho_completo):
+                print("[DEBUG] SUCESSO! O arquivo foi encontrado no disco.")
+                Messagebox.ok("Sucesso", f"Documento gerado com sucesso em:\n{caminho_completo}", parent=self.toplevel_gerarbaixa)
+            else:
+                print("[DEBUG] FALHA! O arquivo NÃO foi encontrado no disco após o comando de salvar.")
+                Messagebox.show_warning(
+                    "Falha ao Salvar", 
+                    f"O comando para gerar o documento foi executado sem erros, mas o arquivo final não foi encontrado em:\n\n{caminho_completo}\n\nCausa provável: O antivírus ou o sistema de segurança do Windows (Acesso Controlado a Pastas) pode estar bloqueando a criação do arquivo.",
+                    parent=self.toplevel_gerarbaixa
+                )
+            
+            # --- FIM DO NOVO BLOCO DE TESTE ---
+
         except Exception as e:
-            # >>> LINHAS DE DEBUG ADICIONADAS AQUI <<<
+            # O bloco de captura de erros que já tínhamos
             print("--- ERRO DETALHADO CAPTURADO ---")
             print(f"Tipo do Erro: {type(e)}")
             print(f"Mensagem do Erro: {e}")
             print("---------------------------------")
-            # ------------------------------------
-
-            Messagebox.show_error("Erro Inesperado", f"Não foi possível gerar o arquivo:\n{e}")
+            Messagebox.show_error("Erro Inesperado", f"Não foi possível gerar o arquivo:\n{e}", parent=self.toplevel_gerarbaixa)

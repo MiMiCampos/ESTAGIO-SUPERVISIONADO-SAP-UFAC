@@ -4,6 +4,7 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
 import hashlib
 from PIL import Image, ImageTk
+from utils.path_helper import resource_path
 
 class GerenciadorUsuarios:
     def __init__(self, master, db_controller, dados_usuario_logado):

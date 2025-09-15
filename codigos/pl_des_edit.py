@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 import openpyxl
 from datetime import datetime
 from utils.excel_formatador import FormatadorExcel
+from utils.path_helper import resource_path
 
 class EdicaoPlanilha:
     def __init__(self, master, nome_planilha, caminho_arquivo_aberto=None, dados_iniciais=None, db_controller=None, id_desfazimento=None):
