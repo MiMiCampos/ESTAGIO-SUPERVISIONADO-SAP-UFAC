@@ -1,3 +1,5 @@
+# Arquivo: tela_menu.py (Lógica Corrigida com Estilo Original dos Botões)
+
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
@@ -8,8 +10,6 @@ from banco_dados.db_controller import DBController
 from utils.path_helper import resource_path
 
 class MenuInicial():
-    # Em tela_menu.py, substitua a função __init__ inteira por esta.
-
     def __init__(self, master, dados_usuario, on_logout):
         self.janela = master
         self.dados_usuario = dados_usuario
@@ -20,8 +20,6 @@ class MenuInicial():
         self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
         
         try:
-            # >>> A CORREÇÃO ESTÁ AQUI: Adicionamos master=self.janela <<<
-            # Dizemos a cada imagem que sua "dona" é a janela do Menu Principal.
             img_data_planilha = Image.open(resource_path("imagens/botao_planilha_desf.png")).resize((300, 175))
             self.img_planilha = ImageTk.PhotoImage(img_data_planilha, master=self.janela)
 
@@ -38,11 +36,20 @@ class MenuInicial():
             Messagebox.show_error("Erro Crítico de Imagem", f"Não foi possível carregar os ícones dos botões.\n\nCausa provável: {e}")
             self.img_planilha = self.img_baixas = self.img_docs = self.img_config = None
         
+        # RESTAURADO: Estilo original para os botões, conforme solicitado.
+        style_azul_btn = ttk.Style()
+        style_azul_btn.configure('MyHeader.TButton', 
+                                 font=("Inconsolata", 14, "bold"), 
+                                 background='white', 
+                                 foreground="#5bc0de", 
+                                 borderwidth=5, 
+                                 padding=10, 
+                                 bordercolor='#5bc0de')
+
         self.frm_cabecalho = ttk.Frame(self.janela, bootstyle="info")
         self.frm_cabecalho.pack(fill=X)
 
         try:
-            # Aplicando a mesma correção para o brasão
             brasao_img_data = Image.open(resource_path("imagens/brasao_UFAC.png")).resize((50, 50))
             self.brasao = ImageTk.PhotoImage(brasao_img_data, master=self.janela)
             brasao_label = ttk.Label(self.frm_cabecalho, image=self.brasao, bootstyle="info")
@@ -78,33 +85,32 @@ class MenuInicial():
 
         perfil = self.dados_usuario['perfil']
 
-        # O resto do código não precisa de alterações, pois a referência já está correta
-        self.btn_planilha_des = ttk.Button(botoes_frame, command=self.abrir_planilha_des, image=self.img_planilha, bootstyle="light")
+        # ALTERADO: Botões principais agora usam o estilo original 'MyHeader.TButton'
+        self.btn_planilha_des = ttk.Button(botoes_frame, command=self.abrir_planilha_des, image=self.img_planilha, style='MyHeader.TButton')
         self.btn_planilha_des.image = self.img_planilha
         self.btn_planilha_des.grid(row=1, column=1, padx=10, pady=10)
 
-        self.btn_org_baixas = ttk.Button(botoes_frame, command=self.abrir_organizacao_baixas, image=self.img_baixas, bootstyle="light")
+        self.btn_org_baixas = ttk.Button(botoes_frame, command=self.abrir_organizacao_baixas, image=self.img_baixas, style='MyHeader.TButton')
         self.btn_org_baixas.image = self.img_baixas
         self.btn_org_baixas.grid(row=1, column=2, padx=10, pady=10)
         if perfil == 'Estagiário':
             self.btn_org_baixas.config(state=DISABLED)
 
-        self.btn_gerar_docs = ttk.Button(botoes_frame, command=self.abrir_gerar_docs, image=self.img_docs, bootstyle="light")
+        self.btn_gerar_docs = ttk.Button(botoes_frame, command=self.abrir_gerar_docs, image=self.img_docs, style='MyHeader.TButton')
         self.btn_gerar_docs.image = self.img_docs
         self.btn_gerar_docs.grid(row=2, column=1, padx=10, pady=10)
         if perfil == 'Estagiário':
             self.btn_gerar_docs.config(state=DISABLED)
 
-        self.btn_configuracoes = ttk.Button(botoes_frame, command=self.abrir_config, image=self.img_config, bootstyle="light")
+        self.btn_configuracoes = ttk.Button(botoes_frame, command=self.abrir_config, image=self.img_config, style='MyHeader.TButton')
         self.btn_configuracoes.image = self.img_config
         self.btn_configuracoes.grid(row=2, column=2, padx=10, pady=10)
             
         if perfil == 'Administrador':
-            self.btn_gerenciar_usuarios = ttk.Button(botoes_frame, text="Gerenciar Usuários", command=self.abrir_gerenciamento_usuarios, bootstyle="secondary")
+            self.btn_gerenciar_usuarios = ttk.Button(botoes_frame, text="Gerenciar Usuários", command=self.abrir_gerenciamento_usuarios, style='MyHeader.TButton')
             self.btn_gerenciar_usuarios.grid(row=3, column=1, columnspan=2, ipady=5, padx=8, sticky="ew")
 
     def _fazer_logout(self):
-        # A função de logout agora é muito mais simples: ela apenas "avisa" o chefe (main.py)
         self.on_logout()
 
     def abrir_planilha_des(self):
