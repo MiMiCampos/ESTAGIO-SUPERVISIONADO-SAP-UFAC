@@ -1,5 +1,3 @@
-# Arquivo: db_controller.py (VERSÃO FINAL E COMPLETA)
-
 import mysql.connector
 from mysql.connector import errorcode
 from ttkbootstrap.dialogs import Messagebox
@@ -57,8 +55,7 @@ class DBController:
                     NULL as 'Nº DE ORDEM', b.tombo AS 'TOMBO', b.descricao AS 'DESCRIÇÃO DO BEM',
                     b.data_aquisicao AS 'DATA DA AQUISIÇÃO', b.nota_fiscal AS 'DOCUMENTO FISCAL',
                     u.nome_unidade AS 'UNIDADE RESPONSÁVEL', s.nome_servidor AS 'SERVIDOR RESPONSÁVEL',
-                    b.classificacao AS 'CLASSIFICAÇÃO', b.destinacao AS 'DESTINAÇÃO',
-                    b.valor_aquisicao AS 'VALOR', b.forma_ingresso AS 'FORMA_DE_INGRESSO'
+                    b.classificacao AS 'CLASSIFICAÇÃO', b.destinacao AS 'DESTINAÇÃO'
                 FROM Bem b
                 LEFT JOIN Unidade u ON b.id_unidade = u.id_unidade
                 LEFT JOIN Servidor s ON b.id_servidor = s.id_servidor
@@ -72,12 +69,39 @@ class DBController:
                 linha[0] = i + 1
                 if isinstance(linha[3], date):
                     linha[3] = linha[3].strftime('%d/%m/%Y')
-                if isinstance(linha[9], (float, int, str)):
-                    try:
-                        valor_numerico = float(linha[9])
-                        linha[9] = f"{valor_numerico:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-                    except (ValueError, TypeError):
-                        linha[9] = '0,00'
+                dados_formatados.append(linha)
+            return dados_formatados
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
+            return []
+
+    # >>> FUNÇÃO QUE FALTAVA ADICIONADA AQUI <<<
+    def get_bens_para_visualizacao(self, id_desfazimento):
+        """Busca os bens para a tela de visualização (sem o nome do servidor)."""
+        if not self.conn: return []
+        try:
+            query = """
+                SELECT 
+                    NULL as 'Nº DE ORDEM',
+                    b.tombo AS 'TOMBO',
+                    b.descricao AS 'DESCRIÇÃO DO BEM',
+                    b.data_aquisicao AS 'DATA DA AQUISIÇÃO',
+                    b.nota_fiscal AS 'DOCUMENTO FISCAL',
+                    u.nome_unidade AS 'UNIDADE RESPONSÁVEL',
+                    b.classificacao AS 'CLASSIFICAÇÃO',
+                    b.destinacao AS 'DESTINAÇÃO'
+                FROM Bem b
+                LEFT JOIN Unidade u ON b.id_unidade = u.id_unidade
+                WHERE b.id_desfazimento = %s
+            """
+            self.cursor.execute(query, (id_desfazimento,))
+            resultados = self.cursor.fetchall()
+            dados_formatados = []
+            for i, row in enumerate(resultados):
+                linha = list(row.values())
+                linha[0] = i + 1
+                if isinstance(linha[3], date):
+                    linha[3] = linha[3].strftime('%d/%m/%Y')
                 dados_formatados.append(linha)
             return dados_formatados
         except mysql.connector.Error as err:
