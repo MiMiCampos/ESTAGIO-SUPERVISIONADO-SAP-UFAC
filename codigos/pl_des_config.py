@@ -42,18 +42,17 @@ class CriarPlanilha:
         # self.tpl_criar_planilha.grab_set()
 
         style = ttk.Style()
-        style.configure('Header.TFrame', background='#5bc0de')
         style.configure('custom.TButton', font=("Inconsolata", 14), borderwidth=1, padding=(10, 10), background='white', foreground='#5bc0de')
         style.map('custom.TButton', bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')], background=[('active', "#ececec"), ('!active', 'white')], relief=[('pressed', 'solid'), ('!pressed', 'solid')])
 
-        frm_cabecalho = ttk.Frame(self.tpl_criar_planilha, style='Header.TFrame', padding=(10, 5))
+        frm_cabecalho = ttk.Frame(self.tpl_criar_planilha, bootstyle="info", padding=(10, 5))
         frm_cabecalho.pack(fill=X, side=TOP)
 
         if self.brasao:
-            lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao, style='Header.TFrame')
+            lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao, bootstyle="info")
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
 
-        lbl_titulo = ttk.Label(frm_cabecalho, text="Criar Nova Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
+        lbl_titulo = ttk.Label(frm_cabecalho, text="Criar Nova Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), bootstyle="inverse-info", foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
 
         frm_rodape = ttk.Frame(self.tpl_criar_planilha, padding=10)
@@ -142,14 +141,13 @@ class CriarPlanilha:
             
             # Oculta a aba para o usuário não ver
             id_sheet.sheet_state = 'hidden'
-            # --- FIM DO CÓDIGO NOVO ---
             
             workbook.save(caminho_completo)
         except Exception as e:
             Messagebox.show_error(title="Erro ao Criar Ficheiro", message=f"Não foi possível criar o ficheiro:\n{e}")
             return
 
-        # --- Regista a planilha no banco de dados IMEDIATAMENTE ---
+        # --- Registra a planilha no banco de dados IMEDIATAMENTE ---
         self.db.salvar_ou_atualizar_planilha_finalizada(
             id_desfazimento=novo_desfazimento_id,
             nome_planilha=nome_arquivo,

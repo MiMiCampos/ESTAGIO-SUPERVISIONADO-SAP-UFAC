@@ -29,7 +29,6 @@ class PlanilhaDesfazimento:
             self.brasao = None
 
         style = ttk.Style()
-        style.configure('Header.TFrame', background='#5bc0de')
         style.configure('custom.TButton', font=("Inconsolata", 12), borderwidth=1, padding=(10, 10), background='white', foreground="#000000")
         style.map('custom.TButton', bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')], background=[('active', "#ececec"), ('!active', 'white')], relief=[('pressed', 'solid'), ('!pressed', 'solid')])
 
@@ -46,16 +45,16 @@ class PlanilhaDesfazimento:
         self.tpl_planilha_des.transient(self.janela)
         # self.tpl_planilha_des.grab_set()
 
-        frm_cabecalho = ttk.Frame(self.tpl_planilha_des, style='Header.TFrame', padding=(10, 5))
+        frm_cabecalho = ttk.Frame(self.tpl_planilha_des, style='info', padding=(10, 5))
         frm_cabecalho.pack(fill=X, side=TOP)
 
         if self.brasao:
-            lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao)
+            lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao, bootstyle="info")
             lbl_brasao.image = self.brasao 
             lbl_brasao.pack(side=LEFT, padx=10, pady=5)
 
-        lbl_titulo = ttk.Label(frm_cabecalho, text="Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
-        lbl_titulo.pack(side=LEFT, expand=True, pady=5)
+        lbl_titulo = ttk.Label(frm_cabecalho, text="Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), foreground='black', bootstyle="inverse-info")
+        lbl_titulo.pack(expand=True, pady=5)
 
         frm_rodape = ttk.Frame(self.tpl_planilha_des, padding=10)
         frm_rodape.pack(fill=X, side=BOTTOM)

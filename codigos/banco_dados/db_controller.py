@@ -75,7 +75,6 @@ class DBController:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
             return []
 
-    # >>> FUNÇÃO QUE FALTAVA ADICIONADA AQUI <<<
     def get_bens_para_visualizacao(self, id_desfazimento):
         """Busca os bens para a tela de visualização (sem o nome do servidor)."""
         if not self.conn: return []

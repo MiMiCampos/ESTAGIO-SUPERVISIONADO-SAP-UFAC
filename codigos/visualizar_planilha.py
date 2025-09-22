@@ -29,7 +29,6 @@ class VisualizarPlanilha:
         
         self.toplevel_visualizar.position_center()
 
-
         frame_rodape_visualizar = ttk.Frame(self.toplevel_visualizar, padding=10)
         frame_rodape_visualizar.pack(fill=X, side=BOTTOM)
         ttk.Button(frame_rodape_visualizar, text="<- Voltar", command=self.toplevel_visualizar.destroy, bootstyle="primary-outline").pack(side=LEFT)

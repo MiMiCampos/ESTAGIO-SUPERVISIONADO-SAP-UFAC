@@ -29,10 +29,6 @@ class OrganizacaoBaixas():
         except Exception:
             self.brasao = None
 
-    # Em org_baixa.py
-
-    # Em org_baixa.py, substitua esta função
-
     def _agrupar_dados(self, dados_brutos):
         """Processa a lista de bens e agrupa por Unidade e Servidor."""
         grupos = {}
@@ -53,7 +49,7 @@ class OrganizacaoBaixas():
                 "data_aquisicao": linha[3],
                 "valor": linha[9] if len(linha) > 9 else '0,00',
                 "forma_ingresso": linha[10] if len(linha) > 10 else 'N/A',
-                "status": linha[7] if len(linha) > 7 else "Irrecuperável" # <<< LINHA QUE FALTAVA
+                "status": linha[7] if len(linha) > 7 else "Irrecuperável"
             }
             grupos[chave].append(dados_do_bem)
         return grupos
@@ -71,16 +67,15 @@ class OrganizacaoBaixas():
         self.tpl_org_baixas.geometry("800x600")
         self.tpl_org_baixas.position_center()
         
-        # ... (código do cabeçalho e resumo da planilha permanece igual) ...
-        style = ttk.Style()
-        style.configure('MyHeader.TFrame', background='#5bc0de')
-        cabecalho_frame = ttk.Frame(self.tpl_org_baixas, style='MyHeader.TFrame')
+        cabecalho_frame = ttk.Frame(self.tpl_org_baixas, bootstyle='info')
         cabecalho_frame.pack(fill=X)
+        
         if self.brasao:
-            brasao_label = ttk.Label(cabecalho_frame, image=self.brasao)
+            brasao_label = ttk.Label(cabecalho_frame, image=self.brasao, bootstyle='info')
             brasao_label.image = self.brasao
             brasao_label.pack(side=LEFT, padx=10, pady=5)
-        titulo = ttk.Label(cabecalho_frame, text="Organização de Baixas", font=("Inconsolata", 15, "bold"), bootstyle=INVERSE, foreground='black', background='#5bc0de')
+            
+        titulo = ttk.Label(cabecalho_frame, text="Organização de Baixas", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black')
         titulo.pack(expand=True, padx=10, pady=10)
         frame_conteudo = ttk.Frame(self.tpl_org_baixas, padding=(20, 10))
         frame_conteudo.pack(fill=BOTH, expand=True)
@@ -108,7 +103,6 @@ class OrganizacaoBaixas():
         scl_frame_grupos.pack(fill=BOTH, expand=True, pady=(0, 20))
         
         for (unidade, servidor), bens in self.dados_agrupados_na_tela.items():
-            # ... (código que cria os checkboxes e lista os bens permanece igual) ...
             group_frame = ttk.Labelframe(scl_frame_grupos, text="", padding=10)
             group_frame.pack(fill=X, expand=True, padx=10, pady=(0, 10))
             info_frame = ttk.Frame(group_frame)
@@ -148,13 +142,12 @@ class OrganizacaoBaixas():
 
         self.tpl_org_baixas.destroy()
         
-        # >>> ALTERAÇÃO AQUI: Passa o id_desfazimento para a próxima tela <<<
         tela_geracao = GerarDocBaixa(
             master=self.janela, 
             nome_planilha_base=self.nome_planilha_recebida, 
             dados_selecionados=dados_selecionados, 
             dados_brutos_para_voltar=self.dados_brutos_recebidos,
             numero_processo=self.numero_processo_recebido,
-            id_desfazimento=self.id_desfazimento_recebido # Repassando o ID
+            id_desfazimento=self.id_desfazimento_recebido 
         )
         tela_geracao.exibir_tela()

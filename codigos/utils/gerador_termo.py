@@ -73,7 +73,6 @@ class GeradorDeTermo:
             for bem in bens:
                 row_cells = tabela.add_row().cells
                 
-                # >>> CORREÇÃO AQUI: Acessando dados pelo nome da chave <<<
                 tombo = bem.get('tombo', 'N/A')
                 descricao = bem.get('descricao', 'N/A')
                 data_aq = bem.get('data_aquisicao', 'N/A')
@@ -139,7 +138,6 @@ class GeradorDeTermo:
         item_num = 1
         for (unidade, servidor), bens in dados_agrupados.items():
             for bem in bens:
-                # >>> CORREÇÃO AQUI: Acessando dados pelo nome da chave <<<
                 tombo = bem.get('tombo', 'N/A')
                 descricao = bem.get('descricao', 'N/A')
                 data_aq = bem.get('data_aquisicao', 'N/A')

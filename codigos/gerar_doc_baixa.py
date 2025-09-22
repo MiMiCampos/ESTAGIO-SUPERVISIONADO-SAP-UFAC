@@ -42,12 +42,13 @@ class GerarDocBaixa:
         style.configure('TEntry', padding=(5, 5))
         style.map('TEntry', fieldbackground=[('readonly', '#f0f0f0')], foreground=[('readonly', '#a0a0a0')])
 
-        frame_cabecalho = ttk.Frame(self.toplevel_gerarbaixa, style='Header.TFrame', padding=(10, 10))
+        frame_cabecalho = ttk.Frame(self.toplevel_gerarbaixa, bootstyle='info', padding=(10, 10))
         frame_cabecalho.pack(fill=X)
+        
         if self.brasao_para_gerarbaixa:
-            lbl_brasao = ttk.Label(frame_cabecalho, image=self.brasao_para_gerarbaixa, style='Header.TFrame')
+            lbl_brasao = ttk.Label(frame_cabecalho, image=self.brasao_para_gerarbaixa, bootstyle='info')
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
-        lbl_titulo = ttk.Label(frame_cabecalho, text="Gerar Documento de Baixa Patrimonial", font=("Inconsolata", 18, "bold"), background='#5bc0de', foreground='black')
+        lbl_titulo = ttk.Label(frame_cabecalho, text="Gerar Documento de Baixa Patrimonial", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True)
 
         frame_corpo = ttk.Frame(self.toplevel_gerarbaixa, padding=20)
@@ -83,8 +84,6 @@ class GerarDocBaixa:
         numero_processo_fresco = self.db.get_processo_por_id_desfazimento(self.id_desfazimento)
         self.entry_num_processo.insert(0, numero_processo_fresco or '')
         self.entry_num_processo.config(state='readonly')
-
-        # CAMPO "SERVIDOR RESPONSÁVEL" FOI REMOVIDO DAQUI
 
         ttk.Label(frame_campos, text="Unidade de Destino:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
         self.entry_unidade_destino = ttk.Entry(frame_campos, font=("Inconsolata", 11))
@@ -125,8 +124,6 @@ class GerarDocBaixa:
 
         if Messagebox.yesno("Confirmar Geração", "Você confirma a geração do documento com as informações fornecidas?") == "Sim":
             self._gerar_arquivo()
-
-    # Em gerar_doc_baixa.py, substitua esta função inteira
 
     def _gerar_arquivo(self):
         formato = self.formato_var.get()
@@ -175,7 +172,7 @@ class GerarDocBaixa:
             # --- FIM DO NOVO BLOCO DE TESTE ---
 
         except Exception as e:
-            # O bloco de captura de erros que já tínhamos
+            # Bloco de captura de erros
             print("--- ERRO DETALHADO CAPTURADO ---")
             print(f"Tipo do Erro: {type(e)}")
             print(f"Mensagem do Erro: {e}")

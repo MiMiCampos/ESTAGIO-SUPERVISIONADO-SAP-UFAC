@@ -19,7 +19,7 @@ class GerenciadorUsuarios:
     def _carregar_recursos(self):
         """Carrega a imagem do brasão."""
         try:
-            brasao_img = Image.open("imagens/brasao_UFAC.png").resize((40, 40))
+            brasao_img = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao = ImageTk.PhotoImage(brasao_img)
         except Exception as e:
             print(f"Erro ao carregar imagem do brasão para Gerenciador: {e}")
@@ -35,18 +35,15 @@ class GerenciadorUsuarios:
         self.toplevel.geometry("800x600")
         self.toplevel.position_center()
         self.toplevel.transient(self.janela_mestra)
-
-        style = ttk.Style()
-        style.configure('Header.TFrame', background='#5bc0de')
-        
-        frame_cabecalho = ttk.Frame(self.toplevel, style='Header.TFrame', padding=(10, 10))
+       
+        frame_cabecalho = ttk.Frame(self.toplevel, bootstyle='info', padding=(10, 5))
         frame_cabecalho.pack(fill=X)
 
         if self.brasao:
-            lbl_brasao = ttk.Label(frame_cabecalho, image=self.brasao, style='Header.TFrame')
+            lbl_brasao = ttk.Label(frame_cabecalho, image=self.brasao, bootstyle='info')
             lbl_brasao.pack(side=LEFT, padx=10)
 
-        lbl_titulo = ttk.Label(frame_cabecalho, text="Gerenciamento de Usuários", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
+        lbl_titulo = ttk.Label(frame_cabecalho, text="Gerenciamento de Usuários", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black')
         lbl_titulo.pack(expand=True)
 
         frame_corpo = ttk.Frame(self.toplevel, padding=20)
@@ -127,8 +124,6 @@ class GerenciadorUsuarios:
                 Messagebox.ok("Sucesso", "Usuário excluído com sucesso.")
                 self._popular_tabela()
                 
-    # Em admin.py, substitua toda esta função:
-
     def _abrir_janela_edicao(self, dados_usuario=None):
         """Abre uma janela para adicionar ou editar um usuário."""
         modo_edicao = dados_usuario is not None
@@ -162,7 +157,7 @@ class GerenciadorUsuarios:
         ent_cpf = ttk.Entry(frame, style='Form.TEntry', width=40)
         ent_cpf.grid(row=1, column=1, sticky=EW, pady=(0, 10))
 
-        # --- Nova função para formatar o CPF neste diálogo ---
+        # --- Função para formatar o CPF ---
         def _formatar_cpf_dialog(event=None):
             texto_atual = ent_cpf.get()
             numeros = "".join(filter(str.isdigit, texto_atual))
@@ -182,7 +177,7 @@ class GerenciadorUsuarios:
             ent_cpf.insert(0, formatado)
             ent_cpf.icursor(END)
 
-        # --- Conectar a função ao campo de CPF ---
+        # --- Conecta a função ao campo de CPF ---
         ent_cpf.bind("<KeyRelease>", _formatar_cpf_dialog)
 
         lbl_senha = ttk.Label(frame, text="Senha:")
@@ -218,7 +213,7 @@ class GerenciadorUsuarios:
             else:
                 ent_nome_estagiario.insert(0, dados_usuario['nome_completo'])
                 combo_nome_servidor.grid_remove()
-                ent_nome_estagiario.grid() # <<<<<<< LINHA DA CORREÇÃO
+                ent_nome_estagiario.grid()
 
             ent_cpf.insert(0, dados_usuario['cpf'])
 

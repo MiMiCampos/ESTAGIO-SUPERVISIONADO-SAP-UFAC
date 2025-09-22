@@ -40,12 +40,9 @@ class Configuracoes():
             self.db.set_configuracao('salvar_auto', '1' if self.salvar_auto_var.get() else '0')
             self.db.set_configuracao('lembrar_configs', '1' if self.lembrar_var.get() else '0')
             
-            # --- LÓGICA CORRIGIDA E MAIS ROBUSTA ---
             tema_selecionado = self.tema_var.get()
             nome_tema_ttk = 'litera' if tema_selecionado == 'Claro' else 'darkly'
             
-            # Pega a instância de estilo GLOBAL da aplicação e aplica o tema.
-            # Isso afeta todas as janelas e é mais seguro.
             style = ttk.Style()
             style.theme_use(nome_tema_ttk)
 
@@ -75,14 +72,14 @@ class Configuracoes():
         style = ttk.Style()
         style.configure('MyHeader.TFrame', background='#5bc0de')
         
-        cabecalho_frame = ttk.Frame(self.tpl_config, style='MyHeader.TFrame', padding=10)
+        cabecalho_frame = ttk.Frame(self.tpl_config, bootstyle='info', padding=10)
         cabecalho_frame.pack(fill=X)
         try:
             brasao_img = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao = ImageTk.PhotoImage(brasao_img)
-            ttk.Label(cabecalho_frame, image=self.brasao, style='MyHeader.TFrame').pack(side=LEFT, padx=10)
+            ttk.Label(cabecalho_frame, image=self.brasao, bootstyle='info').pack(side=LEFT, padx=10)
         except: pass
-        ttk.Label(cabecalho_frame, text="Configurações do Sistema", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black').pack(expand=True)
+        ttk.Label(cabecalho_frame, text="Configurações do Sistema", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black').pack(expand=True)
         
         frame_principal = ttk.Frame(self.tpl_config, padding=30)
         frame_principal.pack(fill=BOTH, expand=True)

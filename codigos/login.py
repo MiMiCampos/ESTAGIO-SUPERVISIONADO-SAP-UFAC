@@ -31,8 +31,7 @@ class TelaLogin:
         except Exception as e:
             print(f"Erro ao carregar brasão na tela de login: {e}")
 
-        # Usando bootstyle para o título se adaptar
-        lbl_titulo = ttk.Label(frm_cabecalho, text="Acesso ao Sistema", font=("Inconsolata", 16, "bold"), bootstyle="inverse-info")
+        lbl_titulo = ttk.Label(frm_cabecalho, text="Acesso ao Sistema", font=("Inconsolata", 16, "bold"), bootstyle="inverse-info", foreground="black")
         lbl_titulo.pack(expand=True)
 
         frm_corpo = ttk.Frame(self.janela_login, padding=40)

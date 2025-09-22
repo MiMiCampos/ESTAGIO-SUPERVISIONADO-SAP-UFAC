@@ -46,18 +46,17 @@ class EdicaoPlanilha:
         # self.toplevel_edicao.grab_set()
 
         style = ttk.Style()
-        style.configure('Header.TFrame', background='#5bc0de')
         style.configure( 'custom.TButton', font=("Inconsolata", 14), borderwidth=1, padding=(10, 10), background='white', foreground='#5bc0de')
         style.map('custom.TButton', bordercolor=[('!active', '#adb5bd'), ('active', '#5bc0de')], background=[('active', "#ececec"), ('!active', 'white')], relief=[('pressed', 'solid'), ('!pressed', 'solid')])
 
-        frame_cabecalho_edicao = ttk.Frame(self.toplevel_edicao, style='Header.TFrame', padding=(10, 5))
+        frame_cabecalho_edicao = ttk.Frame(self.toplevel_edicao, bootstyle='info', padding=(10, 5))
         frame_cabecalho_edicao.pack(fill=X, side=TOP)
 
         if self.brasao_para_edicao:
-            label_brasao_edicao = ttk.Label(frame_cabecalho_edicao, image=self.brasao_para_edicao, style='Header.TFrame')
+            label_brasao_edicao = ttk.Label(frame_cabecalho_edicao, image=self.brasao_para_edicao, bootstyle='info')
             label_brasao_edicao.pack(side=LEFT, padx=(5, 10))
 
-        label_titulo_edicao = ttk.Label(frame_cabecalho_edicao, text="Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), background='#5bc0de', foreground='black')
+        label_titulo_edicao = ttk.Label(frame_cabecalho_edicao, text="Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black')
         label_titulo_edicao.pack(side=LEFT, expand=True, pady=5)
 
         frame_botoes_inferiores = ttk.Frame(self.toplevel_edicao, padding=10)
@@ -229,7 +228,6 @@ class EdicaoPlanilha:
             Messagebox.show_error(title="Erro ao Salvar", message=f"Ocorreu um erro ao salvar o ficheiro:\n{e}")
             return False
 
-    # --- Conecta o salvamento ao banco de dados ---
     def salvar_alteracoes(self):
         """Salva as alterações no ficheiro atual e no banco de dados."""
         if not self.caminho_arquivo_atual:
@@ -246,7 +244,6 @@ class EdicaoPlanilha:
             )
             Messagebox.ok(title="Sucesso", message="Os dados foram salvos.")
 
-    # --- MUDANÇA PRINCIPAL: Conecta o salvamento ao banco de dados ---
     def gerar_planilha_final(self):
         """Salva as alterações no ficheiro atual e no banco de dados, com uma mensagem final."""
         if not self.caminho_arquivo_atual:

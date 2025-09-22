@@ -15,6 +15,8 @@ class MenuInicial():
         self.dados_usuario = dados_usuario
         self.on_logout = on_logout
         self.janela.title("SAP-UFAC - Menu Inicial")
+        self.janela.geometry("1300x800")
+        self.janela.position_center()
         
         self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
         self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
@@ -36,15 +38,14 @@ class MenuInicial():
             Messagebox.show_error("Erro Crítico de Imagem", f"Não foi possível carregar os ícones dos botões.\n\nCausa provável: {e}")
             self.img_planilha = self.img_baixas = self.img_docs = self.img_config = None
         
-        # RESTAURADO: Estilo original para os botões, conforme solicitado.
         style_azul_btn = ttk.Style()
         style_azul_btn.configure('MyHeader.TButton', 
-                                 font=("Inconsolata", 14, "bold"), 
-                                 background='white', 
-                                 foreground="#5bc0de", 
-                                 borderwidth=5, 
-                                 padding=10, 
-                                 bordercolor='#5bc0de')
+                                font=("Inconsolata", 14, "bold"), 
+                                background='white', 
+                                foreground="#5bc0de", 
+                                borderwidth=5, 
+                                padding=10, 
+                                bordercolor='#5bc0de')
 
         self.frm_cabecalho = ttk.Frame(self.janela, bootstyle="info")
         self.frm_cabecalho.pack(fill=X)
@@ -61,6 +62,7 @@ class MenuInicial():
         self.lbl_titulo = ttk.Label(self.frm_cabecalho, 
             text="SISTEMA DE AUTOMAÇÃO PATRIMONIAL DA UNIVERSIDADE FEDERAL DO ACRE (SAP-UFAC)",
             font=("Inconsolata", 16, "bold"),
+            foreground="black",
             bootstyle="inverse-info"
         )
         self.lbl_titulo.pack(expand=True, padx=10, pady=10)
@@ -85,7 +87,7 @@ class MenuInicial():
 
         perfil = self.dados_usuario['perfil']
 
-        # ALTERADO: Botões principais agora usam o estilo original 'MyHeader.TButton'
+        # Botões principais usam o estilo original 'MyHeader.TButton'
         self.btn_planilha_des = ttk.Button(botoes_frame, command=self.abrir_planilha_des, image=self.img_planilha, style='MyHeader.TButton')
         self.btn_planilha_des.image = self.img_planilha
         self.btn_planilha_des.grid(row=1, column=1, padx=10, pady=10)
