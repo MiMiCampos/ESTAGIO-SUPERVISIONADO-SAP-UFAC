@@ -119,7 +119,7 @@ class GerenciadorUsuarios:
         nome_usuario = self.tabela.item(item_selecionado_id)['values'][1]
         resposta = Messagebox.yesno("Confirmar Exclusão", f"Tem certeza que deseja excluir o usuário '{nome_usuario}'?\nEsta ação não pode ser desfeita.")
 
-        if resposta == "Sim":
+        if resposta == "Yes":
             if self.db.deletar_usuario(id_usuario_para_deletar):
                 Messagebox.ok("Sucesso", "Usuário excluído com sucesso.")
                 self._popular_tabela()
