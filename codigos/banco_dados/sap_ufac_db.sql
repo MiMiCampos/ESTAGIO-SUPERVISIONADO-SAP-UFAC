@@ -200,20 +200,25 @@ SELECT * FROM Desfazimento;
 -- TABELA DE DOCUMENTOS DE BAIXA:
 CREATE TABLE DocumentoDeBaixa (
     id_documento INT PRIMARY KEY AUTO_INCREMENT,
+    numero_termo VARCHAR(20) NOT NULL,          -- Coluna que estava faltando para o número do termo (ex: "000123/2025")
+    motivo VARCHAR(255),                        -- Coluna que estava faltando para o motivo da baixa
     data_geracao DATETIME,
-    caminho_arquivo_baixa VARCHAR(512),
+    caminho_arquivo VARCHAR(512),               -- Nome da coluna corrigido para corresponder ao código Python
     id_desfazimento INT,
     FOREIGN KEY (id_desfazimento) REFERENCES Desfazimento(id_desfazimento)
-);
+    );
 
 SELECT * FROM DocumentoDeBaixa;
 
 -- TABELA DE BENS PATRIMONIAIS:
+-- Cria a tabela 'Bem' com a estrutura completa e atualizada
 CREATE TABLE Bem (
     tombo VARCHAR(10) PRIMARY KEY,
     descricao TEXT,
     data_aquisicao DATE,
     nota_fiscal VARCHAR(100),
+    valor_aquisicao DECIMAL(10, 2) DEFAULT 0.00,  -- NOVO: Coluna para o valor de aquisição
+    forma_ingresso VARCHAR(100),                  -- NOVO: Coluna para a forma de ingresso
     classificacao VARCHAR(100) NULL,
     destinacao VARCHAR(100) NULL,
     id_unidade INT,
@@ -225,6 +230,9 @@ CREATE TABLE Bem (
     FOREIGN KEY (id_desfazimento) REFERENCES Desfazimento(id_desfazimento),
     FOREIGN KEY (id_documento) REFERENCES DocumentoDeBaixa(id_documento)
 );
+UPDATE Bem SET 
+    valor_aquisicao = ROUND(RAND() * (5000 - 150) + 150, 2), 
+    forma_ingresso = 'Compra';
 
 TRUNCATE TABLE Bem;
 
