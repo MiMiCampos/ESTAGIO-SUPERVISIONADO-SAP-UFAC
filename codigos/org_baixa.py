@@ -6,6 +6,8 @@ from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 from gerar_doc_baixa import GerarDocBaixa # Importação movida para o topo
 from utils.path_helper import resource_path
+from consulta_documentos import ConsultaDocumentos
+
 
 class OrganizacaoBaixas():
     def __init__(self, master, db_controller, nome_planilha=None, dados_para_agrupar=None, numero_processo=None, id_desfazimento=None):
@@ -122,11 +124,23 @@ class OrganizacaoBaixas():
                 ttk.Label(bem_frame, text=bem["descricao"], width=45, anchor="w").pack(side="left", padx=10)
                 ttk.Label(bem_frame, text=bem["status"], width=20, anchor="e").pack(side="right")
                 
+        # O código corrigido
         botoes_frame = ttk.Frame(frame_conteudo)
         botoes_frame.pack(fill=X, pady=(10, 0), side=BOTTOM)
+        
+        # Botão Voltar continua na esquerda
         ttk.Button(botoes_frame, text="<- Voltar", bootstyle="primary-outline", command=self.tpl_org_baixas.destroy).pack(side="left")
+        
+        # Botão Gerar Documentos continua na direita
         ttk.Button(botoes_frame, text="Gerar Documentos de Baixa", command=self.abrir_tela_geracao, bootstyle="success").pack(side="right")
-        # O botão visualizar foi removido temporariamente para simplificar o fluxo principal
+        
+        # NOVO BOTÃO: Adicionado no meio, empacotado à direita antes do outro
+        ttk.Button(
+            botoes_frame, 
+            text="Consultar Documentos Gerados", 
+            command=self.abrir_consulta_documentos, 
+            bootstyle="info-outline"
+        ).pack(side="right", padx=5)
         
     def _coletar_dados_selecionados(self):
         dados_selecionados = {}
@@ -153,3 +167,7 @@ class OrganizacaoBaixas():
             id_desfazimento=self.id_desfazimento_recebido 
         )
         tela_geracao.exibir_tela()
+
+    def abrir_consulta_documentos(self):
+        """Abre a tela de consulta de documentos já gerados."""
+        ConsultaDocumentos(self.janela, self.db)

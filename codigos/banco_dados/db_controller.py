@@ -423,3 +423,27 @@ class DBController:
             Messagebox.show_error("Erro de Atualização", f"Não foi possível associar os bens ao documento:\n{err}")
             self.conn.rollback()
             return False
+    
+    def get_documentos_gerados(self):
+        """
+        Busca no banco de dados uma lista de todos os documentos de baixa já gerados.
+        Retorna uma lista de dicionários, cada um representando um documento.
+        """
+        if not self.conn: return []
+        try:
+            query = """
+                SELECT 
+                    d.numero_termo,
+                    d.data_geracao,
+                    d.caminho_arquivo,
+                    d.motivo,
+                    dz.numero_processo
+                FROM DocumentoDeBaixa d
+                LEFT JOIN Desfazimento dz ON d.id_desfazimento = dz.id_desfazimento
+                ORDER BY d.data_geracao DESC
+            """
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar documentos gerados:\n{err}")
+            return []

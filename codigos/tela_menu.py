@@ -5,7 +5,6 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from PIL import Image, ImageTk
 from ttkbootstrap.dialogs import Messagebox
-
 from banco_dados.db_controller import DBController
 from utils.path_helper import resource_path
 
@@ -158,3 +157,4 @@ class MenuInicial():
         if self.db:
             self.db.close_connection()
         self.janela.destroy()
+    
