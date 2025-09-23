@@ -17,9 +17,10 @@ class MenuInicial():
         self.janela.title("SAP-UFAC - Menu Inicial")
         self.janela.geometry("1300x800")
         self.janela.position_center()
+        self.db = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
         
-        self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
-        self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
+        # self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
+        # self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
         
         try:
             img_data_planilha = Image.open(resource_path("imagens/botao_planilha_desf.png")).resize((300, 175))
@@ -117,21 +118,22 @@ class MenuInicial():
 
     def abrir_planilha_des(self):
         from pl_des import PlanilhaDesfazimento
-        PlanilhaDesfazimento(self.janela, self.db_controller, self).planilha_des()
+        PlanilhaDesfazimento(self.janela, self.db, self).planilha_des()
 
     def abrir_organizacao_baixas(self):
         from org_baixa import OrganizacaoBaixas
-        ultima_planilha_info = self.db_controller.get_ultima_planilha_criada()
+        ultima_planilha_info = self.db.get_ultima_planilha_criada()
         if ultima_planilha_info is None:
             Messagebox.show_warning("Nenhuma Planilha Encontrada", "Não há nenhuma planilha registrada no banco de dados para organizar.")
             return
         id_desfazimento = ultima_planilha_info['id_desfazimento']
-        dados_brutos = self.db_controller.get_bens_por_desfazimento(id_desfazimento)
+        dados_brutos = self.db.get_bens_por_desfazimento(id_desfazimento)
         if not dados_brutos:
             Messagebox.show_info("Planilha Vazia", "A última planilha criada ainda não contém nenhum bem para organizar.")
             return
         tela_baixas = OrganizacaoBaixas(
-            self.janela,
+            master=self.janela, # Usando a palavra-chave 'master' para clareza
+            db_controller=self.db, # <-- PARÂMETRO ADICIONADO
             nome_planilha=ultima_planilha_info['nome'],
             dados_para_agrupar=dados_brutos,
             numero_processo=ultima_planilha_info['numero_processo'],
@@ -141,17 +143,18 @@ class MenuInicial():
         
     def abrir_gerar_docs(self):
         from gerar_doc import GerarDocumentos
-        GerarDocumentos(self.janela, self.db_controller).gerar_doc()
+        GerarDocumentos(self.janela, self.db).gerar_doc()
 
     def abrir_config(self):
         from config import Configuracoes
-        Configuracoes(self.janela, self.db_controller).configuracao()
+        Configuracoes(self.janela, self.db).configuracao()
 
     def abrir_gerenciamento_usuarios(self):
         from admin import GerenciadorUsuarios
-        GerenciadorUsuarios(self.janela, self.db_controller, self.dados_usuario).exibir_tela()
+        GerenciadorUsuarios(self.janela, self.db, self.dados_usuario).exibir_tela()
+
 
     def fechar_aplicacao(self):
-        if self.db_controller:
-            self.db_controller.close_connection()
+        if self.db:
+            self.db.close_connection()
         self.janela.destroy()

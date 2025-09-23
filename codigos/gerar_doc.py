@@ -191,7 +191,8 @@ class GerarDocumentos():
         self.toplevel_geradoc.destroy()
         
         tela_baixas = OrganizacaoBaixas(
-            self.janela_mestra_geradoc,
+            master=self.janela_mestra_geradoc, # Corrigido para usar 'master'
+            db_controller=self.db, # <-- ADICIONE ESTA LINHA
             nome_planilha=planilha.get('nome_planilha'),
             dados_para_agrupar=dados_brutos_dos_bens,
             numero_processo=numero_processo,

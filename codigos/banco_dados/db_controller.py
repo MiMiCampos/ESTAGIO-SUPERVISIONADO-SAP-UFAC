@@ -46,20 +46,54 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bem: {err}")
             return None
-            
-    def get_bens_por_desfazimento(self, id_desfazimento):
+        
+    def get_bens_completos_por_desfazimento(self, id_desfazimento):
+        """Busca todos os bens com dados completos para a geração de documentos."""
         if not self.conn: return []
         try:
             query = """
                 SELECT 
-                    NULL as 'Nº DE ORDEM', b.tombo AS 'TOMBO', b.descricao AS 'DESCRIÇÃO DO BEM',
-                    b.data_aquisicao AS 'DATA DA AQUISIÇÃO', b.nota_fiscal AS 'DOCUMENTO FISCAL',
-                    u.nome_unidade AS 'UNIDADE RESPONSÁVEL', s.nome_servidor AS 'SERVIDOR RESPONSÁVEL',
-                    b.classificacao AS 'CLASSIFICAÇÃO', b.destinacao AS 'DESTINAÇÃO'
+                    b.tombo, b.descricao, b.data_aquisicao, b.nota_fiscal,
+                    u.nome_unidade, s.nome_servidor,
+                    b.classificacao, b.destinacao,
+                    b.valor_aquisicao, b.forma_ingresso
                 FROM Bem b
                 LEFT JOIN Unidade u ON b.id_unidade = u.id_unidade
                 LEFT JOIN Servidor s ON b.id_servidor = s.id_servidor
                 WHERE b.id_desfazimento = %s
+            """
+            self.cursor.execute(query, (id_desfazimento,))
+            return self.cursor.fetchall() # Retorna dicionários
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
+            return []
+            
+    # No arquivo banco_dados/db_controller.py
+
+    def get_bens_por_desfazimento(self, id_desfazimento):
+        """
+        Busca todos os bens de um processo de desfazimento que ainda não foram
+        associados a um documento de baixa, retornando todos os campos necessários.
+        """
+        if not self.conn: return []
+        try:
+            query = """
+                SELECT 
+                    NULL as 'Nº DE ORDEM',                  -- 0
+                    b.tombo AS 'TOMBO',                     -- 1
+                    b.descricao AS 'DESCRIÇÃO DO BEM',      -- 2
+                    b.data_aquisicao AS 'DATA DA AQUISIÇÃO',-- 3
+                    b.nota_fiscal AS 'DOCUMENTO FISCAL',    -- 4
+                    u.nome_unidade AS 'UNIDADE RESPONSÁVEL',-- 5
+                    s.nome_servidor AS 'SERVIDOR RESPONSÁVEL',-- 6
+                    b.classificacao AS 'CLASSIFICAÇÃO',     -- 7
+                    b.destinacao AS 'DESTINAÇÃO',           -- 8
+                    b.valor_aquisicao AS 'VALOR',           -- 9  <-- COLUNA ADICIONADA
+                    b.forma_ingresso AS 'FORMA DE INGRESSO' -- 10 <-- COLUNA ADICIONADA
+                FROM Bem b
+                LEFT JOIN Unidade u ON b.id_unidade = u.id_unidade
+                LEFT JOIN Servidor s ON b.id_servidor = s.id_servidor
+                WHERE b.id_desfazimento = %s AND b.id_documento IS NULL -- Filtro de duplicidade
             """
             self.cursor.execute(query, (id_desfazimento,))
             resultados = self.cursor.fetchall()
@@ -69,12 +103,19 @@ class DBController:
                 linha[0] = i + 1
                 if isinstance(linha[3], date):
                     linha[3] = linha[3].strftime('%d/%m/%Y')
+                
+                # Formata o valor monetário para o padrão brasileiro, se não for nulo
+                if linha[9] is not None:
+                    linha[9] = f"{linha[9]:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                else:
+                    linha[9] = "0,00"
+
                 dados_formatados.append(linha)
             return dados_formatados
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
             return []
-
+        
     def get_bens_para_visualizacao(self, id_desfazimento):
         """Busca os bens para a tela de visualização (sem o nome do servidor)."""
         if not self.conn: return []
@@ -144,6 +185,29 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar número do processo: {err}")
             return None
+        
+    # No arquivo banco_dados/db_controller.py
+
+    def registrar_documento_baixa(self, id_desfazimento, numero_termo, caminho_arquivo, motivo):
+        """Salva o registro de um novo documento de baixa no banco de dados."""
+        if not self.conn: return False
+        try:
+            query = """
+                INSERT INTO DocumentoDeBaixa (id_desfazimento, numero_termo, data_geracao, caminho_arquivo, motivo)
+                VALUES (%s, %s, NOW(), %s, %s)
+            """
+            self.cursor.execute(query, (id_desfazimento, numero_termo, caminho_arquivo, motivo))
+            self.conn.commit()
+            return self.cursor.lastrowid
+
+            return True
+        except mysql.connector.Error as err:
+            # ADICIONE ESTA LINHA:
+            print(f"ERRO DETALHADO DO MYSQL: {err}") 
+            
+            Messagebox.show_error("Erro ao Registrar Documento", f"Não foi possível salvar o registro do documento de baixa:\n{err}")
+            self.conn.rollback()
+            return False
 
     # --- Métodos para Planilhas ---
     
@@ -325,15 +389,37 @@ class DBController:
             self.conn.rollback()
             return False
 
+    # No arquivo banco_dados/db_controller.py
+
     def get_proximo_numero_termo(self):
-        if not self.conn: return "000000"
+        """
+        Busca o próximo AUTO_INCREMENT da tabela DocumentoDeBaixa.
+        Retorna:
+            int: O próximo ID como um número inteiro.
+        """
+        if not self.conn: return 1 # Retorna 1 como padrão se não houver conexão
         try:
             db_name = self.conn.database
             query = f"SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{db_name}' AND TABLE_NAME = 'DocumentoDeBaixa'"
             self.cursor.execute(query)
             resultado = self.cursor.fetchone()
             proximo_id = resultado.get('AUTO_INCREMENT', 1) if resultado else 1
-            return f"{proximo_id:06d}"
+            return proximo_id # <<< ALTERAÇÃO PRINCIPAL: Retorna o número inteiro
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar próximo número do termo: {err}")
-            return "000000"
+            return 1
+    
+    def associar_bens_a_documento(self, id_documento, lista_tombos):
+        if not self.conn or not lista_tombos: return False
+        try:
+            formatadores = ','.join(['%s'] * len(lista_tombos))
+            query = f"UPDATE Bem SET id_documento = %s WHERE tombo IN ({formatadores})"
+            params = [id_documento] + lista_tombos
+            self.cursor.execute(query, tuple(params))
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"ERRO AO ASSOCIAR BENS: {err}")
+            Messagebox.show_error("Erro de Atualização", f"Não foi possível associar os bens ao documento:\n{err}")
+            self.conn.rollback()
+            return False

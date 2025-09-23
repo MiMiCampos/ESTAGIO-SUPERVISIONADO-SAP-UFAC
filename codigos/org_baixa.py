@@ -8,7 +8,7 @@ from gerar_doc_baixa import GerarDocBaixa # Importação movida para o topo
 from utils.path_helper import resource_path
 
 class OrganizacaoBaixas():
-    def __init__(self, master, nome_planilha=None, dados_para_agrupar=None, numero_processo=None, id_desfazimento=None):
+    def __init__(self, master, db_controller, nome_planilha=None, dados_para_agrupar=None, numero_processo=None, id_desfazimento=None):
         self.janela = master
         self.nome_planilha_recebida = nome_planilha
         self.dados_brutos_recebidos = dados_para_agrupar
@@ -20,6 +20,7 @@ class OrganizacaoBaixas():
         self.brasao = None
         self.check_vars = {}
         self.dados_agrupados_na_tela = {}
+        self.db = db_controller
         self._carregar_imagem_brasao()
 
     def _carregar_imagem_brasao(self):
@@ -144,6 +145,7 @@ class OrganizacaoBaixas():
         
         tela_geracao = GerarDocBaixa(
             master=self.janela, 
+            db_controller=self.db, 
             nome_planilha_base=self.nome_planilha_recebida, 
             dados_selecionados=dados_selecionados, 
             dados_brutos_para_voltar=self.dados_brutos_recebidos,

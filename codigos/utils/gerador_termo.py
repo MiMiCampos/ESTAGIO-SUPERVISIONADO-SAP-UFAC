@@ -11,6 +11,8 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph
 from utils.path_helper import resource_path
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 class GeradorDeTermo:
     @staticmethod
@@ -37,7 +39,7 @@ class GeradorDeTermo:
     def _gerar_docx(caminho_completo, dados_gerais, dados_agrupados):
         doc = Document()
         section = doc.sections[0]
-        section.orientation, section.width = section.height, section.width
+        # section.orientation, section.width = section.height, section.width
         section.page_width = Inches(11.69)
         section.page_height = Inches(8.27)
         section.left_margin = Inches(0.5)
@@ -61,7 +63,7 @@ class GeradorDeTermo:
         doc.add_paragraph()
 
         total_valor = 0.0
-        colunas = ['Item', 'Registro', 'Plaqueta', 'Aceito', 'Descrição do Bem', 'Forma de Ingresso', 'Data Aquisição', 'Data Transferência', 'Valor']
+        colunas = ['Item', 'Registro', 'Plaquetável', 'Aceito', 'Descrição do Bem', 'Forma de Ingresso', 'Data Aquisição', 'Data Transferência', 'Valor']
         tabela = doc.add_table(rows=1, cols=len(colunas))
         tabela.style = 'Table Grid'
         hdr_cells = tabela.rows[0].cells
@@ -94,7 +96,26 @@ class GeradorDeTermo:
                     total_valor += valor_float
                 except (ValueError, TypeError): pass
                 item_num += 1
+        for row in tabela.rows:
+            for cell in row.cells:
+                tcPr = cell._tc.get_or_add_tcPr()
+                tcBorders = OxmlElement('w:tcBorders')
+                
+                # Mantém as bordas de cima e de baixo visíveis
+                for border_type in ['top', 'bottom']:
+                    border = OxmlElement(f'w:{border_type}')
+                    border.set(qn('w:val'), 'single') # 'single' significa uma linha sólida
+                    border.set(qn('w:sz'), '4') # Tamanho da borda
+                    tcBorders.append(border)
 
+                # Torna as bordas da esquerda e direita invisíveis
+                for border_type in ['left', 'right']:
+                    border = OxmlElement(f'w:{border_type}')
+                    border.set(qn('w:val'), 'nil') # 'nil' significa sem borda
+                    tcBorders.append(border)
+                
+                tcPr.append(tcBorders)
+                
         total_formatado = f"{total_valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         doc.add_paragraph()
         p_total = doc.add_paragraph(f"Total Página: {total_formatado}\t\t\t\t\tPágina: 1\nTotal Acumulado: {total_formatado}")
@@ -133,7 +154,7 @@ class GeradorDeTermo:
         style_normal.fontSize = 8
         style_normal.alignment = 1
 
-        header = ['Item', 'Registro', 'Plaqueta', 'Aceito', 'Descrição do Bem', 'Forma de Ingresso', 'Data Aquisição', 'Data Transf.', 'Valor']
+        header = ['Item', 'Registro', 'Plaquetável', 'Aceito', 'Descrição do Bem', 'Forma de Ingresso', 'Data Aquisição', 'Data Transf.', 'Valor']
         dados_tabela = [header]
         item_num = 1
         for (unidade, servidor), bens in dados_agrupados.items():
@@ -162,7 +183,10 @@ class GeradorDeTermo:
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
             ('FONTSIZE', (0,0), (-1,-1), 8),
-            ('GRID', (0,0), (-1,-1), 1, colors.black)
+            # Desenha apenas linhas horizontais
+            ('LINEABOVE', (0,0), (-1,0), 1, colors.black),     # Linha acima do cabeçalho
+            ('LINEBELOW', (0,0), (-1,0), 1, colors.black),     # Linha abaixo do cabeçalho
+            ('LINEBELOW', (0,-1), (-1,-1), 1, colors.black),   # Linha abaixo da última linha de dados
         ]))
 
         y -= 25
