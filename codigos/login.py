@@ -69,15 +69,24 @@ class TelaLogin:
         self.ent_cpf.insert(0, formatado)
         self.ent_cpf.icursor(END)
 
+    # No seu arquivo da tela de login (ex: tela_login.py)
+
     def fazer_login(self, event=None):
-        cpf = self.ent_cpf.get().strip()
+        import re # Adicione esta importação se ainda não tiver
+
+        cpf_input = self.ent_cpf.get().strip()
         senha = self.ent_senha.get().strip()
+
+        # Limpa o CPF digitado para conter apenas números
+        cpf = re.sub(r'\D', '', cpf_input)
 
         if not cpf or not senha:
             Messagebox.show_warning("Campos Vazios", "Por favor, preencha o CPF e a senha.", parent=self.janela_login)
             return
 
         senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+        
+        # A variável 'cpf' agora contém apenas números, correspondendo à nova consulta
         usuario = self.db.verificar_usuario(cpf, senha_hash)
 
         if usuario:

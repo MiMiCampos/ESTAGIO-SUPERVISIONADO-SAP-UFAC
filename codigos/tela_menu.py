@@ -9,14 +9,15 @@ from banco_dados.db_controller import DBController
 from utils.path_helper import resource_path
 
 class MenuInicial():
-    def __init__(self, master, dados_usuario, on_logout):
+    def __init__(self, master, db_controller, dados_usuario, on_logout):       
         self.janela = master
         self.dados_usuario = dados_usuario
         self.on_logout = on_logout
         self.janela.title("SAP-UFAC - Menu Inicial")
         self.janela.geometry("1300x800")
         self.janela.position_center()
-        self.db = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
+        self.db = db_controller # Usa a conexão recebida
+
         
         # self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
         # self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)

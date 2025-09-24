@@ -8,6 +8,7 @@ class AplicacaoPrincipal:
         self.root = root
         self.root.title("SAP-UFAC")
         self.root.withdraw()
+        
 
         self.db_conn = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
         
@@ -47,12 +48,17 @@ class AplicacaoPrincipal:
             widget.destroy()
         
         # Passa a função de logout como um "aviso" para a TelaMenu
-        self.menu = MenuInicial(self.root, dados_usuario, self.fazer_logout)
+        self.menu = MenuInicial(self.root, self.db_conn, dados_usuario, self.fazer_logout)
 
     def fazer_logout(self):
         # O "chefe" (main.py) agora é responsável pelo logout
         print("INFO: Realizando logout e voltando para a tela de login.")
         self.mostrar_tela_login()
+        
+    def fechar_app(self):
+        if self.db:
+            self.db.close_connection() # <-- AGORA SERÁ CHAMADO CORRETAMENTE
+        self.root.destroy()
 
 if __name__ == "__main__":
     root = ttk.Window(themename="litera")

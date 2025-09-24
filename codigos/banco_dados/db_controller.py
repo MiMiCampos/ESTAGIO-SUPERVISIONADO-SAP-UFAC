@@ -21,12 +21,6 @@ class DBController:
             self.conn = None
             self.cursor = None
 
-    def close_connection(self):
-        if self.conn and self.conn.is_connected():
-            self.cursor.close()
-            self.conn.close()
-            print("Conexão com o banco de dados fechada.")
-
     # --- Métodos para Bens e Desfazimento ---
 
     def get_bem_by_tombo(self, tombo):
@@ -273,10 +267,17 @@ class DBController:
 
     # --- Métodos para Usuários e Servidores ---
 
+    # No arquivo banco_dados/db_controller.py
+
     def verificar_usuario(self, cpf, senha_hash):
         if not self.conn: return None
         try:
-            query = "SELECT id_usuario, nome_completo, perfil FROM Usuario WHERE cpf = %s AND senha_hash = %s"
+            # ALTERAÇÃO: A consulta agora limpa a pontuação do CPF do banco antes de comparar
+            query = """
+                SELECT id_usuario, nome_completo, perfil 
+                FROM Usuario 
+                WHERE REPLACE(REPLACE(cpf, '.', ''), '-', '') = %s AND senha_hash = %s
+            """
             self.cursor.execute(query, (cpf, senha_hash))
             return self.cursor.fetchone()
         except mysql.connector.Error as err:
@@ -447,3 +448,9 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar documentos gerados:\n{err}")
             return []
+        
+    def close_connection(self):
+        if self.conn and self.conn.is_connected():
+            self.cursor.close()
+            self.conn.close()
+            print("Conexão com o banco de dados fechada.")
