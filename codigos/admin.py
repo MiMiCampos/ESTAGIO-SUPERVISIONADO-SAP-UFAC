@@ -231,7 +231,7 @@ class GerenciadorUsuarios:
                 nome = ent_nome_estagiario.get().strip()
 
             cpf = ent_cpf.get().strip()
-            senha = ent_senha.get().strip()
+            senha = ent_senha.get().strip() # Captura a senha, mesmo que seja vazia
 
             if not all([nome, cpf, perfil]):
                 Messagebox.show_warning("Campos Obrigatórios", "Nome, CPF e Perfil são obrigatórios.")
@@ -247,18 +247,36 @@ class GerenciadorUsuarios:
                 return
 
             if modo_edicao:
-                if self.db.atualizar_usuario(dados_usuario['id_usuario'], nome, cpf, perfil):
-                    if senha:
-                        print("FUNCIONALIDADE DE ATUALIZAR SENHA AINDA NÃO IMPLEMENTADA")
+                # Tentativa de atualizar nome, CPF e perfil
+                sucesso_atualizacao = self.db.atualizar_usuario(dados_usuario['id_usuario'], nome, cpf, perfil)
+                
+                sucesso_senha = True # Assume sucesso se não houver senha para atualizar
+                if senha: # Se uma nova senha foi fornecida
+                    if len(senha) < 6: # Adicione uma validação mínima para a senha
+                        Messagebox.show_warning("Senha Fraca", "A nova senha deve ter no mínimo 6 caracteres.")
+                        return
+                    nova_senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+                    sucesso_senha = self.db.atualizar_senha_usuario(dados_usuario['id_usuario'], nova_senha_hash)
+                    
+                    if not sucesso_senha:
+                        Messagebox.show_error("Erro", "Não foi possível atualizar a senha do usuário.")
+                        return # Sai da função se a senha falhar
+
+                if sucesso_atualizacao and sucesso_senha: # Verifica ambos os sucessos
                     Messagebox.ok("Sucesso", "Usuário atualizado com sucesso.")
                     dialog.destroy()
                     self._popular_tabela()
-            else:
+                elif not sucesso_atualizacao:
+                    Messagebox.show_error("Erro", "Não foi possível atualizar os dados do usuário (nome/CPF/perfil).")
+
+            else: # Modo de adição de novo usuário
                 senha_hash = hashlib.sha256(senha.encode()).hexdigest()
                 if self.db.cadastrar_usuario(nome, cpf, senha_hash, perfil):
                     Messagebox.ok("Sucesso", "Usuário cadastrado com sucesso.")
                     dialog.destroy()
                     self._popular_tabela()
+                else:
+                    Messagebox.show_error("Erro", "Não foi possível cadastrar o novo usuário.")
 
         btn_salvar = ttk.Button(frame_botoes, text="Salvar", command=_salvar_usuario, bootstyle="success")
         btn_salvar.pack(side=LEFT, padx=10)

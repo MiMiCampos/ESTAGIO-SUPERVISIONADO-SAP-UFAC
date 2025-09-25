@@ -62,8 +62,6 @@ class DBController:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
             return []
             
-    # No arquivo banco_dados/db_controller.py
-
     def get_bens_por_desfazimento(self, id_desfazimento):
         """
         Busca todos os bens de um processo de desfazimento que ainda não foram
@@ -180,8 +178,6 @@ class DBController:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar número do processo: {err}")
             return None
         
-    # No arquivo banco_dados/db_controller.py
-
     def registrar_documento_baixa(self, id_desfazimento, numero_termo, caminho_arquivo, motivo):
         """Salva o registro de um novo documento de baixa no banco de dados."""
         if not self.conn: return False
@@ -196,7 +192,6 @@ class DBController:
 
             return True
         except mysql.connector.Error as err:
-            # ADICIONE ESTA LINHA:
             print(f"ERRO DETALHADO DO MYSQL: {err}") 
             
             Messagebox.show_error("Erro ao Registrar Documento", f"Não foi possível salvar o registro do documento de baixa:\n{err}")
@@ -267,12 +262,10 @@ class DBController:
 
     # --- Métodos para Usuários e Servidores ---
 
-    # No arquivo banco_dados/db_controller.py
-
     def verificar_usuario(self, cpf, senha_hash):
         if not self.conn: return None
         try:
-            # ALTERAÇÃO: A consulta agora limpa a pontuação do CPF do banco antes de comparar
+            # A consulta agora limpa a pontuação do CPF do banco antes de comparar
             query = """
                 SELECT id_usuario, nome_completo, perfil 
                 FROM Usuario 
@@ -330,6 +323,27 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Atualização", f"Não foi possível atualizar o usuário:\n{err}")
             self.conn.rollback()
+            return False
+    
+    def atualizar_senha_usuario(self, id_usuario, nova_senha_hash):
+        """
+        Atualiza a senha (hash) de um usuário no banco de dados MySQL.
+        Retorna True em caso de sucesso, False caso contrário.
+        """
+        if not self.conn or not self.conn.is_connected():
+            self.connect() # Tenta reconectar se a conexão não estiver ativa
+            if not self.conn or not self.conn.is_connected():
+                print("Erro: Não foi possível estabelecer conexão com o MySQL para atualizar a senha.")
+                return False
+        
+        try:
+            query = "UPDATE Usuario SET senha_hash = %s WHERE id_usuario = %s"
+            self.cursor.execute(query, (nova_senha_hash, id_usuario))
+            self.conn.commit() # Confirma as mudanças no banco
+            return True
+        except mysql.connector.Error as err:
+            print(f"Erro ao atualizar senha do usuário {id_usuario} no MySQL: {err}")
+            self.conn.rollback() # Desfaz a transação em caso de erro
             return False
 
     def deletar_usuario(self, id_usuario):
@@ -390,8 +404,6 @@ class DBController:
             self.conn.rollback()
             return False
 
-    # No arquivo banco_dados/db_controller.py
-
     def get_proximo_numero_termo(self):
         """
         Busca o próximo AUTO_INCREMENT da tabela DocumentoDeBaixa.
@@ -405,7 +417,7 @@ class DBController:
             self.cursor.execute(query)
             resultado = self.cursor.fetchone()
             proximo_id = resultado.get('AUTO_INCREMENT', 1) if resultado else 1
-            return proximo_id # <<< ALTERAÇÃO PRINCIPAL: Retorna o número inteiro
+            return proximo_id 
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar próximo número do termo: {err}")
             return 1
