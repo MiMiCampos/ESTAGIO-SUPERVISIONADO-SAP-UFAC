@@ -93,17 +93,17 @@ class GerarDocBaixa:
 
         frame_configs = ttk.Labelframe(frame_corpo, text="Configurações de Saída", padding=15)
         frame_configs.pack(fill=X)
-        self.formato_var = tk.StringVar(value=".docx") # Alterado para .docx como padrão
+        self.formato_var = tk.StringVar(value=".pdf") # Alterado para .pdf como padrão
         ttk.Label(frame_configs, text="Formato do documento:").pack(side=LEFT)
         ttk.Radiobutton(frame_configs, text=".pdf", variable=self.formato_var, value=".pdf").pack(side=LEFT, padx=5)
         ttk.Radiobutton(frame_configs, text=".docx (Word)", variable=self.formato_var, value=".docx").pack(side=LEFT, padx=5)
         
         frame_pasta = ttk.Frame(frame_corpo, padding=(0, 20))
         frame_pasta.pack(fill=X, pady=(10,0))
-        ttk.Label(frame_pasta, text="Pasta de destino:").pack(anchor=W, pady=(10, 0))
+        ttk.Label(frame_pasta, text="Pasta de Destino:").pack(anchor=W, pady=(10, 0))
         self.entry_pasta_destino = ttk.Entry(frame_pasta, font=("Inconsolata", 11))
         self.entry_pasta_destino.pack(side=LEFT, fill=X, expand=True, ipady=4)
-        ttk.Button(frame_pasta, text="Selecionar...", bootstyle="info-outline", command=self.selecionar_pasta_destino).pack(side=LEFT, padx=(5,0))
+        ttk.Button(frame_pasta, text="Selecionar Pasta", bootstyle="info-outline", command=self.selecionar_pasta_destino).pack(side=LEFT, padx=(5,0), fill=Y)
 
         frame_rodape = ttk.Frame(self.toplevel_gerarbaixa, padding=10)
         frame_rodape.pack(fill=X, side=BOTTOM)

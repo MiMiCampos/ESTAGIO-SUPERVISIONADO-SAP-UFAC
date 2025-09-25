@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime
+from PIL import Image, ImageTk
 
 class ConsultaDocumentos:
     def __init__(self, master, db_controller):
@@ -17,17 +18,36 @@ class ConsultaDocumentos:
         self.toplevel.geometry("1100x700")
         self.toplevel.position_center()
         
+        self.brasao = None
+        self.carregar_recursos()
         self.criar_interface()
+    
+    def carregar_recursos(self):
+        """Carrega as imagens necessárias (apenas o brasão)."""
+        try:
+            # Ajuste o caminho da imagem se necessário, use resource_path se empacotado
+            imagem_brasao = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
+            self.brasao = ImageTk.PhotoImage(imagem_brasao)
+        except Exception as e:
+            print(f"Erro ao carregar imagem do brasão para ConsultaDocumentos: {e}")
+            self.brasao = None
 
     def criar_interface(self):
         # --- Frame do Cabeçalho ---
         frame_cabecalho = ttk.Frame(self.toplevel, bootstyle='info', padding=(10, 10))
         frame_cabecalho.pack(fill=X)
+        
+        if self.brasao:
+            lbl_brasao = ttk.Label(frame_cabecalho, image=self.brasao, bootstyle='info')
+            lbl_brasao.image = self.brasao
+            lbl_brasao.pack(side=LEFT, padx=(5, 10))
+        
         lbl_titulo = ttk.Label(
             frame_cabecalho, 
             text="Documentos de Baixa Gerados", 
             font=("Inconsolata", 16, "bold"), 
-            bootstyle='inverse-info'
+            bootstyle='inverse-info',
+            foreground="black"
         )
         lbl_titulo.pack()
 
@@ -49,7 +69,6 @@ class ConsultaDocumentos:
         frame_header = ttk.Frame(sf)
         frame_header.pack(fill=X, padx=10, pady=(0,5))
         
-        # --- CORREÇÃO APLICADA AQUI ---
         ttk.Label(frame_header, text="Termo", font=("Helvetica", 10, "bold"), width=20).pack(side=LEFT)
         ttk.Label(frame_header, text="Data", font=("Helvetica", 10, "bold"), width=20).pack(side=LEFT)
         ttk.Label(frame_header, text="Processo", font=("Helvetica", 10, "bold"), width=25).pack(side=LEFT)

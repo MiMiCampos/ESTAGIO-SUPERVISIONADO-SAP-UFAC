@@ -22,7 +22,7 @@ class CriarPlanilha:
     def carregar_recursos(self):
         """Carrega as imagens necessárias (apenas o brasão)."""
         try:
-            brasao_img = Image.open("imagens/brasao_UFAC.png").resize((40, 40))
+            brasao_img = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao = ImageTk.PhotoImage(brasao_img)
         except Exception as e:
             print(f"Erro ao carregar imagem do brasão: {e}")
@@ -84,16 +84,21 @@ class CriarPlanilha:
 
         lbl_data = ttk.Label(frm_corpo, text="Data da Planilha", font=("Inconsolata", 12, "bold"))
         lbl_data.pack(fill=X, anchor=W, pady=(0, 5))
+        
         self.date_entry = ttk.DateEntry(frm_corpo, bootstyle="info", dateformat="%d/%m/%Y")
         self.date_entry.pack(fill=X, ipady=2, pady=(0, 20))
+        
         lbl_pasta = ttk.Label(frm_corpo, text="Pasta de Salvamento", font=("Inconsolata", 12, "bold"))
         lbl_pasta.pack(fill=X, anchor=W, pady=(0, 5))
+        
         frm_pasta = ttk.Frame(frm_corpo)
         frm_pasta.pack(fill=X, pady=(0, 25))
+        
         self.ent_pasta = ttk.Entry(frm_pasta, font=("Inconsolata", 11))
         self.ent_pasta.pack(side=LEFT, fill=X, expand=True, ipady=5)
-        btn_selecionar = ttk.Button(frm_pasta, text="Selecionar Pasta", bootstyle="info-outline", style='custom.TButton', command=self.selecionar_pasta)
-        btn_selecionar.pack(side=LEFT, padx=(5, 0))
+        
+        btn_selecionar = ttk.Button(frm_pasta, text="Selecionar Pasta", bootstyle="info-outline", command=self.selecionar_pasta)
+        btn_selecionar.pack(side=LEFT, padx=(5, 0), fill=Y)
 
     def selecionar_pasta(self):
         """Abre uma caixa de diálogo para selecionar uma pasta."""

@@ -26,7 +26,7 @@ class EdicaoPlanilha:
     def carregar_recursos_edicao(self):
         """Carrega as imagens necessárias (apenas o brasão) para a tela de edição."""
         try:
-            imagem_brasao_edicao = Image.open("imagens/brasao_UFAC.png").resize((40, 40))
+            imagem_brasao_edicao = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao_para_edicao = ImageTk.PhotoImage(imagem_brasao_edicao)
         except Exception as e:
             print(f"Erro ao carregar imagem do brasão para tela de edição: {e}")
