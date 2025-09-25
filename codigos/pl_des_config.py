@@ -50,6 +50,7 @@ class CriarPlanilha:
 
         if self.brasao:
             lbl_brasao = ttk.Label(frm_cabecalho, image=self.brasao, bootstyle="info")
+            lbl_brasao.image = self.brasao
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
 
         lbl_titulo = ttk.Label(frm_cabecalho, text="Criar Nova Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), bootstyle="inverse-info", foreground='black')

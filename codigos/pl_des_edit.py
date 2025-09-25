@@ -54,6 +54,7 @@ class EdicaoPlanilha:
 
         if self.brasao_para_edicao:
             label_brasao_edicao = ttk.Label(frame_cabecalho_edicao, image=self.brasao_para_edicao, bootstyle='info')
+            label_brasao_edicao.image = self.brasao_para_edicao
             label_brasao_edicao.pack(side=LEFT, padx=(5, 10))
 
         label_titulo_edicao = ttk.Label(frame_cabecalho_edicao, text="Planilha de Desfazimento", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black')
@@ -96,17 +97,21 @@ class EdicaoPlanilha:
         scrollbar_vertical.pack(side=RIGHT, fill=Y)
         self.tabela_desfazimento.pack(expand=True, fill=BOTH)
 
+        # Botão Voltar
         botao_voltar_edicao = ttk.Button(frame_botoes_inferiores, text="<- Voltar", command=self.toplevel_edicao.destroy, bootstyle="primary-outline")
         botao_voltar_edicao.pack(side=LEFT, padx=10)
         
+        # Botão Excluir (é o primeiro a ser empacotado da direita para a esquerda)
+        botao_excluir_item = ttk.Button(frame_botoes_inferiores, text="Excluir", command=self._excluir_item_selecionado, bootstyle="danger")
+        botao_excluir_item.pack(side=RIGHT, padx=(0, 10), ipadx=10) # Padding à direita para os outros botões
+        
+        # Botão Gerar Planilha
         botao_gerar_planilha = ttk.Button(frame_botoes_inferiores, text="Gerar Planilha", command=self.gerar_planilha_final, bootstyle="info")
         botao_gerar_planilha.pack(side=RIGHT, padx=(0, 10), ipadx=10)
         
+        # Botão Salvar
         botao_salvar_edicao = ttk.Button(frame_botoes_inferiores, text="Salvar", command=self.salvar_alteracoes, bootstyle="success")
         botao_salvar_edicao.pack(side=RIGHT, padx=(0, 10), ipadx=10)
-
-        botao_editar_item = ttk.Button(frame_botoes_inferiores, text="Editar", command=self.editar_item_selecionado, bootstyle="info-outline")
-        botao_editar_item.pack(side=RIGHT, padx=(0, 10), ipadx=10)
 
         self._popular_tabela_com_dados_carregados()
 
@@ -172,35 +177,52 @@ class EdicaoPlanilha:
         self.numero_ordem_atual += 1
         self.entry_numero_tombo.delete(0, END)
 
-    def editar_item_selecionado(self):
-        """Abre uma janela para editar o item selecionado."""
-        item_selecionado_id = self.tabela_desfazimento.focus()
+    def _excluir_item_selecionado(self):
+        item_selecionado_id = self.tabela_desfazimento.focus() # Obtém o ID interno do item selecionado
         if not item_selecionado_id:
-            Messagebox.show_warning(title="Atenção", message="Nenhum item selecionado para editar.")
+            Messagebox.show_warning("Nenhum item selecionado", "Por favor, selecione um bem na lista para excluir.")
             return
+
+        dados_item = self.tabela_desfazimento.item(item_selecionado_id)['values']
+        tombo_do_bem = str(dados_item[1]) # O tombo está na segunda coluna (índice 1)
+
+        resposta = Messagebox.yesno(
+            "Confirmar Exclusão", 
+            f"Tem certeza que deseja excluir o bem com o tombo '{tombo_do_bem}' desta planilha?\nEsta ação não pode ser desfeita na planilha aberta."
+        )
+
+        if resposta == "Sim":
+            # 1. Remover da Treeview (interface)
+            self.tabela_desfazimento.delete(item_selecionado_id)
+            
+            # 2. Desvincular o bem do desfazimento no banco de dados
+            if self.db.desvincular_bem_da_planilha(tombo_do_bem, self.id_desfazimento_atual):
+                Messagebox.ok("Sucesso", f"Bem com tombo '{tombo_do_bem}' removido da planilha e desvinculado no banco.")
+                # Após remover, reordenar a coluna 'Nº DE ORDEM' na tabela
+                self._reordenar_tabela()
+                # Chamar salvar_alteracoes para persistir imediatamente no Excel
+                self.salvar_alteracoes() 
+            else:
+                Messagebox.show_error("Erro", f"Não foi possível remover o bem com tombo '{tombo_do_bem}' do banco de dados.")
+
+    def _reordenar_tabela(self):
+        """Reorganiza a coluna 'Nº DE ORDEM' após uma exclusão."""
+        novos_dados = []
+        for item_id in self.tabela_desfazimento.get_children():
+            novos_dados.append(self.tabela_desfazimento.item(item_id)['values'])
         
-        valores_atuais = self.tabela_desfazimento.item(item_selecionado_id)['values']
-        janela_edicao_item = ttk.Toplevel(self.toplevel_edicao)
-        janela_edicao_item.title("Editar Item")
-        janela_edicao_item.transient(self.toplevel_edicao)
-        janela_edicao_item.grab_set()
-        frame_edicao_campos = ttk.Frame(janela_edicao_item, padding=15)
-        frame_edicao_campos.pack(expand=True, fill=BOTH)
-        campos_entrada = {}
-        colunas_nomes = ['Nº ORDEM', 'TOMBO', 'DESCRIÇÃO', 'DATA AQUISIÇÃO', 'DOC. FISCAL', 'UNIDADE', 'CLASSIFICAÇÃO', 'DESTINO']
-        for i, nome_coluna in enumerate(colunas_nomes):
-            lbl = ttk.Label(frame_edicao_campos, text=f"{nome_coluna}:")
-            lbl.grid(row=i, column=0, sticky=W, pady=5)
-            ent = ttk.Entry(frame_edicao_campos, width=40)
-            ent.grid(row=i, column=1, sticky=EW, pady=5)
-            ent.insert(0, valores_atuais[i])
-            campos_entrada[i] = ent
-        def salvar_edicao():
-            novos_valores = [campos_entrada[i].get() for i in range(len(colunas_nomes))]
-            self.tabela_desfazimento.item(item_selecionado_id, values=novos_valores)
-            janela_edicao_item.destroy()
-        botao_salvar_edicao_item = ttk.Button(frame_edicao_campos, text="Salvar Alterações", command=salvar_edicao, bootstyle="success")
-        botao_salvar_edicao_item.grid(row=len(colunas_nomes), column=0, columnspan=2, pady=15)
+        # Limpa a tabela
+        for item_id in self.tabela_desfazimento.get_children():
+            self.tabela_desfazimento.delete(item_id)
+            
+        # Insere os dados novamente com o número de ordem correto
+        self.numero_ordem_atual = 1
+        for linha in novos_dados:
+            # Cria uma nova linha com o número de ordem atualizado
+            linha_atualizada = list(linha)
+            linha_atualizada[0] = self.numero_ordem_atual
+            self.tabela_desfazimento.insert('', END, values=linha_atualizada)
+            self.numero_ordem_atual += 1
 
     def _salvar_dados_no_arquivo(self, caminho):
         """

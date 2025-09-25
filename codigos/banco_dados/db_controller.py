@@ -259,6 +259,29 @@ class DBController:
         except mysql.connector.Error as err:
             Messagebox.show_error("Erro ao Salvar", f"Erro ao salvar registro da planilha: {err}")
             self.conn.rollback()
+            
+    def desvincular_bem_da_planilha(self, tombo_do_bem, id_desfazimento_atual):
+        """
+        Desvincula um bem de uma planilha de desfazimento específica, setando o id_desfazimento para NULL.
+        Isso o remove da planilha, mas mantém no cadastro geral de bens.
+        Retorna True em caso de sucesso, False caso contrário.
+        """
+        if not self.conn or not self.conn.is_connected():
+            self.connect() # Tenta reconectar se a conexão não estiver ativa
+            if not self.conn or not self.conn.is_connected():
+                print("Erro: Não foi possível estabelecer conexão com o MySQL para desvincular bem.")
+                return False
+        
+        try:
+            # Garante a desvinculação APENAS do bem com aquele tombo DAQUELA planilha específica
+            query = "UPDATE Bem SET id_desfazimento = NULL WHERE tombo = %s AND id_desfazimento = %s"
+            self.cursor.execute(query, (tombo_do_bem, id_desfazimento_atual))
+            self.conn.commit() # Confirma as mudanças no banco
+            return True
+        except mysql.connector.Error as err:
+            print(f"Erro ao desvincular bem {tombo_do_bem} da planilha {id_desfazimento_atual} no MySQL: {err}")
+            self.conn.rollback() # Desfaz a transação em caso de erro
+            return False
 
     # --- Métodos para Usuários e Servidores ---
 

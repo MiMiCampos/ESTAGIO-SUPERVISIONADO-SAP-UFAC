@@ -49,8 +49,8 @@ class GerarDocumentos():
         
         if self.brasao_para_geradoc:
             lbl_brasao = ttk.Label(frame_cabecalho_geradoc, image=self.brasao_para_geradoc, bootstyle='info')
-            lbl_brasao.pack(side=LEFT, padx=(5, 10))
             lbl_brasao.image = self.brasao_para_geradoc
+            lbl_brasao.pack(side=LEFT, padx=(5, 10))
             
         lbl_titulo = ttk.Label(frame_cabecalho_geradoc, text="Gerar Documentos", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
