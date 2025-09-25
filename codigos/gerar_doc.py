@@ -19,12 +19,13 @@ class GerarDocumentos():
         self.janela_mestra_geradoc = master
         self.db = db_controller
         self.toplevel_geradoc = None
+        self.brasao_para_geradoc = None
         self.carregar_recursos_geradoc()
 
     def carregar_recursos_geradoc(self):
         """Carrega as imagens necessárias para esta tela."""
         try:
-            imagem_brasao_geradoc = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
+            imagem_brasao_geradoc = Image.open(resource_path("imagens/brasao_UFAC.png")).resize((50, 50))
             self.brasao_para_geradoc = ImageTk.PhotoImage(imagem_brasao_geradoc)
         except Exception as e:
             print(f"Erro ao carregar brasão para Gerar Documentos: {e}")
@@ -49,6 +50,7 @@ class GerarDocumentos():
         if self.brasao_para_geradoc:
             lbl_brasao = ttk.Label(frame_cabecalho_geradoc, image=self.brasao_para_geradoc, bootstyle='info')
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
+            lbl_brasao.image = self.brasao_para_geradoc
             
         lbl_titulo = ttk.Label(frame_cabecalho_geradoc, text="Gerar Documentos", font=("Inconsolata", 16, "bold"), bootstyle='inverse-info', foreground='black')
         lbl_titulo.pack(side=LEFT, expand=True, pady=5)
@@ -191,8 +193,8 @@ class GerarDocumentos():
         self.toplevel_geradoc.destroy()
         
         tela_baixas = OrganizacaoBaixas(
-            master=self.janela_mestra_geradoc, # Corrigido para usar 'master'
-            db_controller=self.db, # <-- ADICIONE ESTA LINHA
+            master=self.janela_mestra_geradoc, 
+            db_controller=self.db, 
             nome_planilha=planilha.get('nome_planilha'),
             dados_para_agrupar=dados_brutos_dos_bens,
             numero_processo=numero_processo,

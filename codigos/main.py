@@ -9,7 +9,6 @@ class AplicacaoPrincipal:
         self.root.title("SAP-UFAC")
         self.root.withdraw()
         
-
         self.db_conn = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
         
         if not self.db_conn.conn:
@@ -57,7 +56,7 @@ class AplicacaoPrincipal:
         
     def fechar_app(self):
         if self.db:
-            self.db.close_connection() # <-- AGORA SERÁ CHAMADO CORRETAMENTE
+            self.db.close_connection()
         self.root.destroy()
 
 if __name__ == "__main__":

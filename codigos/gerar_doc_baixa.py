@@ -29,8 +29,6 @@ class GerarDocBaixa:
         except Exception as e:
             self.brasao_para_gerarbaixa = None
 
-    # No arquivo gerar_doc_baixa.py
-
     def exibir_tela(self):
         self.toplevel_gerarbaixa = ttk.Toplevel(self.janela_mestra_gerarbaixa)
         self.toplevel_gerarbaixa.title("Gerar Documento de Baixa")
@@ -68,7 +66,6 @@ class GerarDocBaixa:
         frame_campos.grid_columnconfigure(1, weight=1)
         frame_campos.grid_columnconfigure(3, weight=1)
 
-        # <<< ALTERAÇÃO AQUI: Label e lógica de formatação
         ttk.Label(frame_campos, text="Termo Inicial:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
         self.entry_termo = ttk.Entry(frame_campos, font=("Inconsolata", 11))
         self.entry_termo.grid(row=0, column=1, sticky=tk.EW, padx=5, pady=5)
@@ -111,7 +108,6 @@ class GerarDocBaixa:
         frame_rodape = ttk.Frame(self.toplevel_gerarbaixa, padding=10)
         frame_rodape.pack(fill=X, side=BOTTOM)
         ttk.Button(frame_rodape, text="<- Voltar", command=self.toplevel_gerarbaixa.destroy, bootstyle="primary-outline").pack(side=LEFT, padx=10)
-        # <<< ALTERAÇÃO AQUI: Texto do botão
         ttk.Button(frame_rodape, text="Confirmar e Gerar Documentos", command=self.confirmar_geracao, bootstyle="success").pack(side=RIGHT, padx=10)
 
     def selecionar_pasta_destino(self):

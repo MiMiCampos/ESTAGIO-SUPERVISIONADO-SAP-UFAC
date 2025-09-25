@@ -1,5 +1,3 @@
-# Arquivo: tela_menu.py (Lógica Corrigida com Estilo Original dos Botões)
-
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
@@ -18,7 +16,6 @@ class MenuInicial():
         self.janela.position_center()
         self.db = db_controller # Usa a conexão recebida
 
-        
         # self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
         # self.janela.protocol("WM_DELETE_WINDOW", self.fechar_aplicacao)
         

@@ -26,7 +26,7 @@ class ConsultaDocumentos:
         lbl_titulo = ttk.Label(
             frame_cabecalho, 
             text="Documentos de Baixa Gerados", 
-            font=("Helvetica", 16, "bold"), 
+            font=("Inconsolata", 16, "bold"), 
             bootstyle='inverse-info'
         )
         lbl_titulo.pack()
@@ -72,7 +72,6 @@ class ConsultaDocumentos:
         motivo = doc_data.get('motivo', 'N/A')
         caminho = doc_data.get('caminho_arquivo', '')
 
-        # --- CORREÇÃO APLICADA AQUI ---
         # Cria os labels e botões
         ttk.Label(frame_linha, text=termo, width=20).pack(side=LEFT)
         ttk.Label(frame_linha, text=data_formatada, width=20).pack(side=LEFT)
