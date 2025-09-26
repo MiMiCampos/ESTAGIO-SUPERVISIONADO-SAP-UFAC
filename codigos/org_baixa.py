@@ -67,8 +67,13 @@ class OrganizacaoBaixas():
 
         self.tpl_org_baixas = ttk.Toplevel(self.janela)
         self.tpl_org_baixas.title("Organização de Baixas Patrimoniais")
-        self.tpl_org_baixas.geometry("800x600")
-        self.tpl_org_baixas.position_center()
+        # self.tpl_org_baixas.geometry("800x600")
+        # self.tpl_org_baixas.position_center()
+        
+        
+        screen_width = self.tpl_org_baixas.winfo_screenwidth()
+        screen_height = self.tpl_org_baixas.winfo_screenheight()
+        self.tpl_org_baixas.geometry(f"{screen_width}x{screen_height}+0+0")       
         
         cabecalho_frame = ttk.Frame(self.tpl_org_baixas, bootstyle='info')
         cabecalho_frame.pack(fill=X)
@@ -135,12 +140,12 @@ class OrganizacaoBaixas():
         ttk.Button(botoes_frame, text="Gerar Documentos de Baixa", command=self.abrir_tela_geracao, bootstyle="success").pack(side="right")
         
         # NOVO BOTÃO: Adicionado no meio, empacotado à direita antes do outro
-        ttk.Button(
-            botoes_frame, 
-            text="Consultar Documentos Gerados", 
-            command=self.abrir_consulta_documentos, 
-            bootstyle="info-outline"
-        ).pack(side="right", padx=5)
+        # ttk.Button(
+        #     botoes_frame, 
+        #     text="Consultar Documentos Gerados", 
+        #     command=self.abrir_consulta_documentos, 
+        #     bootstyle="info-outline"
+        # ).pack(side="right", padx=5)
         
     def _coletar_dados_selecionados(self):
         dados_selecionados = {}
@@ -168,6 +173,4 @@ class OrganizacaoBaixas():
         )
         tela_geracao.exibir_tela()
 
-    def abrir_consulta_documentos(self):
-        """Abre a tela de consulta de documentos já gerados."""
-        ConsultaDocumentos(self.janela, self.db)
+    

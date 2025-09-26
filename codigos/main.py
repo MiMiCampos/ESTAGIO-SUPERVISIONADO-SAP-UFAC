@@ -7,6 +7,9 @@ class AplicacaoPrincipal:
     def __init__(self, root):
         self.root = root
         self.root.title("SAP-UFAC")
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        self.root.geometry(f"{screen_width}x{screen_height}+0+0")
         self.root.withdraw()
         
         self.db_conn = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
@@ -22,7 +25,6 @@ class AplicacaoPrincipal:
         tema_salvo = configs.get('tema', 'Claro')
         nome_tema_ttk = 'litera' if tema_salvo == 'Claro' else 'darkly'
         self.root.style.theme_use(nome_tema_ttk)
-        
         self.mostrar_tela_login()
         
     def mostrar_tela_login(self):
@@ -33,6 +35,11 @@ class AplicacaoPrincipal:
         self.root.withdraw()
         
         self.login_window = ttk.Toplevel(self.root)
+        
+        screen_width = self.login_window.winfo_screenwidth()
+        screen_height = self.login_window.winfo_screenheight()
+        self.login_window.geometry(f"{screen_width}x{screen_height}+0+0")
+        
         app_login = TelaLogin(self.login_window, self.db_conn, self.login_bem_sucedido)
     
     def login_bem_sucedido(self, dados_usuario):

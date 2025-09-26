@@ -12,8 +12,13 @@ class MenuInicial():
         self.dados_usuario = dados_usuario
         self.on_logout = on_logout
         self.janela.title("SAP-UFAC - Menu Inicial")
-        self.janela.geometry("1300x800")
-        self.janela.position_center()
+        # self.janela.geometry("1300x800")
+        # self.janela.position_center()
+        
+        screen_width = self.janela.winfo_screenwidth()
+        screen_height = self.janela.winfo_screenheight()
+        self.janela.geometry(f"{screen_width}x{screen_height}+0+0")
+        
         self.db = db_controller # Usa a conexão recebida
 
         # self.db_controller = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")

@@ -484,6 +484,25 @@ class DBController:
             Messagebox.show_error("Erro de Consulta", f"Erro ao buscar documentos gerados:\n{err}")
             return []
         
+    def get_documentos_por_desfazimento(self, id_desfazimento):
+        """Busca documentos de baixa filtrados por um id_desfazimento específico."""
+        if not self.conn: return []
+        try:
+            query = """
+                SELECT 
+                    d.numero_termo, d.data_geracao, d.caminho_arquivo, d.motivo,
+                    dz.numero_processo
+                FROM DocumentoDeBaixa d
+                LEFT JOIN Desfazimento dz ON d.id_desfazimento = dz.id_desfazimento
+                WHERE d.id_desfazimento = %s
+                ORDER BY d.data_geracao DESC
+            """
+            self.cursor.execute(query, (id_desfazimento,))
+            return self.cursor.fetchall()
+        except mysql.connector.Error as err:
+            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar documentos para esta planilha:\n{err}")
+            return []
+        
     def close_connection(self):
         if self.conn and self.conn.is_connected():
             self.cursor.close()

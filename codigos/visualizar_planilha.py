@@ -23,9 +23,10 @@ class VisualizarPlanilha:
 
         self.toplevel_visualizar = ttk.Toplevel(self.janela_mestra_visualizar)
         self.toplevel_visualizar.title(f"Visualizando: {self.nome_da_planilha_visualizada}")
-        self.toplevel_visualizar.geometry("1400x600")
-        self.toplevel_visualizar.transient(self.janela_mestra_visualizar)
-        # self.toplevel_visualizar.grab_set()
+       
+        screen_width = self.janela_mestra_visualizar.winfo_screenwidth()
+        screen_height = self.janela_mestra_visualizar.winfo_screenheight()
+        self.janela_mestra_visualizar.geometry(f"{screen_width}x{screen_height}+0+0")
         
         self.toplevel_visualizar.position_center()
 

@@ -40,8 +40,14 @@ class EdicaoPlanilha:
 
         self.toplevel_edicao = ttk.Toplevel(self.janela_mestra)
         self.toplevel_edicao.title("Editando Planilha de Desfazimento")
-        self.toplevel_edicao.geometry("1500x700")
-        self.toplevel_edicao.position_center()
+        # self.toplevel_edicao.geometry("1500x700")
+        # self.toplevel_edicao.position_center()
+        
+        
+        screen_width = self.toplevel_edicao.winfo_screenwidth()
+        screen_height = self.toplevel_edicao.winfo_screenheight()
+        self.toplevel_edicao.geometry(f"{screen_width}x{screen_height}+0+0")        
+        
         self.toplevel_edicao.transient(self.janela_mestra)
         # self.toplevel_edicao.grab_set()
 

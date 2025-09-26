@@ -39,8 +39,13 @@ class GerarDocumentos():
 
         self.toplevel_geradoc = ttk.Toplevel(self.janela_mestra_geradoc)
         self.toplevel_geradoc.title("Gerar Documentos")
-        self.toplevel_geradoc.geometry("1000x700")
-        self.toplevel_geradoc.position_center()
+        
+        screen_width = self.toplevel_geradoc.winfo_screenwidth()
+        screen_height = self.toplevel_geradoc.winfo_screenheight()
+        self.toplevel_geradoc.geometry(f"{screen_width}x{screen_height}+0+0")
+        
+        # self.toplevel_geradoc.try("1000x700")
+        # self.toplevel_geradoc.position_center()
         self.toplevel_geradoc.transient(self.janela_mestra_geradoc)
         # self.toplevel_geradoc.grab_set()
 
@@ -79,7 +84,7 @@ class GerarDocumentos():
         frame_cabecalho_lista.grid_columnconfigure(0, weight=4)
         frame_cabecalho_lista.grid_columnconfigure(1, weight=1)
         frame_cabecalho_lista.grid_columnconfigure(2, weight=1)
-        frame_cabecalho_lista.grid_columnconfigure(3, weight=2)
+        frame_cabecalho_lista.grid_columnconfigure(3, weight=3)
         
         ttk.Separator(frame_lista_planilhas).pack(fill=X, pady=(0, 10))
 
@@ -118,11 +123,25 @@ class GerarDocumentos():
         btn_download.pack(side=LEFT, padx=5)
         btn_baixa = ttk.Button(frame_acoes, text="Baixa", bootstyle="link-info", command=lambda p=planilha_data: self.navegar_para_baixas(p))
         btn_baixa.pack(side=LEFT, padx=5)
+        
+        btn_docs = ttk.Button(frame_acoes, text="Documentos Gerados", bootstyle="link-info", command=lambda p=planilha_data: self.abrir_consulta_documentos_filtrada(p))
+        btn_docs.pack(side=LEFT, padx=5)
 
         frame_linha.grid_columnconfigure(0, weight=4)
         frame_linha.grid_columnconfigure(1, weight=1)
         frame_linha.grid_columnconfigure(2, weight=1)
-        frame_linha.grid_columnconfigure(3, weight=2)
+        frame_linha.grid_columnconfigure(3, weight=3)
+
+    def abrir_consulta_documentos_filtrada(self, planilha):
+        """Abre a tela de consulta de documentos, passando o ID do desfazimento para filtrar."""
+        id_desfazimento = planilha.get('id_desfazimento')
+        if id_desfazimento is None:
+            Messagebox.show_error("Erro", "ID de desfazimento não encontrado para esta planilha.", parent=self.toplevel_geradoc)
+            return
+        
+        # Chama a tela de consulta, passando o filtro
+        from consulta_documentos import ConsultaDocumentos
+        ConsultaDocumentos(self.toplevel_geradoc, self.db, id_desfazimento)
     
     def abrir_planilha_visualizacao(self, planilha):
         """Busca os dados dos bens da planilha e abre a tela de visualização."""

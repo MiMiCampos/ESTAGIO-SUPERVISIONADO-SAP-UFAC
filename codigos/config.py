@@ -63,8 +63,13 @@ class Configuracoes():
 
         self.tpl_config = ttk.Toplevel(self.janela_mestra)
         self.tpl_config.title("Configurações")
-        self.tpl_config.geometry("800x600")
-        self.tpl_config.position_center()
+        # self.tpl_config.geometry("800x600")
+        # self.tpl_config.position_center()
+        
+        screen_width = self.tpl_config.winfo_screenwidth()
+        screen_height = self.tpl_config.winfo_screenheight()
+        self.tpl_config.geometry(f"{screen_width}x{screen_height}+0+0")     
+        
         self.tpl_config.transient(self.janela_mestra)
 
         self._carregar_configuracoes()

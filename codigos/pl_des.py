@@ -40,8 +40,14 @@ class PlanilhaDesfazimento:
         
         self.tpl_planilha_des = ttk.Toplevel(self.janela)
         self.tpl_planilha_des.title("Planilha de Desfazimento")
-        self.tpl_planilha_des.geometry("800x600")
-        self.tpl_planilha_des.position_center()
+        # self.tpl_planilha_des.geometry("800x600")
+        # self.tpl_planilha_des.position_center()
+        
+        
+        screen_width = self.tpl_planilha_des.winfo_screenwidth()
+        screen_height = self.tpl_planilha_des.winfo_screenheight()
+        self.tpl_planilha_des.geometry(f"{screen_width}x{screen_height}+0+0")        
+        
         self.tpl_planilha_des.transient(self.janela)
         # self.tpl_planilha_des.grab_set()
 

@@ -10,14 +10,19 @@ from datetime import datetime
 from PIL import Image, ImageTk
 
 class ConsultaDocumentos:
-    def __init__(self, master, db_controller):
+    def __init__(self, master, db_controller, id_desfazimento=None):
         self.janela_mestra = master
         self.db = db_controller
+        self.id_desfazimento = id_desfazimento
         self.toplevel = ttk.Toplevel(self.janela_mestra)
         self.toplevel.title("Consultar Documentos de Baixa Gerados")
-        self.toplevel.geometry("1100x700")
-        self.toplevel.position_center()
+        # self.toplevel.geometry("1100x700")
+        # self.toplevel.position_center()
         
+        screen_width = self.toplevel.winfo_screenwidth()
+        screen_height = self.toplevel.winfo_screenheight()
+        self.toplevel.geometry(f"{screen_width}x{screen_height}+0+0")  
+
         self.brasao = None
         self.carregar_recursos()
         self.criar_interface()
@@ -33,40 +38,42 @@ class ConsultaDocumentos:
             self.brasao = None
 
     def criar_interface(self):
-        # --- Frame do Cabeçalho ---
         frame_cabecalho = ttk.Frame(self.toplevel, bootstyle='info', padding=(10, 10))
         frame_cabecalho.pack(fill=X)
         
         if self.brasao:
             lbl_brasao = ttk.Label(frame_cabecalho, image=self.brasao, bootstyle='info')
-            lbl_brasao.image = self.brasao
             lbl_brasao.pack(side=LEFT, padx=(5, 10))
         
         lbl_titulo = ttk.Label(
-            frame_cabecalho, 
-            text="Documentos de Baixa Gerados", 
-            font=("Inconsolata", 16, "bold"), 
-            bootstyle='inverse-info',
-            foreground="black"
+            frame_cabecalho, text="Documentos de Baixa Gerados", 
+            font=("Inconsolata", 16, "bold"), bootstyle='inverse-info'
         )
         lbl_titulo.pack()
 
-        # --- Frame Principal com a Lista ---
         frame_principal = ttk.Frame(self.toplevel, padding=20)
         frame_principal.pack(expand=True, fill=BOTH)
 
         sf = ScrolledFrame(frame_principal, autohide=True)
         sf.pack(fill=BOTH, expand=YES)
         
-        # --- Busca os dados e preenche a lista ---
-        documentos = self.db.get_documentos_gerados()
+        # --- LÓGICA DE BUSCA ATUALIZADA ---
+        # Se um ID foi passado, busca os documentos filtrados. Senão, busca todos.
+        if self.id_desfazimento:
+            documentos = self.db.get_documentos_por_desfazimento(self.id_desfazimento)
+            titulo_filtro = ttk.Label(sf, text=f"Exibindo documentos apenas da planilha selecionada.", bootstyle="secondary")
+            titulo_filtro.pack(pady=(0, 10))
+        else:
+            documentos = self.db.get_documentos_gerados()
 
         if not documentos:
-            ttk.Label(sf, text="Nenhum documento de baixa foi gerado ainda.", font=("Helvetica", 12)).pack(pady=20)
-            return
+            msg = "Nenhum documento de baixa foi gerado para esta planilha." if self.id_desfazimento else "Nenhum documento de baixa foi gerado ainda."
+            ttk.Label(sf, text=msg, font=("Helvetica", 12)).pack(pady=20)
+        else:
+            self.criar_lista_documentos(sf, documentos)
 
-        # Cabeçalho da lista
-        frame_header = ttk.Frame(sf)
+    def criar_lista_documentos(self, parent, documentos):
+        frame_header = ttk.Frame(parent)
         frame_header.pack(fill=X, padx=10, pady=(0,5))
         
         ttk.Label(frame_header, text="Termo", font=("Helvetica", 10, "bold"), width=20).pack(side=LEFT)
@@ -74,10 +81,10 @@ class ConsultaDocumentos:
         ttk.Label(frame_header, text="Processo", font=("Helvetica", 10, "bold"), width=25).pack(side=LEFT)
         ttk.Label(frame_header, text="Motivo", font=("Helvetica", 10, "bold")).pack(side=LEFT, fill=X, expand=True)
         ttk.Label(frame_header, text="Ações", font=("Helvetica", 10, "bold"), width=25).pack(side=RIGHT)
-        ttk.Separator(sf).pack(fill=X, padx=10, pady=(0, 10))
+        ttk.Separator(parent).pack(fill=X, padx=10, pady=(0, 10))
 
         for doc in documentos:
-            self.criar_linha_documento(sf, doc)
+            self.criar_linha_documento(parent, doc)
 
     def criar_linha_documento(self, parent, doc_data):
         frame_linha = ttk.Frame(parent)

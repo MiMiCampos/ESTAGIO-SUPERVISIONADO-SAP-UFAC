@@ -32,8 +32,14 @@ class GerarDocBaixa:
     def exibir_tela(self):
         self.toplevel_gerarbaixa = ttk.Toplevel(self.janela_mestra_gerarbaixa)
         self.toplevel_gerarbaixa.title("Gerar Documento de Baixa")
-        self.toplevel_gerarbaixa.geometry("1100x750")
-        self.toplevel_gerarbaixa.position_center()
+        # self.toplevel_gerarbaixa.geometry("1100x750")
+        # self.toplevel_gerarbaixa.position_center()
+        
+        
+        screen_width = self.toplevel_gerarbaixa.winfo_screenwidth()
+        screen_height = self.toplevel_gerarbaixa.winfo_screenheight()
+        self.toplevel_gerarbaixa.geometry(f"{screen_width}x{screen_height}+0+0")   
+        
         self.toplevel_gerarbaixa.transient(self.janela_mestra_gerarbaixa)
         self.toplevel_gerarbaixa.grab_set()
         
