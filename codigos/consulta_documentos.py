@@ -47,7 +47,8 @@ class ConsultaDocumentos:
         
         lbl_titulo = ttk.Label(
             frame_cabecalho, text="Documentos de Baixa Gerados", 
-            font=("Inconsolata", 16, "bold"), bootstyle='inverse-info'
+            font=("Inconsolata", 16, "bold"), bootstyle='inverse-info',
+            foreground='black'
         )
         lbl_titulo.pack()
 
