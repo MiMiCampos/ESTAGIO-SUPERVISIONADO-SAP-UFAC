@@ -36,9 +36,10 @@ class GerarDocBaixa:
         # self.toplevel_gerarbaixa.position_center()
         
         
-        screen_width = self.toplevel_gerarbaixa.winfo_screenwidth()
-        screen_height = self.toplevel_gerarbaixa.winfo_screenheight()
-        self.toplevel_gerarbaixa.geometry(f"{screen_width}x{screen_height}+0+0")   
+        # screen_width = self.toplevel_gerarbaixa.winfo_screenwidth()
+        # screen_height = self.toplevel_gerarbaixa.winfo_screenheight()
+        # self.toplevel_gerarbaixa.geometry(f"{screen_width}x{screen_height}+0+0")   
+        self.toplevel_gerarbaixa.state('zoomed')
         
         self.toplevel_gerarbaixa.transient(self.janela_mestra_gerarbaixa)
         self.toplevel_gerarbaixa.grab_set()

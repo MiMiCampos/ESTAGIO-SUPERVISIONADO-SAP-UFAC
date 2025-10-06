@@ -19,9 +19,10 @@ class ConsultaDocumentos:
         # self.toplevel.geometry("1100x700")
         # self.toplevel.position_center()
         
-        screen_width = self.toplevel.winfo_screenwidth()
-        screen_height = self.toplevel.winfo_screenheight()
-        self.toplevel.geometry(f"{screen_width}x{screen_height}+0+0")  
+        # screen_width = self.toplevel.winfo_screenwidth()
+        # screen_height = self.toplevel.winfo_screenheight()
+        # self.toplevel.geometry(f"{screen_width}x{screen_height}+0+0")  
+        self.toplevel.state('zoomed')
 
         self.brasao = None
         self.carregar_recursos()

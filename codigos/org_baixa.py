@@ -71,9 +71,10 @@ class OrganizacaoBaixas():
         # self.tpl_org_baixas.position_center()
         
         
-        screen_width = self.tpl_org_baixas.winfo_screenwidth()
-        screen_height = self.tpl_org_baixas.winfo_screenheight()
-        self.tpl_org_baixas.geometry(f"{screen_width}x{screen_height}+0+0")       
+        # screen_width = self.tpl_org_baixas.winfo_screenwidth()
+        # screen_height = self.tpl_org_baixas.winfo_screenheight()
+        # self.tpl_org_baixas.geometry(f"{screen_width}x{screen_height}+0+0")  
+        self.tpl_org_baixas.state('zoomed')
         
         cabecalho_frame = ttk.Frame(self.tpl_org_baixas, bootstyle='info')
         cabecalho_frame.pack(fill=X)

@@ -40,9 +40,10 @@ class GerarDocumentos():
         self.toplevel_geradoc = ttk.Toplevel(self.janela_mestra_geradoc)
         self.toplevel_geradoc.title("Gerar Documentos")
         
-        screen_width = self.toplevel_geradoc.winfo_screenwidth()
-        screen_height = self.toplevel_geradoc.winfo_screenheight()
-        self.toplevel_geradoc.geometry(f"{screen_width}x{screen_height}+0+0")
+        # screen_width = self.toplevel_geradoc.winfo_screenwidth()
+        # screen_height = self.toplevel_geradoc.winfo_screenheight()
+        # self.toplevel_geradoc.geometry(f"{screen_width}x{screen_height}+0+0")
+        self.toplevel_geradoc.state('zoomed')
         
         # self.toplevel_geradoc.try("1000x700")
         # self.toplevel_geradoc.position_center()
@@ -170,7 +171,7 @@ class GerarDocumentos():
         dados_para_baixar = self.db.get_bens_por_desfazimento(id_desfazimento)
         
         if not dados_para_baixar:
-            Messagebox.show_info("Aviso", "Não há dados para baixar para esta planilha.")
+            Messagebox.show_info("Não há dados para baixar para esta planilha.", "Aviso")
             return
 
         caminho_arquivo = filedialog.asksaveasfilename(
@@ -206,7 +207,7 @@ class GerarDocumentos():
 
         dados_brutos_dos_bens = self.db.get_bens_por_desfazimento(id_desfazimento)
         if not dados_brutos_dos_bens:
-            Messagebox.show_info("Aviso", "Nenhum bem associado a esta planilha foi encontrado para organizar a baixa.")
+            Messagebox.show_info("Nenhum bem associado a esta planilha foi encontrado para organizar a baixa.", "Aviso")
             return
 
         self.toplevel_geradoc.destroy()

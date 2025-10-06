@@ -40,9 +40,10 @@ class CriarPlanilha:
         # self.tpl_criar_planilha.position_center()
         
         
-        screen_width = self.tpl_criar_planilha.winfo_screenwidth()
-        screen_height = self.tpl_criar_planilha.winfo_screenheight()
-        self.tpl_criar_planilha.geometry(f"{screen_width}x{screen_height}+0+0")        
+        # screen_width = self.tpl_criar_planilha.winfo_screenwidth()
+        # screen_height = self.tpl_criar_planilha.winfo_screenheight()
+        # self.tpl_criar_planilha.geometry(f"{screen_width}x{screen_height}+0+0")
+        self.tpl_criar_planilha.state('zoomed')  
         
         self.tpl_criar_planilha.transient(self.master)
         # self.tpl_criar_planilha.grab_set()
