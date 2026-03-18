@@ -82,8 +82,8 @@ class PlanilhaDesfazimento:
         ultima_planilha_info = self.db.get_ultima_planilha_criada()
 
         if ultima_planilha_info is None:
-            Messagebox.show_info("Nenhuma Planilha Encontrada",
-                                "Não há nenhuma planilha registrada no banco de dados. Por favor, crie uma nova primeiro.")
+            Messagebox.show_info(title="Nenhuma Planilha Encontrada",
+                                message="Não há nenhuma planilha registrada no banco de dados. Por favor, crie uma nova primeiro.")
             return
 
         caminho_arquivo = ultima_planilha_info['caminho']

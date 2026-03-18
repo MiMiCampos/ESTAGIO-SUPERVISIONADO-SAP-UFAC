@@ -119,12 +119,12 @@ class GerarDocBaixa:
 
     def confirmar_geracao(self):
         if not self.entry_pasta_destino.get().strip() or not self.entry_motivo.get().strip():
-            Messagebox.show_error("Erro de Validação", "Os campos 'Motivo' e 'Pasta de destino' são obrigatórios.", parent=self.toplevel_gerarbaixa)
+            Messagebox.show_error(message="Os campos 'Motivo' e 'Pasta de destino' são obrigatórios.", title="Erro de Validação", parent=self.toplevel_gerarbaixa)
             return
 
         total_docs = len(self.dados_selecionados_para_gerar)
         msg = f"Você confirma a geração de {total_docs} documento(s) de baixa com as informações fornecidas?"
-        if Messagebox.yesno("Confirmar Geração", msg, parent=self.toplevel_gerarbaixa) == "Sim":
+        if Messagebox.yesno(title="Confirmar Geração", message=msg, parent=self.toplevel_gerarbaixa) == "Sim":
             self._gerar_multiplos_arquivos()
 
     def _gerar_multiplos_arquivos(self):
@@ -184,11 +184,11 @@ class GerarDocBaixa:
 
         # Mensagem final para o usuário
         if erros == 0:
-            Messagebox.ok("Sucesso", f"{documentos_gerados} documento(s) gerado(s) com sucesso na pasta selecionada.", parent=self.toplevel_gerarbaixa)
+            Messagebox.ok(title="Sucesso", message=f"{documentos_gerados} documento(s) gerado(s) com sucesso na pasta selecionada.", parent=self.toplevel_gerarbaixa)
         else:
-            Messagebox.show_warning("Operação Concluída com Erros",
-                                    f"Documentos gerados: {documentos_gerados}\n"
-                                    f"Falhas: {erros}\n\n"
-                                    "Verifique o terminal para mais detalhes sobre os erros.", parent=self.toplevel_gerarbaixa)
+            Messagebox.show_warning(title="Operação Concluída com Erros",
+                                    message=f"Documentos gerados: {documentos_gerados}\n"
+                                            f"Falhas: {erros}\n\n"
+                                            "Verifique o terminal para mais detalhes sobre os erros.", parent=self.toplevel_gerarbaixa)
         
         self.toplevel_gerarbaixa.destroy()

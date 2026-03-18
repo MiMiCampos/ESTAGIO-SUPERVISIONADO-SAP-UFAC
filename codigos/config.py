@@ -46,10 +46,10 @@ class Configuracoes():
             style = ttk.Style()
             style.theme_use(nome_tema_ttk)
 
-            Messagebox.ok("Sucesso", "Configurações salvas com sucesso!", parent=self.tpl_config)
+            Messagebox.ok("Configurações salvas com sucesso!", "Sucesso", parent=self.tpl_config)
             self.tpl_config.destroy()
         except Exception as e:
-            Messagebox.show_error("Erro", f"Ocorreu um erro ao salvar as configurações:\n{e}", parent=self.tpl_config)
+            Messagebox.show_error("Ocorreu um erro ao salvar as configurações:\n{e}", f"Erro", parent=self.tpl_config)
 
     def selecionar_pasta(self):
         caminho_pasta = filedialog.askdirectory(title="Selecione a pasta padrão")

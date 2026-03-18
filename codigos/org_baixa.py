@@ -140,7 +140,7 @@ class OrganizacaoBaixas():
     def abrir_tela_geracao(self):
         dados_selecionados = self._coletar_dados_selecionados()
         if not dados_selecionados:
-            Messagebox.show_warning("Nenhum grupo selecionado", "Por favor, selecione pelo menos um grupo para gerar os documentos.")
+            Messagebox.show_warning(title="Nenhum grupo selecionado", message="Por favor, selecione pelo menos um grupo para gerar os documentos.")
             return
 
         self.tpl_org_baixas.destroy()

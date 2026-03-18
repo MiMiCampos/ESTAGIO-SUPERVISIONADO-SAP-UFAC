@@ -29,7 +29,7 @@ class MenuInicial():
             self.img_config = ImageTk.PhotoImage(img_data_config, master=self.janela)
 
         except Exception as e:
-            Messagebox.show_error("Erro Crítico de Imagem", f"Não foi possível carregar os ícones dos botões.\n\nCausa provável: {e}")
+            Messagebox.show_error(title="Erro Crítico de Imagem", message=f"Não foi possível carregar os ícones dos botões.\n\nCausa provável: {e}")
             self.img_planilha = self.img_baixas = self.img_docs = self.img_config = None
         
         style_azul_btn = ttk.Style()
@@ -117,12 +117,12 @@ class MenuInicial():
         from org_baixa import OrganizacaoBaixas
         ultima_planilha_info = self.db.get_ultima_planilha_criada()
         if ultima_planilha_info is None:
-            Messagebox.show_warning("Nenhuma Planilha Encontrada", "Não há nenhuma planilha registrada no banco de dados para organizar.")
+            Messagebox.show_warning(title="Nenhuma Planilha Encontrada", message="Não há nenhuma planilha registrada no banco de dados para organizar.")
             return
         id_desfazimento = ultima_planilha_info['id_desfazimento']
         dados_brutos = self.db.get_bens_por_desfazimento(id_desfazimento)
         if not dados_brutos:
-            Messagebox.show_info("Planilha Vazia", "A última planilha criada ainda não contém nenhum bem para organizar.")
+            Messagebox.show_info(title="Planilha Vazia", message="A última planilha criada ainda não contém nenhum bem para organizar.")
             return
         tela_baixas = OrganizacaoBaixas(
             master=self.janela, 

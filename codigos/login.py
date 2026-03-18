@@ -77,7 +77,7 @@ class TelaLogin:
         cpf = re.sub(r'\D', '', cpf_input)
 
         if not cpf or not senha:
-            Messagebox.show_warning("Campos Vazios", "Por favor, preencha o CPF e a senha.", parent=self.janela_login)
+            Messagebox.show_warning(title="Campos Vazios", message="Por favor, preencha o CPF e a senha.", parent=self.janela_login)
             return
 
         senha_hash = hashlib.sha256(senha.encode()).hexdigest()
@@ -88,4 +88,4 @@ class TelaLogin:
         if usuario:
             self.on_login_success(usuario)
         else:
-            Messagebox.show_error("Falha no Login", "CPF ou senha inválidos.", parent=self.janela_login)
+            Messagebox.show_error(title="Falha no Login", message="CPF ou senha inválidos.", parent=self.janela_login)

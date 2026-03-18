@@ -126,11 +126,11 @@ class EdicaoPlanilha:
     def adicionar_item_planilha(self):
         """Busca o tombo no banco, o associa ao desfazimento e o adiciona na tabela da interface."""
         if not self.db:
-            Messagebox.show_error("Erro Crítico", "A conexão com o banco de dados não foi estabelecida.")
+            Messagebox.show_error(title="Erro Crítico", message="A conexão com o banco de dados não foi estabelecida.")
             return
 
         if self.id_desfazimento_atual is None:
-            Messagebox.show_error("Erro de Processo", "Não há um processo de desfazimento ativo. \n\n" "Se está a continuar uma edição, certifique-se que o ficheiro foi salvo anteriormente pelo sistema.")
+            Messagebox.show_error(title="Erro de Processo", message="Não há um processo de desfazimento ativo. \n\n" "Se está a continuar uma edição, certifique-se que o ficheiro foi salvo anteriormente pelo sistema.")
             return
 
         numero_tombo = self.entry_numero_tombo.get().strip()
@@ -141,18 +141,18 @@ class EdicaoPlanilha:
         for item_id in self.tabela_desfazimento.get_children():
             item_values = self.tabela_desfazimento.item(item_id)['values']
             if str(item_values[1]) == numero_tombo:
-                Messagebox.show_warning("Tombo Duplicado", f"O tombo '{numero_tombo}' já foi adicionado a esta planilha.")
+                Messagebox.show_warning(title="Tombo Duplicado", message=f"O tombo '{numero_tombo}' já foi adicionado a esta planilha.")
                 self.entry_numero_tombo.delete(0, END)
                 return
 
         bem_data = self.db.get_bem_by_tombo(numero_tombo)
         
         if not bem_data:
-            Messagebox.show_warning("Tombo não encontrado", f"O bem de tombo '{numero_tombo}' não foi encontrado no banco de dados.")
+            Messagebox.show_warning(title="Tombo não encontrado", message=f"O bem de tombo '{numero_tombo}' não foi encontrado no banco de dados.")
             return
         id_desfazimento_no_banco = bem_data.get('id_desfazimento')
         if id_desfazimento_no_banco is not None and id_desfazimento_no_banco != self.id_desfazimento_atual:
-            Messagebox.show_warning("Bem em Uso", f"O tombo '{numero_tombo}' já está associado a outro processo de desfazimento.")
+            Messagebox.show_warning(title="Bem em Uso", message=f"O tombo '{numero_tombo}' já está associado a outro processo de desfazimento.")
             return
         if id_desfazimento_no_banco is None:
             sucesso = self.db.associar_bem_a_desfazimento(numero_tombo, self.id_desfazimento_atual)
@@ -174,15 +174,15 @@ class EdicaoPlanilha:
     def _excluir_item_selecionado(self):
         item_selecionado_id = self.tabela_desfazimento.focus() # Obtém o ID interno do item selecionado
         if not item_selecionado_id:
-            Messagebox.show_warning("Nenhum item selecionado", "Por favor, selecione um bem na lista para excluir.")
+            Messagebox.show_warning(title="Nenhum item selecionado", message="Por favor, selecione um bem na lista para excluir.")
             return
 
         dados_item = self.tabela_desfazimento.item(item_selecionado_id)['values']
         tombo_do_bem = str(dados_item[1]) # O tombo está na segunda coluna (índice 1)
 
         resposta = Messagebox.yesno(
-            "Confirmar Exclusão", 
-            f"Tem certeza que deseja excluir o bem com o tombo '{tombo_do_bem}' desta planilha?\nEsta ação não pode ser desfeita na planilha aberta."
+            title="Confirmar Exclusão",
+            message=f"Tem certeza que deseja excluir o bem com o tombo '{tombo_do_bem}' desta planilha?\nEsta ação não pode ser desfeita na planilha aberta."
         )
 
         if resposta == "Sim":
@@ -191,13 +191,13 @@ class EdicaoPlanilha:
             
             # 2. Desvincular o bem do desfazimento no banco de dados
             if self.db.desvincular_bem_da_planilha(tombo_do_bem, self.id_desfazimento_atual):
-                Messagebox.ok("Sucesso", f"Bem com tombo '{tombo_do_bem}' removido da planilha e desvinculado no banco.")
+                Messagebox.ok(title="Sucesso", message=f"Bem com tombo '{tombo_do_bem}' removido da planilha e desvinculado no banco.")
                 # Após remover, reordenar a coluna 'Nº DE ORDEM' na tabela
                 self._reordenar_tabela()
                 # Chamar salvar_alteracoes para persistir imediatamente no Excel
                 self.salvar_alteracoes() 
             else:
-                Messagebox.show_error("Erro", f"Não foi possível remover o bem com tombo '{tombo_do_bem}' do banco de dados.")
+                Messagebox.show_error(title="Erro", message=f"Não foi possível remover o bem com tombo '{tombo_do_bem}' do banco de dados.")
 
     def _reordenar_tabela(self):
         """Reorganiza a coluna 'Nº DE ORDEM' após uma exclusão."""

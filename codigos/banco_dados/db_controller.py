@@ -13,11 +13,11 @@ class DBController:
             print("Conexão com o banco de dados bem-sucedida!")
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                Messagebox.show_error("Erro de Conexão", "Acesso negado. Verifique seu usuário e senha.")
+                Messagebox.show_error("Acesso negado. Verifique seu usuário e senha.", "Erro de Conexão")
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                Messagebox.show_error("Erro de Conexão", f"O banco de dados '{database}' não existe.")
+                Messagebox.show_error("O banco de dados '{database}' não existe.", f"Erro de Conexão")
             else:
-                Messagebox.show_error("Erro de Conexão", f"Ocorreu um erro: {err}")
+                Messagebox.show_error("Ocorreu um erro: {err}", f"Erro de Conexão")
             self.conn = None
             self.cursor = None
 
@@ -38,7 +38,7 @@ class DBController:
             self.cursor.execute(query, (tombo,))
             return self.cursor.fetchone()
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bem: {err}")
+            Messagebox.show_error("Erro ao buscar bem: {err}", f"Erro de Consulta")
             return None
         
     def get_bens_completos_por_desfazimento(self, id_desfazimento):
@@ -59,7 +59,7 @@ class DBController:
             self.cursor.execute(query, (id_desfazimento,))
             return self.cursor.fetchall() # Retorna dicionários
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
+            Messagebox.show_error("Erro ao buscar bens da planilha:\n{err}", f"Erro de Consulta")
             return []
             
     def get_bens_por_desfazimento(self, id_desfazimento):
@@ -105,7 +105,7 @@ class DBController:
                 dados_formatados.append(linha)
             return dados_formatados
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
+            Messagebox.show_error("Erro ao buscar bens da planilha:\n{err}", f"Erro de Consulta")
             return []
         
     def get_bens_para_visualizacao(self, id_desfazimento):
@@ -137,7 +137,7 @@ class DBController:
                 dados_formatados.append(linha)
             return dados_formatados
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar bens da planilha:\n{err}")
+            Messagebox.show_error("Erro ao buscar bens da planilha:\n{err}", f"Erro de Consulta")
             return []
 
     def associar_bem_a_desfazimento(self, tombo, id_desfazimento):
@@ -148,7 +148,7 @@ class DBController:
             self.conn.commit()
             return True
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Atualização", f"Não foi possível associar o bem:\n{err}")
+            Messagebox.show_error("Não foi possível associar o bem:\n{err}", f"Erro de Atualização")
             self.conn.rollback()
             return False
 
@@ -161,9 +161,9 @@ class DBController:
             return self.cursor.lastrowid
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_DUP_ENTRY:
-                Messagebox.show_error("Processo Duplicado", f"O número de processo '{numero_processo}' já existe.")
+                Messagebox.show_error("O número de processo '{numero_processo}' já existe.", f"Processo duplicado")
             else:
-                Messagebox.show_error("Erro no Banco de Dados", f"Não foi possível criar o processo de desfazimento:\n{err}")
+                Messagebox.show_error("Não foi possível criar o processo de desfazimento:\n{err}", f"Erro no Banco de Dados")
             self.conn.rollback()
             return None
 
@@ -175,7 +175,7 @@ class DBController:
             resultado = self.cursor.fetchone()
             return resultado['numero_processo'] if resultado else None
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar número do processo: {err}")
+            Messagebox.show_error("Erro ao buscar número do processo: {err}", f"Erro de Consulta")
             return None
         
     def registrar_documento_baixa(self, id_desfazimento, numero_termo, caminho_arquivo, motivo):
@@ -194,7 +194,7 @@ class DBController:
         except mysql.connector.Error as err:
             print(f"ERRO DETALHADO DO MYSQL: {err}") 
             
-            Messagebox.show_error("Erro ao Registrar Documento", f"Não foi possível salvar o registro do documento de baixa:\n{err}")
+            Messagebox.show_error("Não foi possível salvar o registro do documento de baixa:\n{err}", f"Erro ao Registrar Documento")
             self.conn.rollback()
             return False
 
@@ -213,7 +213,7 @@ class DBController:
             self.cursor.execute(query)
             return self.cursor.fetchall()
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar planilhas: {err}")
+            Messagebox.show_error("Erro ao buscar planilhas: {err}", f"Erro de Consulta")
             return []
 
     def get_ultima_planilha_criada(self):
@@ -239,7 +239,7 @@ class DBController:
                 }
             return None
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar a última planilha: {err}")
+            Messagebox.show_error("Erro ao buscar a última planilha: {err}", f"Erro de Consulta")
             return None
 
     def salvar_ou_atualizar_planilha_finalizada(self, id_desfazimento, nome_planilha, caminho, total_tombos):
@@ -257,7 +257,7 @@ class DBController:
             self.cursor.execute(query, (id_desfazimento, nome_planilha, caminho, total_tombos))
             self.conn.commit()
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro ao Salvar", f"Erro ao salvar registro da planilha: {err}")
+            Messagebox.show_error("Erro ao salvar registro da planilha: {err}", f"Erro ao Salvar")
             self.conn.rollback()
             
     def desvincular_bem_da_planilha(self, tombo_do_bem, id_desfazimento_atual):
@@ -297,7 +297,7 @@ class DBController:
             self.cursor.execute(query, (cpf, senha_hash))
             return self.cursor.fetchone()
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Autenticação", f"Erro ao verificar usuário: {err}")
+            Messagebox.show_error("Erro ao verificar usuário: {err}", f"Erro de Autenticação")
             return None
             
     def listar_usuarios(self):
@@ -307,7 +307,7 @@ class DBController:
             self.cursor.execute(query)
             return self.cursor.fetchall()
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao listar usuários: {err}")
+            Messagebox.show_error("Erro ao listar usuários: {err}", f"Erro de Consulta")
             return []
 
     def cpf_existe(self, cpf, id_usuario_excluir=None):
@@ -321,7 +321,7 @@ class DBController:
             self.cursor.execute(query, tuple(params))
             return self.cursor.fetchone() is not None
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Verificação", f"Erro ao verificar CPF: {err}")
+            Messagebox.show_error("Erro ao verificar CPF: {err}", f"Erro de Verificação")
             return True
 
     def cadastrar_usuario(self, nome, cpf, senha_hash, perfil):
@@ -332,7 +332,7 @@ class DBController:
             self.conn.commit()
             return True
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Cadastro", f"Não foi possível cadastrar o usuário:\n{err}")
+            Messagebox.show_error("Não foi possível cadastrar o usuário:\n{err}", f"Erro de Cadastro")
             self.conn.rollback()
             return False
 
@@ -344,7 +344,7 @@ class DBController:
             self.conn.commit()
             return True
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Atualização", f"Não foi possível atualizar o usuário:\n{err}")
+            Messagebox.show_error("Não foi possível atualizar o usuário:\n{err}", f"Erro de Atualização")
             self.conn.rollback()
             return False
     
@@ -376,12 +376,12 @@ class DBController:
             self.cursor.execute(query, (id_usuario,))
             if self.cursor.rowcount == 0:
                 self.conn.rollback()
-                Messagebox.show_warning("Aviso", "Nenhum usuário foi encontrado com o ID fornecido.")
+                Messagebox.show_warning("Nenhum usuário foi encontrado com o ID fornecido.", "Aviso")
                 return False
             self.conn.commit()
             return True
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro ao Deletar", f"Não foi possível deletar o usuário:\n{err}")
+            Messagebox.show_error("Não foi possível deletar o usuário:\n{err}", f"Erro ao Deletar")
             self.conn.rollback()
             return False
         
@@ -392,7 +392,7 @@ class DBController:
             self.cursor.execute(query)
             return [servidor['nome_servidor'] for servidor in self.cursor.fetchall()]
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao listar servidores: {err}")
+            Messagebox.show_error("Erro ao listar servidores: {err}", f"Erro de Consulta")
             return []
 
     # --- Métodos para Configurações e Utilitários ---
@@ -408,7 +408,7 @@ class DBController:
                 configs[item['chave']] = item['valor']
             return configs
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar configurações: {err}")
+            Messagebox.show_error("Erro ao buscar configurações: {err}", f"Erro de Consulta")
             return {}
 
     def set_configuracao(self, chave, valor):
@@ -423,7 +423,7 @@ class DBController:
             self.conn.commit()
             return True
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro ao Salvar", f"Não foi possível salvar a configuração '{chave}':\n{err}")
+            Messagebox.show_error("Não foi possível salvar a configuração '{chave}':\n{err}", f"Erro ao Salvar")
             self.conn.rollback()
             return False
 
@@ -442,7 +442,7 @@ class DBController:
             proximo_id = resultado.get('AUTO_INCREMENT', 1) if resultado else 1
             return proximo_id 
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar próximo número do termo: {err}")
+            Messagebox.show_error("Erro ao buscar próximo número do termo: {err}", f"Erro de Consulta")
             return 1
     
     def associar_bens_a_documento(self, id_documento, lista_tombos):
@@ -456,7 +456,7 @@ class DBController:
             return True
         except mysql.connector.Error as err:
             print(f"ERRO AO ASSOCIAR BENS: {err}")
-            Messagebox.show_error("Erro de Atualização", f"Não foi possível associar os bens ao documento:\n{err}")
+            Messagebox.show_error("Não foi possível associar os bens ao documento:\n{err}", f"Erro de Atualização")
             self.conn.rollback()
             return False
     
@@ -481,7 +481,7 @@ class DBController:
             self.cursor.execute(query)
             return self.cursor.fetchall()
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar documentos gerados:\n{err}")
+            Messagebox.show_error("Erro ao buscar documentos gerados: {err}", f"Erro de Consulta")
             return []
         
     def get_documentos_por_desfazimento(self, id_desfazimento):
@@ -500,7 +500,7 @@ class DBController:
             self.cursor.execute(query, (id_desfazimento,))
             return self.cursor.fetchall()
         except mysql.connector.Error as err:
-            Messagebox.show_error("Erro de Consulta", f"Erro ao buscar documentos para esta planilha:\n{err}")
+            Messagebox.show_error("Erro ao buscar documentos para esta planilha: {err}", f"Erro de Consulta")
             return []
         
     def close_connection(self):

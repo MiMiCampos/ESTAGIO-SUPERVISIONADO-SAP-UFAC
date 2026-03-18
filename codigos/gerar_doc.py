@@ -131,7 +131,7 @@ class GerarDocumentos():
         """Abre a tela de consulta de documentos, passando o ID do desfazimento para filtrar."""
         id_desfazimento = planilha.get('id_desfazimento')
         if id_desfazimento is None:
-            Messagebox.show_error("Erro", "ID de desfazimento não encontrado para esta planilha.", parent=self.toplevel_geradoc)
+            Messagebox.show_error(title="Erro", message="ID de desfazimento não encontrado para esta planilha.", parent=self.toplevel_geradoc)
             return
         
         # Chama a tela de consulta, passando o filtro
@@ -142,7 +142,7 @@ class GerarDocumentos():
         """Busca os dados dos bens da planilha e abre a tela de visualização."""
         id_desfazimento = planilha.get('id_desfazimento')
         if id_desfazimento is None:
-            Messagebox.show_error("Erro", "Não foi possível encontrar o ID de desfazimento para esta planilha.")
+            Messagebox.show_error(title="Erro", message="Não foi possível encontrar o ID de desfazimento para esta planilha.")
             return
 
         conteudo_planilha = self.db.get_bens_para_visualizacao(id_desfazimento)
@@ -159,13 +159,13 @@ class GerarDocumentos():
         nome_planilha = planilha.get('nome_planilha', 'planilha_sem_nome')
         
         if id_desfazimento is None:
-            Messagebox.show_error("Erro", "Não foi possível encontrar o ID de desfazimento para esta planilha.")
+            Messagebox.show_error(title="Erro", message="Não foi possível encontrar o ID de desfazimento para esta planilha.")
             return
 
         dados_para_baixar = self.db.get_bens_por_desfazimento(id_desfazimento)
         
         if not dados_para_baixar:
-            Messagebox.show_info("Não há dados para baixar para esta planilha.", "Aviso")
+            Messagebox.show_info(title="Aviso", message="Não há dados para baixar para esta planilha.")
             return
 
         caminho_arquivo = filedialog.asksaveasfilename(
@@ -196,12 +196,12 @@ class GerarDocumentos():
         numero_processo = planilha.get('numero_processo')
 
         if id_desfazimento is None:
-            Messagebox.show_error("Erro", "Não foi possível encontrar o ID de desfazimento para esta planilha.")
+            Messagebox.show_error(title="Erro", message="Não foi possível encontrar o ID de desfazimento para esta planilha.")
             return
 
         dados_brutos_dos_bens = self.db.get_bens_por_desfazimento(id_desfazimento)
         if not dados_brutos_dos_bens:
-            Messagebox.show_info("Nenhum bem associado a esta planilha foi encontrado para organizar a baixa.", "Aviso")
+            Messagebox.show_info(message="Nenhum bem associado a esta planilha foi encontrado para organizar a baixa.", title="Aviso")
             return
 
         self.toplevel_geradoc.destroy()

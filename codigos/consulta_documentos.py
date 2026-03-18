@@ -112,7 +112,7 @@ class ConsultaDocumentos:
 
     def _abrir_arquivo(self, caminho):
         if not caminho or not os.path.exists(caminho):
-            Messagebox.show_warning("Arquivo não encontrado", f"O arquivo não existe mais no caminho original:\n{caminho}", parent=self.toplevel)
+            Messagebox.show_warning(message=f"O arquivo não existe mais no caminho original:\n{caminho}", title="Arquivo Não Encontrado", parent=self.toplevel)
             return
         
         try:
@@ -123,11 +123,11 @@ class ConsultaDocumentos:
             else: # linux
                 subprocess.run(["xdg-open", caminho])
         except Exception as e:
-            Messagebox.show_error("Erro", f"Não foi possível abrir o arquivo:\n{e}", parent=self.toplevel)
+            Messagebox.show_error(message=f"Não foi possível abrir o arquivo:\n{e}", title="Erro", parent=self.toplevel)
 
     def _abrir_pasta(self, caminho):
         if not caminho or not os.path.exists(caminho):
-            Messagebox.show_warning("Caminho não encontrado", f"O caminho original do arquivo não foi encontrado:\n{caminho}", parent=self.toplevel)
+            Messagebox.show_warning(message=f"O caminho original do arquivo não foi encontrado:\n{caminho}", title="Caminho Não Encontrado", parent=self.toplevel)
             return
 
         pasta = os.path.dirname(caminho)
@@ -139,4 +139,4 @@ class ConsultaDocumentos:
             else: # linux
                 subprocess.run(["xdg-open", pasta])
         except Exception as e:
-            Messagebox.show_error("Erro", f"Não foi possível abrir a pasta:\n{e}", parent=self.toplevel)
+            Messagebox.show_error(message=f"Não foi possível abrir a pasta:\n{e}", title="Erro", parent=self.toplevel)
