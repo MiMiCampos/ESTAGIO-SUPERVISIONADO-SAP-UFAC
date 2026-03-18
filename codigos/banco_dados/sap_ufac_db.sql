@@ -1,4 +1,3 @@
--- EXCLUI O BANCO PERMANENTEMENTE:
 DROP DATABASE IF EXISTS sap_ufac_db;
 
 CREATE DATABASE sap_ufac_db;
@@ -200,10 +199,10 @@ SELECT * FROM Desfazimento;
 -- TABELA DE DOCUMENTOS DE BAIXA:
 CREATE TABLE DocumentoDeBaixa (
     id_documento INT PRIMARY KEY AUTO_INCREMENT,
-    numero_termo VARCHAR(20) NOT NULL,          -- Coluna que estava faltando para o número do termo (ex: "000123/2025")
-    motivo VARCHAR(255),                        -- Coluna que estava faltando para o motivo da baixa
+    numero_termo VARCHAR(20) NOT NULL,          
+    motivo VARCHAR(255),                        
     data_geracao DATETIME,
-    caminho_arquivo VARCHAR(512),               -- Nome da coluna corrigido para corresponder ao código Python
+    caminho_arquivo VARCHAR(512),              
     id_desfazimento INT,
     FOREIGN KEY (id_desfazimento) REFERENCES Desfazimento(id_desfazimento)
     );
@@ -217,8 +216,8 @@ CREATE TABLE Bem (
     descricao TEXT,
     data_aquisicao DATE,
     nota_fiscal VARCHAR(100),
-    valor_aquisicao DECIMAL(10, 2) DEFAULT 0.00,  -- NOVO: Coluna para o valor de aquisição
-    forma_ingresso VARCHAR(100),                  -- NOVO: Coluna para a forma de ingresso
+    valor_aquisicao DECIMAL(10, 2) DEFAULT 0.00,  
+    forma_ingresso VARCHAR(100),                  
     classificacao VARCHAR(100) NULL,
     destinacao VARCHAR(100) NULL,
     id_unidade INT,
@@ -331,7 +330,7 @@ INSERT INTO Configuracao (chave, valor) VALUES
 ('tema', 'Claro'),
 ('pasta_padrao', ''),
 ('formato_padrao', '.pdf'),
-('salvar_auto', '1'), -- 1 para True (ligado), 0 para False (desligado)
+('salvar_auto', '1'), 
 ('lembrar_configs', '1');
 
 SELECT * FROM Configuracao;

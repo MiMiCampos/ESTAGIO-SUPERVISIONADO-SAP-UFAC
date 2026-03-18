@@ -40,15 +40,9 @@ class GerarDocumentos():
         self.toplevel_geradoc = ttk.Toplevel(self.janela_mestra_geradoc)
         self.toplevel_geradoc.title("Gerar Documentos")
         
-        # screen_width = self.toplevel_geradoc.winfo_screenwidth()
-        # screen_height = self.toplevel_geradoc.winfo_screenheight()
-        # self.toplevel_geradoc.geometry(f"{screen_width}x{screen_height}+0+0")
         self.toplevel_geradoc.state('zoomed')
         
-        # self.toplevel_geradoc.try("1000x700")
-        # self.toplevel_geradoc.position_center()
         self.toplevel_geradoc.transient(self.janela_mestra_geradoc)
-        # self.toplevel_geradoc.grab_set()
 
         frame_cabecalho_geradoc = ttk.Frame(self.toplevel_geradoc, bootstyle='info', padding=(10, 5))
         frame_cabecalho_geradoc.pack(fill=X, side=TOP)

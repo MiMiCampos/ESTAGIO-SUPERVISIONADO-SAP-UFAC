@@ -205,7 +205,7 @@ class DBController:
         try:
             query = """
                 SELECT pf.id_planilha, pf.nome_planilha, pf.data_geracao, pf.total_tombos, 
-                       pf.id_desfazimento, d.numero_processo
+                        pf.id_desfazimento, d.numero_processo
                 FROM PlanilhaFinalizada pf
                 JOIN Desfazimento d ON pf.id_desfazimento = d.id_desfazimento
                 ORDER BY pf.data_geracao DESC

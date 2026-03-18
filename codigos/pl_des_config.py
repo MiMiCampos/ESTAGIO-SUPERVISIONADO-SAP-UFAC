@@ -36,17 +36,10 @@ class CriarPlanilha:
 
         self.tpl_criar_planilha = ttk.Toplevel(self.master)
         self.tpl_criar_planilha.title("Criar Nova Planilha de Desfazimento")
-        # self.tpl_criar_planilha.geometry("800x600")
-        # self.tpl_criar_planilha.position_center()
         
-        
-        # screen_width = self.tpl_criar_planilha.winfo_screenwidth()
-        # screen_height = self.tpl_criar_planilha.winfo_screenheight()
-        # self.tpl_criar_planilha.geometry(f"{screen_width}x{screen_height}+0+0")
         self.tpl_criar_planilha.state('zoomed')  
         
         self.tpl_criar_planilha.transient(self.master)
-        # self.tpl_criar_planilha.grab_set()
 
         style = ttk.Style()
         style.configure('custom.TButton', font=("Inconsolata", 14), borderwidth=1, padding=(10, 10), background='white', foreground='#5bc0de')
@@ -160,7 +153,6 @@ class CriarPlanilha:
             Messagebox.show_error(title="Erro ao Criar Ficheiro", message=f"Não foi possível criar o ficheiro:\n{e}")
             return
 
-        # --- Registra a planilha no banco de dados IMEDIATAMENTE ---
         self.db.salvar_ou_atualizar_planilha_finalizada(
             id_desfazimento=novo_desfazimento_id,
             nome_planilha=nome_arquivo,

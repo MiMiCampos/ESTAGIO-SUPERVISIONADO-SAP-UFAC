@@ -1,5 +1,3 @@
-# Arquivo: login.py (VERSÃO FINAL)
-
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
@@ -69,10 +67,8 @@ class TelaLogin:
         self.ent_cpf.insert(0, formatado)
         self.ent_cpf.icursor(END)
 
-    # No seu arquivo da tela de login (ex: tela_login.py)
-
     def fazer_login(self, event=None):
-        import re # Adicione esta importação se ainda não tiver
+        import re 
 
         cpf_input = self.ent_cpf.get().strip()
         senha = self.ent_senha.get().strip()

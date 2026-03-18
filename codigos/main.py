@@ -7,10 +7,6 @@ class AplicacaoPrincipal:
     def __init__(self, root):
         self.root = root
         self.root.title("SAP-UFAC")
-        # screen_width = self.root.winfo_screenwidth()
-        # screen_height = self.root.winfo_screenheight()
-        # self.root.geometry(f"{screen_width}x{screen_height}+0+0")
-        # self.root.withdraw()
         self.root.state('zoomed')
         
         self.db_conn = DBController(host="localhost", user="root", password="root", database="sap_ufac_db")
@@ -69,6 +65,5 @@ class AplicacaoPrincipal:
 
 if __name__ == "__main__":
     root = ttk.Window(themename="litera")
-    # "Ancora" a instância da aplicação na janela principal para evitar o erro de imagem
     root.app = AplicacaoPrincipal(root)
     root.mainloop()

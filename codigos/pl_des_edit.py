@@ -40,17 +40,10 @@ class EdicaoPlanilha:
 
         self.toplevel_edicao = ttk.Toplevel(self.janela_mestra)
         self.toplevel_edicao.title("Editando Planilha de Desfazimento")
-        # self.toplevel_edicao.geometry("1500x700")
-        # self.toplevel_edicao.position_center()
-        
-        
-        # screen_width = self.toplevel_edicao.winfo_screenwidth()
-        # screen_height = self.toplevel_edicao.winfo_screenheight()
-        # self.toplevel_edicao.geometry(f"{screen_width}x{screen_height}+0+0")   
+ 
         self.toplevel_edicao.state('zoomed')  
         
         self.toplevel_edicao.transient(self.janela_mestra)
-        # self.toplevel_edicao.grab_set()
 
         style = ttk.Style()
         style.configure( 'custom.TButton', font=("Inconsolata", 14), borderwidth=1, padding=(10, 10), background='white', foreground='#5bc0de')
@@ -137,8 +130,7 @@ class EdicaoPlanilha:
             return
 
         if self.id_desfazimento_atual is None:
-            Messagebox.show_error("Erro de Processo", "Não há um processo de desfazimento ativo. \n\n"
-                                  "Se está a continuar uma edição, certifique-se que o ficheiro foi salvo anteriormente pelo sistema.")
+            Messagebox.show_error("Erro de Processo", "Não há um processo de desfazimento ativo. \n\n" "Se está a continuar uma edição, certifique-se que o ficheiro foi salvo anteriormente pelo sistema.")
             return
 
         numero_tombo = self.entry_numero_tombo.get().strip()
@@ -158,18 +150,14 @@ class EdicaoPlanilha:
         if not bem_data:
             Messagebox.show_warning("Tombo não encontrado", f"O bem de tombo '{numero_tombo}' não foi encontrado no banco de dados.")
             return
-
         id_desfazimento_no_banco = bem_data.get('id_desfazimento')
         if id_desfazimento_no_banco is not None and id_desfazimento_no_banco != self.id_desfazimento_atual:
             Messagebox.show_warning("Bem em Uso", f"O tombo '{numero_tombo}' já está associado a outro processo de desfazimento.")
             return
-
         if id_desfazimento_no_banco is None:
             sucesso = self.db.associar_bem_a_desfazimento(numero_tombo, self.id_desfazimento_atual)
             if not sucesso: return
-
         data_aq_formatada = bem_data['data_aquisicao'].strftime('%d/%m/%Y') if bem_data.get('data_aquisicao') else 'N/A'
-
         valores_linha = (
             self.numero_ordem_atual,
             bem_data.get('tombo', 'N/A'),
@@ -179,7 +167,6 @@ class EdicaoPlanilha:
             bem_data.get('nome_unidade', 'N/A'),
             'Irrecuperável', 'Alienação/Leilão'
         )
-
         self.tabela_desfazimento.insert('', END, values=valores_linha)
         self.numero_ordem_atual += 1
         self.entry_numero_tombo.delete(0, END)
@@ -243,7 +230,6 @@ class EdicaoPlanilha:
             for item_id in self.tabela_desfazimento.get_children():
                 dados_da_tabela.append(self.tabela_desfazimento.item(item_id)['values'])
             
-            # --- A CHAMADA ACONTECE AQUI ---
             FormatadorExcel.formatar_planilha_desfazimento(
                 workbook, 
                 sheet, 

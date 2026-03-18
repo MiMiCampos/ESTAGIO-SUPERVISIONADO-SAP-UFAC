@@ -32,13 +32,7 @@ class GerarDocBaixa:
     def exibir_tela(self):
         self.toplevel_gerarbaixa = ttk.Toplevel(self.janela_mestra_gerarbaixa)
         self.toplevel_gerarbaixa.title("Gerar Documento de Baixa")
-        # self.toplevel_gerarbaixa.geometry("1100x750")
-        # self.toplevel_gerarbaixa.position_center()
-        
-        
-        # screen_width = self.toplevel_gerarbaixa.winfo_screenwidth()
-        # screen_height = self.toplevel_gerarbaixa.winfo_screenheight()
-        # self.toplevel_gerarbaixa.geometry(f"{screen_width}x{screen_height}+0+0")   
+            
         self.toplevel_gerarbaixa.state('zoomed')
         
         self.toplevel_gerarbaixa.transient(self.janela_mestra_gerarbaixa)
@@ -138,24 +132,19 @@ class GerarDocBaixa:
         pasta = self.entry_pasta_destino.get()
         ano_atual = datetime.now().year
         
-        # Pega o próximo número de termo (como INT) uma vez no início
         proximo_numero_termo = self.db.get_proximo_numero_termo()
-        
         documentos_gerados = 0
         erros = 0
-
         # Loop principal para gerar um arquivo por grupo (servidor/unidade)
         for (unidade, servidor), bens in self.dados_selecionados_para_gerar.items():
             id_novo_documento = None # Garante que o ID é resetado a cada iteração
             try:
                 # Formata o número do termo para o documento atual
                 numero_termo_formatado = f"{proximo_numero_termo:06d}/{ano_atual}"
-                
                 # Cria um nome de arquivo único e limpo
                 servidor_formatado = "".join(c for c in servidor if c.isalnum() or c in (' ', '_')).rstrip()
                 nome_arquivo_sugerido = f"Termo_{proximo_numero_termo:06d}_{servidor_formatado.replace(' ', '_')}{formato}"
                 caminho_completo = os.path.join(pasta, nome_arquivo_sugerido)
-                
                 dados_gerais_doc = {
                     'termo': numero_termo_formatado,
                     'motivo': self.entry_motivo.get(),
@@ -164,36 +153,28 @@ class GerarDocBaixa:
                     'processo': self.entry_num_processo.get(),
                     'servidor_responsavel': servidor
                 }
-                
-                # Prepara os dados apenas para o grupo atual
                 dados_agrupados_doc = {(unidade, servidor): bens}
-                
-                # 1. Gera o arquivo físico
                 GeradorDeTermo.gerar(
                     formato=formato,
                     caminho_completo=caminho_completo,
                     dados_gerais=dados_gerais_doc,
                     dados_agrupados=dados_agrupados_doc
                 )
-                
-                # --- Lógica de Persistência ---
-                # 2. Registra o documento no banco e obtém o seu ID
                 id_novo_documento = self.db.registrar_documento_baixa(
                     id_desfazimento=self.id_desfazimento,
                     numero_termo=numero_termo_formatado,
                     caminho_arquivo=caminho_completo,
                     motivo=dados_gerais_doc['motivo']
                 )
-
                 if id_novo_documento:
-                    # 3. Se o registro funcionou, associa os bens a este novo ID
+                    # Se o registro funcionou, associa os bens a este novo ID
                     lista_tombos = [bem['tombo'] for bem in bens]
                     self.db.associar_bens_a_documento(id_novo_documento, lista_tombos)
                 else:
                     # Força um erro se o registro no banco falhar por algum motivo
                     raise Exception("Falha ao registrar o documento no banco de dados.")
 
-                # 4. Incrementa os contadores de sucesso
+                # Incrementa os contadores de sucesso
                 documentos_gerados += 1
                 proximo_numero_termo += 1
 
@@ -206,8 +187,8 @@ class GerarDocBaixa:
             Messagebox.ok("Sucesso", f"{documentos_gerados} documento(s) gerado(s) com sucesso na pasta selecionada.", parent=self.toplevel_gerarbaixa)
         else:
             Messagebox.show_warning("Operação Concluída com Erros",
-                                   f"Documentos gerados: {documentos_gerados}\n"
-                                   f"Falhas: {erros}\n\n"
-                                   "Verifique o terminal para mais detalhes sobre os erros.", parent=self.toplevel_gerarbaixa)
+                                    f"Documentos gerados: {documentos_gerados}\n"
+                                    f"Falhas: {erros}\n\n"
+                                    "Verifique o terminal para mais detalhes sobre os erros.", parent=self.toplevel_gerarbaixa)
         
         self.toplevel_gerarbaixa.destroy()

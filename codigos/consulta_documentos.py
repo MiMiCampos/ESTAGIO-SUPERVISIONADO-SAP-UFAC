@@ -16,12 +16,7 @@ class ConsultaDocumentos:
         self.id_desfazimento = id_desfazimento
         self.toplevel = ttk.Toplevel(self.janela_mestra)
         self.toplevel.title("Consultar Documentos de Baixa Gerados")
-        # self.toplevel.geometry("1100x700")
-        # self.toplevel.position_center()
-        
-        # screen_width = self.toplevel.winfo_screenwidth()
-        # screen_height = self.toplevel.winfo_screenheight()
-        # self.toplevel.geometry(f"{screen_width}x{screen_height}+0+0")  
+
         self.toplevel.state('zoomed')
 
         self.brasao = None
@@ -31,7 +26,6 @@ class ConsultaDocumentos:
     def carregar_recursos(self):
         """Carrega as imagens necessárias (apenas o brasão)."""
         try:
-            # Ajuste o caminho da imagem se necessário, use resource_path se empacotado
             imagem_brasao = Image.open("imagens/brasao_UFAC.png").resize((50, 50))
             self.brasao = ImageTk.PhotoImage(imagem_brasao)
         except Exception as e:
@@ -59,7 +53,6 @@ class ConsultaDocumentos:
         sf = ScrolledFrame(frame_principal, autohide=True)
         sf.pack(fill=BOTH, expand=YES)
         
-        # --- LÓGICA DE BUSCA ATUALIZADA ---
         # Se um ID foi passado, busca os documentos filtrados. Senão, busca todos.
         if self.id_desfazimento:
             documentos = self.db.get_documentos_por_desfazimento(self.id_desfazimento)
@@ -110,11 +103,11 @@ class ConsultaDocumentos:
         frame_acoes.pack(side=RIGHT)
         
         btn_abrir = ttk.Button(frame_acoes, text="Abrir Arquivo", bootstyle="info-outline", width=12,
-                               command=lambda p=caminho: self._abrir_arquivo(p))
+                                command=lambda p=caminho: self._abrir_arquivo(p))
         btn_abrir.pack(side=LEFT, padx=(0,5))
         
         btn_pasta = ttk.Button(frame_acoes, text="Abrir Pasta", bootstyle="secondary-outline", width=10,
-                               command=lambda p=caminho: self._abrir_pasta(p))
+                                command=lambda p=caminho: self._abrir_pasta(p))
         btn_pasta.pack(side=LEFT)
 
     def _abrir_arquivo(self, caminho):

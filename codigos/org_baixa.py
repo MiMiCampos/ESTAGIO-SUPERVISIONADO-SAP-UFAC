@@ -4,7 +4,7 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledFrame
 from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
-from gerar_doc_baixa import GerarDocBaixa # Importação movida para o topo
+from gerar_doc_baixa import GerarDocBaixa 
 from utils.path_helper import resource_path
 from consulta_documentos import ConsultaDocumentos
 
@@ -35,8 +35,7 @@ class OrganizacaoBaixas():
     def _agrupar_dados(self, dados_brutos):
         """Processa a lista de bens e agrupa por Unidade e Servidor."""
         grupos = {}
-        # Índices da lista 'dados_brutos' que vem do db_controller:
-        # 1=tombo, 2=descricao, 3=data_aquisicao, 5=unidade, 6=servidor, 7=status, 9=valor, 10=forma_ingresso
+
         for linha in dados_brutos:
             unidade = linha[5] if len(linha) > 5 else "Unidade não informada"
             servidor = linha[6] if len(linha) > 6 and linha[6] else "Servidor não informado"
@@ -67,13 +66,7 @@ class OrganizacaoBaixas():
 
         self.tpl_org_baixas = ttk.Toplevel(self.janela)
         self.tpl_org_baixas.title("Organização de Baixas Patrimoniais")
-        # self.tpl_org_baixas.geometry("800x600")
-        # self.tpl_org_baixas.position_center()
         
-        
-        # screen_width = self.tpl_org_baixas.winfo_screenwidth()
-        # screen_height = self.tpl_org_baixas.winfo_screenheight()
-        # self.tpl_org_baixas.geometry(f"{screen_width}x{screen_height}+0+0")  
         self.tpl_org_baixas.state('zoomed')
         
         cabecalho_frame = ttk.Frame(self.tpl_org_baixas, bootstyle='info')
@@ -130,23 +123,12 @@ class OrganizacaoBaixas():
                 ttk.Label(bem_frame, text=bem["descricao"], width=45, anchor="w").pack(side="left", padx=10)
                 ttk.Label(bem_frame, text=bem["status"], width=20, anchor="e").pack(side="right")
                 
-        # O código corrigido
         botoes_frame = ttk.Frame(frame_conteudo)
         botoes_frame.pack(fill=X, pady=(10, 0), side=BOTTOM)
         
-        # Botão Voltar continua na esquerda
         ttk.Button(botoes_frame, text="<- Voltar", bootstyle="primary-outline", command=self.tpl_org_baixas.destroy).pack(side="left")
         
-        # Botão Gerar Documentos continua na direita
         ttk.Button(botoes_frame, text="Gerar Documentos de Baixa", command=self.abrir_tela_geracao, bootstyle="success").pack(side="right")
-        
-        # NOVO BOTÃO: Adicionado no meio, empacotado à direita antes do outro
-        # ttk.Button(
-        #     botoes_frame, 
-        #     text="Consultar Documentos Gerados", 
-        #     command=self.abrir_consulta_documentos, 
-        #     bootstyle="info-outline"
-        # ).pack(side="right", padx=5)
         
     def _coletar_dados_selecionados(self):
         dados_selecionados = {}

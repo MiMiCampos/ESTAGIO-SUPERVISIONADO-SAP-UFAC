@@ -31,13 +31,8 @@ class GerenciadorUsuarios:
             return
 
         self.toplevel = ttk.Toplevel(self.janela_mestra)
-        self.toplevel.title("Gerenciamento de Usuários")
-        # self.toplevel.geometry("800x600")
-        # self.toplevel.position_center()
-        
-        # screen_width = self.toplevel.winfo_screenwidth()
-        # screen_height = self.toplevel.winfo_screenheight()
-        # self.toplevel.geometry(f"{screen_width}x{screen_height}+0+0")
+        self.toplevel.title("Gerenciamento de Usuários")        
+
         self.toplevel.state('zoomed')
         
         self.toplevel.transient(self.janela_mestra)

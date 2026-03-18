@@ -39,7 +39,6 @@ class GeradorDeTermo:
     def _gerar_docx(caminho_completo, dados_gerais, dados_agrupados):
         doc = Document()
         section = doc.sections[0]
-        # section.orientation, section.width = section.height, section.width
         section.page_width = Inches(11.69)
         section.page_height = Inches(8.27)
         section.left_margin = Inches(0.5)
