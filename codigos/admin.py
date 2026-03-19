@@ -93,7 +93,7 @@ class GerenciadorUsuarios:
     def _abrir_janela_edicao_selecionado(self):
         item_selecionado_id = self.tabela.focus()
         if not item_selecionado_id:
-            Messagebox.show_warning("Nenhum usuário selecionado", "Por favor, selecione um usuário na lista para editar.")
+            Messagebox.show_warning(title="Nenhum usuário selecionado", message="Por favor, selecione um usuário na lista para editar.")
             return
         
         dados_item = self.tabela.item(item_selecionado_id)
@@ -108,21 +108,21 @@ class GerenciadorUsuarios:
     def _deletar_usuario_selecionado(self):
         item_selecionado_id = self.tabela.focus()
         if not item_selecionado_id:
-            Messagebox.show_warning("Nenhum usuário selecionado", "Por favor, selecione um usuário na lista para excluir.")
+            Messagebox.show_warning(title="Nenhum usuário selecionado", message="Por favor, selecione um usuário na lista para excluir.")
             return
 
         id_usuario_para_deletar = int(self.tabela.item(item_selecionado_id)['values'][0])
         
         if id_usuario_para_deletar == self.usuario_logado['id_usuario']:
-            Messagebox.show_error("Ação Inválida", "Você não pode excluir o seu próprio usuário.")
+            Messagebox.show_error(title="Ação Inválida", message="Você não pode excluir o seu próprio usuário.")
             return
 
         nome_usuario = self.tabela.item(item_selecionado_id)['values'][1]
-        resposta = Messagebox.yesno("Confirmar Exclusão", f"Tem certeza que deseja excluir o usuário '{nome_usuario}'?\nEsta ação não pode ser desfeita.")
+        resposta = Messagebox.yesno(title="Confirmar Exclusão", message=f"Tem certeza que deseja excluir o usuário '{nome_usuario}'?\nEsta ação não pode ser desfeita.")
 
         if resposta == "Sim":
             if self.db.deletar_usuario(id_usuario_para_deletar):
-                Messagebox.ok("Sucesso", "Usuário excluído com sucesso.")
+                Messagebox.ok(title="Sucesso", message="Usuário excluído com sucesso.")
                 self._popular_tabela()
                 
     def _abrir_janela_edicao(self, dados_usuario=None):
@@ -235,16 +235,16 @@ class GerenciadorUsuarios:
             senha = ent_senha.get().strip() # Captura a senha, mesmo que seja vazia
 
             if not all([nome, cpf, perfil]):
-                Messagebox.show_warning("Campos Obrigatórios", "Nome, CPF e Perfil são obrigatórios.")
+                Messagebox.show_warning(title="Campos Obrigatórios", message="Nome, CPF e Perfil são obrigatórios.")
                 return
 
             if not modo_edicao and not senha:
-                Messagebox.show_warning("Senha Obrigatória", "A senha é obrigatória para novos usuários.")
+                Messagebox.show_warning(title="Senha Obrigatória", message="A senha é obrigatória para novos usuários.")
                 return
 
             id_para_ignorar = dados_usuario['id_usuario'] if modo_edicao else None
             if self.db.cpf_existe(cpf, id_para_ignorar):
-                Messagebox.show_error("CPF Duplicado", "Este CPF já está cadastrado no sistema.")
+                Messagebox.show_error(title="CPF Duplicado", message="Este CPF já está cadastrado no sistema.")
                 return
 
             if modo_edicao:
@@ -254,30 +254,30 @@ class GerenciadorUsuarios:
                 sucesso_senha = True # Assume sucesso se não houver senha para atualizar
                 if senha: # Se uma nova senha foi fornecida
                     if len(senha) < 6: # Adicione uma validação mínima para a senha
-                        Messagebox.show_warning("Senha Fraca", "A nova senha deve ter no mínimo 6 caracteres.")
+                        Messagebox.show_warning(title="Senha Fraca", message="A nova senha deve ter no mínimo 6 caracteres.")
                         return
                     nova_senha_hash = hashlib.sha256(senha.encode()).hexdigest()
                     sucesso_senha = self.db.atualizar_senha_usuario(dados_usuario['id_usuario'], nova_senha_hash)
                     
                     if not sucesso_senha:
-                        Messagebox.show_error("Erro", "Não foi possível atualizar a senha do usuário.")
+                        Messagebox.show_error(title="Erro", message="Não foi possível atualizar a senha do usuário.")
                         return # Sai da função se a senha falhar
 
                 if sucesso_atualizacao and sucesso_senha: # Verifica ambos os sucessos
-                    Messagebox.ok("Sucesso", "Usuário atualizado com sucesso.")
+                    Messagebox.ok(title="Sucesso", message="Usuário atualizado com sucesso.")
                     dialog.destroy()
                     self._popular_tabela()
                 elif not sucesso_atualizacao:
-                    Messagebox.show_error("Erro", "Não foi possível atualizar os dados do usuário (nome/CPF/perfil).")
+                    Messagebox.show_error(title="Erro", message="Não foi possível atualizar os dados do usuário (nome/CPF/perfil).")
 
             else: # Modo de adição de novo usuário
                 senha_hash = hashlib.sha256(senha.encode()).hexdigest()
                 if self.db.cadastrar_usuario(nome, cpf, senha_hash, perfil):
-                    Messagebox.ok("Sucesso", "Usuário cadastrado com sucesso.")
+                    Messagebox.ok(title="Sucesso", message="Usuário cadastrado com sucesso.")
                     dialog.destroy()
                     self._popular_tabela()
                 else:
-                    Messagebox.show_error("Erro", "Não foi possível cadastrar o novo usuário.")
+                    Messagebox.show_error(title="Erro", message="Não foi possível cadastrar o novo usuário.")
 
         btn_salvar = ttk.Button(frame_botoes, text="Salvar", command=_salvar_usuario, bootstyle="success")
         btn_salvar.pack(side=LEFT, padx=10)

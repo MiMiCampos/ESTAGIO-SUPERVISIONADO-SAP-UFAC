@@ -151,4 +151,3 @@ class MenuInicial():
         if self.db:
             self.db.close_connection()
         self.janela.destroy()
-    
